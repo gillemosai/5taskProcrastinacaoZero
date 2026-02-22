@@ -9,6 +9,7 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './manifest.webmanifest',
   'https://cdn.tailwindcss.com',
   'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo-192x192.png',
   'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png',
