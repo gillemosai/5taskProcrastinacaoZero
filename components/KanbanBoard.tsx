@@ -78,7 +78,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ task, onClose, onUpdat
             <div className="space-y-2">
               {columns[col].map(item => (
                 <div key={item.id} className={`p-3 rounded-lg border flex justify-between items-start gap-2 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
-                  <span className={`text-sm leading-tight ${col === 'done' ? 'line-through opacity-50' : ''}`}>{item.text}</span>
+                  <span className={`text-sm leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'} ${col === 'done' ? 'line-through opacity-50' : ''}`}>{item.text}</span>
                   <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => deleteSubTask(item.id)} className="text-red-400 p-1"><Trash2 size={14}/></button>
                     <button onClick={() => moveSubTask(item.id, 'next')} className="text-purple-400 p-1"><ChevronRight size={16}/></button>

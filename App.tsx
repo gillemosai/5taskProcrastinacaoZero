@@ -194,6 +194,7 @@ const App: React.FC = () => {
                 task={tasks.find(t => t.id === activeTaskId)!} 
                 onClose={() => setActiveTaskId(null)} 
                 onUpdateSubtasks={(subs) => setTasks(prev => prev.map(t => t.id === activeTaskId ? {...t, subTasks: subs} : t))} 
+                isDarkMode={isDarkMode}
               />
             </div>
           ) : (

@@ -1,33 +1,91 @@
+
 {
-  "name": "5task - Foco Simples",
+  "name": "5task - Foco Quântico",
   "short_name": "5task",
-  "description": "Um gerenciador de tarefas focado com limite de 5 itens e a genialidade de Einstein.",
-  "id": "5task-pwa-v73",
-  "start_url": "./index.html",
+  "description": "Gerenciador de tarefas baseado na priorização radical. Limite de 5 itens para foco total e produtividade máxima.",
+  "id": "com.fivetask.quantum.app.v76",
+  "start_url": "index.html",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#020617",
   "theme_color": "#020617",
+  "background_color": "#020617",
   "orientation": "portrait",
-  "categories": ["productivity", "utilities"],
-  "icons": [
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities", "education"],
+  "iarc_rating_id": "e84f0778-3b5e-4c7b-8b5e-1234567890ab",
+  "related_applications": [
     {
-      "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png?v=73",
-      "sizes": "1024x1024",
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.fivetask.quantum.app",
+      "id": "com.fivetask.quantum.app"
+    }
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "48x48", "type": "image/png" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "72x72", "type": "image/png" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ],
+  "screenshots": [
+    {
+      "src": "PLACEHOLDER_MOBILE_1_URL",
+      "sizes": "1080x1920",
       "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "narrow",
+      "label": "Tela Inicial - Einstein te saudando"
+    },
+    {
+      "src": "PLACEHOLDER_MOBILE_2_URL",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Lista de Tarefas - Foco em 5 itens"
+    },
+    {
+      "src": "PLACEHOLDER_MOBILE_3_URL",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Configuração de Prioridades e Cores"
+    },
+    {
+      "src": "PLACEHOLDER_MOBILE_4_URL",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Quadro Kanban Interno"
+    },
+    {
+      "src": "PLACEHOLDER_DESKTOP_1_URL",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Visão Geral Desktop - Modo Escuro"
+    },
+    {
+      "src": "PLACEHOLDER_DESKTOP_2_URL",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Planejamento Kanban - Visão Ampla"
     }
   ],
   "shortcuts": [
     {
       "name": "Nova Tarefa",
-      "short_name": "Adicionar",
-      "description": "Adicionar uma nova tarefa rapidamente",
-      "url": "./index.html?action=new",
-      "icons": [{ 
-        "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png?v=73", 
-        "sizes": "1024x1024",
-        "type": "image/png"
-      }]
+      "short_name": "Add",
+      "url": "index.html?action=new",
+      "icons": [{ "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }

@@ -93,7 +93,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           {isEditing ? (
             <input 
               autoFocus
-              className="flex-1 bg-slate-800 text-white border-none rounded px-2 py-1 outline-none font-medium"
+              className={`flex-1 border-none rounded px-2 py-1 outline-none font-medium ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-900'}`}
               value={editedText}
               onChange={(e) => setEditedText(e.target.value)}
               onBlur={handleSave}
@@ -115,13 +115,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           )}
 
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => setShowConfig(!showConfig)} className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400">
+            <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
               <Palette size={16} />
             </button>
-            <button onClick={() => setIsEditing(true)} className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400">
+            <button onClick={() => setIsEditing(true)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
               <Edit2 size={16} />
             </button>
-            <button onClick={() => onDelete(task.id)} className="p-2 hover:bg-red-500/20 rounded-lg text-red-400">
+            <button onClick={() => onDelete(task.id)} className={`p-2 rounded-lg text-red-400 ${isDarkMode ? 'hover:bg-red-500/20' : 'hover:bg-red-50'}`}>
               <Trash2 size={16} />
             </button>
           </div>
@@ -129,14 +129,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
         {/* Menu de Configuração Rápida */}
         {showConfig && (
-          <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-slate-800 animate-fadeIn">
+          <div className={`flex flex-wrap items-center gap-4 pt-3 border-t animate-fadeIn ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
             <div className="flex gap-2">
               {(['urgent', 'attention', 'critical', 'none'] as Priority[]).map(p => (
                 <button 
                   key={p}
                   onClick={() => onUpdateProps(task.id, p, task.highlightColor || 'none')}
                   className={`w-6 h-6 rounded flex items-center justify-center border transition-all
-                    ${p === 'urgent' ? 'bg-red-500 border-red-600' : p === 'attention' ? 'bg-yellow-500 border-yellow-600' : p === 'critical' ? 'bg-black border-slate-700' : 'bg-slate-700 border-slate-600'}
+                    ${p === 'urgent' ? 'bg-red-500 border-red-600' : p === 'attention' ? 'bg-yellow-500 border-yellow-600' : p === 'critical' ? 'bg-black border-slate-700' : (isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-200 border-slate-300')}
                     ${task.priority === p ? 'ring-2 ring-neon-blue scale-110' : 'opacity-60 hover:opacity-100'}`}
                   title={p.toUpperCase()}
                 >
@@ -144,14 +144,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                 </button>
               ))}
             </div>
-            <div className="h-4 w-[1px] bg-slate-800" />
+            <div className={`h-4 w-[1px] ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`} />
             <div className="flex gap-2">
               {(['blue', 'purple', 'pink', 'none'] as HighlightColor[]).map(c => (
                 <button 
                   key={c}
                   onClick={() => onUpdateProps(task.id, task.priority || 'none', c)}
                   className={`w-6 h-6 rounded-full transition-all border-2
-                    ${c === 'blue' ? 'bg-neon-blue border-cyan-400' : c === 'purple' ? 'bg-neon-purple border-purple-400' : c === 'pink' ? 'bg-neon-pink border-pink-400' : 'bg-slate-700 border-slate-600'}
+                    ${c === 'blue' ? 'bg-neon-blue border-cyan-400' : c === 'purple' ? 'bg-neon-purple border-purple-400' : c === 'pink' ? 'bg-neon-pink border-pink-400' : (isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-200 border-slate-300')}
                     ${task.highlightColor === c ? 'ring-2 ring-white scale-110' : 'opacity-60 hover:opacity-100'}`}
                 />
               ))}

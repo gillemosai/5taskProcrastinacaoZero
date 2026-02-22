@@ -37,7 +37,6 @@ Na versão **v76 (Quantum Engine)**, elevamos a experiência com um sistema de t
 - **📋 Micro-Kanban Integrado:** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído).
 - **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Quantum Storage" do navegador, funcionando perfeitamente sem internet.
 - **📱 PWA Nativo:** Instalável em Android e iOS, com suporte a Service Workers para carregamento instantâneo.
-- **🧠 Avatar Temático:** Avatar do Einstein atualizado com tema de Carnaval2026
 
 ## 🛠️ Tecnologias de Ponta
 
