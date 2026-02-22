@@ -3,7 +3,7 @@
   "name": "5task - Foco Quântico",
   "short_name": "5task",
   "description": "Gerenciador de tarefas baseado na priorização radical. Limite de 5 itens para foco total e produtividade máxima.",
-  "id": "com.fivetask.quantum.app.v76",
+  "id": "com.fivetask.quantum.app.v77",
   "start_url": "index.html",
   "scope": "/",
   "display": "standalone",

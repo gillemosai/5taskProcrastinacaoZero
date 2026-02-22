@@ -1,5 +1,5 @@
 
-const CACHE_NAME = '5task-quantum-v76-stable';
+const CACHE_NAME = '5task-quantum-v77-stable';
 const GITHUB_ASSETS = 'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/';
 
 const ASSETS_TO_CACHE = [

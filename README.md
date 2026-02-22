@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-76.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-77.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -21,9 +21,9 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **v76 (Quantum Engine)**, elevamos a experiência com um sistema de temas dinâmicos, priorização visual e uma fluidez de interface digna das leis da relatividade.
+Na versão **v77 (Quantum Engine)**, elevamos a experiência com um sistema de temas dinâmicos, priorização visual e uma fluidez de interface digna das leis da relatividade.
 
-## ✨ Funcionalidades Principais (Atualizado v76)
+## ✨ Funcionalidades Principais (Atualizado v77)
 
 - **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
 - **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**, com ajustes automáticos de legibilidade e contraste.
@@ -66,8 +66,8 @@ Na versão **v76 (Quantum Engine)**, elevamos a experiência com um sistema de t
 - [x] Limite de 5 tarefas e Gamificação com Einstein.
 - [x] Persistência local com IndexedDB.
 - [x] Micro-Kanban por tarefa.
-- [x] Sistema de Temas Claro/Escuro (v76).
-- [x] Priorização Colorida e Reordenação Animada (v76).
+- [x] Sistema de Temas Claro/Escuro (v77).
+- [x] Priorização Colorida e Reordenação Animada (v77).
 - [ ] ☁️ Sincronização em nuvem (Firebase Integration).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
