@@ -44,6 +44,31 @@ if (workbox.navigationPreload.isSupported()) {
   workbox.navigationPreload.enable();
 }
 
+// Background Sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-tasks') {
+    console.log('Syncing tasks...');
+  }
+});
+
+// Periodic Background Sync
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'get-daily-tasks') {
+    console.log('Fetching daily tasks...');
+  }
+});
+
+// Push Notifications
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : { title: '5task', body: 'Novas atualizações!' };
+  const options = {
+    body: data.body,
+    icon: 'https://placehold.co/192x192/020617/00f3ff.png',
+    badge: 'https://placehold.co/96x96/020617/00f3ff.png'
+  };
+  event.waitUntil(self.registration.showNotification(data.title, options));
+});
+
 self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
     event.respondWith((async () => {

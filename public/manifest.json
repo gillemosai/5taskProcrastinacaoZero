@@ -8,6 +8,14 @@
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "tabbed", "minimal-ui"],
+  "tab_strip": {
+    "home_tab": {
+      "scope": "/"
+    }
+  },
+  "scope_extensions": [
+    { "origin": "*.run.app" }
+  ],
   "theme_color": "#020617",
   "background_color": "#020617",
   "orientation": "portrait",
