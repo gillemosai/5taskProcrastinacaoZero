@@ -1,45 +1,45 @@
 
-const CACHE_NAME = '5task-quantum-v77-stable';
-const GITHUB_ASSETS = 'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/';
+// This is the "Offline page" service worker
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  `${GITHUB_ASSETS}5task-logo.png`,
-  `${GITHUB_ASSETS}einstein-happy.png`,
-  `${GITHUB_ASSETS}einstein-skeptical.png`,
-  `${GITHUB_ASSETS}einstein-ecstatic.png`,
-  `${GITHUB_ASSETS}einstein-worried.png`
-];
+const CACHE = "5task-quantum-v77-offline";
+const offlineFallbackPage = "index.html";
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
-  );
-  self.skipWaiting();
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('install', async (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
-    })
+    caches.open(CACHE)
+      .then((cache) => cache.add(offlineFallbackPage))
   );
-  self.clients.claim();
 });
+
+if (workbox.navigationPreload.isSupported()) {
+  workbox.navigationPreload.enable();
+}
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((networkResponse) => {
-        if (networkResponse.status === 200) {
-          const cacheCopy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cacheCopy));
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const preloadResp = await event.preloadResponse;
+
+        if (preloadResp) {
+          return preloadResp;
         }
-        return networkResponse;
-      });
-    }).catch(() => caches.match('./index.html'))
-  );
+
+        const networkResp = await fetch(event.request);
+        return networkResp;
+      } catch (error) {
+
+        const cache = await caches.open(CACHE);
+        const cachedResp = await cache.match(offlineFallbackPage);
+        return cachedResp;
+      }
+    })());
+  }
 });
