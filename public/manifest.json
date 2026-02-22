@@ -4,31 +4,33 @@
   "short_name": "5task",
   "description": "Gerenciador de tarefas baseado na priorização radical. Limite de 5 itens para foco total e produtividade máxima.",
   "id": "com.fivetask.quantum.app.v77",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "minimal-ui"],
   "theme_color": "#020617",
   "background_color": "#020617",
   "orientation": "portrait",
   "lang": "pt-BR",
   "dir": "ltr",
   "categories": ["productivity", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
     { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ],
   "screenshots": [
     {
-      "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png",
-      "sizes": "1024x1024",
+      "src": "https://picsum.photos/id/1/1080/1920",
+      "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "5task Mobile"
     },
     {
-      "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png",
-      "sizes": "1024x1024",
+      "src": "https://picsum.photos/id/3/1920/1080",
+      "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
       "label": "5task Desktop"

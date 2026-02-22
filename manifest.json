@@ -4,77 +4,43 @@
   "short_name": "5task",
   "description": "Gerenciador de tarefas baseado na priorização radical. Limite de 5 itens para foco total e produtividade máxima.",
   "id": "com.fivetask.quantum.app.v77",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "minimal-ui"],
   "theme_color": "#020617",
   "background_color": "#020617",
   "orientation": "portrait",
   "lang": "pt-BR",
   "dir": "ltr",
-  "categories": ["productivity", "utilities", "education"],
-  "iarc_rating_id": "e84f0778-3b5e-4c7b-8b5e-1234567890ab",
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.fivetask.quantum.app",
-      "id": "com.fivetask.quantum.app"
-    }
-  ],
+  "categories": ["productivity", "utilities"],
   "prefer_related_applications": false,
   "icons": [
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "48x48", "type": "image/png" },
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "72x72", "type": "image/png" },
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "96x96", "type": "image/png" },
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "128x128", "type": "image/png" },
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "144x144", "type": "image/png" },
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "152x152", "type": "image/png" },
     { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+    { "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ],
   "screenshots": [
     {
-      "src": "PLACEHOLDER_MOBILE_1_URL",
+      "src": "https://picsum.photos/id/1/1080/1920",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Tela Inicial - Einstein te saudando"
     },
     {
-      "src": "PLACEHOLDER_MOBILE_2_URL",
+      "src": "https://picsum.photos/id/2/1080/1920",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Lista de Tarefas - Foco em 5 itens"
     },
     {
-      "src": "PLACEHOLDER_MOBILE_3_URL",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Configuração de Prioridades e Cores"
-    },
-    {
-      "src": "PLACEHOLDER_MOBILE_4_URL",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Quadro Kanban Interno"
-    },
-    {
-      "src": "PLACEHOLDER_DESKTOP_1_URL",
+      "src": "https://picsum.photos/id/3/1920/1080",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Visão Geral Desktop - Modo Escuro"
-    },
-    {
-      "src": "PLACEHOLDER_DESKTOP_2_URL",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Planejamento Kanban - Visão Ampla"
     }
   ],
   "shortcuts": [
