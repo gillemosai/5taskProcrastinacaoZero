@@ -3,7 +3,7 @@
   "name": "5task - Foco Quântico",
   "short_name": "5task",
   "description": "Gerenciador de tarefas baseado na priorização radical. Limite de 5 itens para foco total e produtividade máxima.",
-  "id": "com.fivetask.quantum.app.v77",
+  "id": "com.fivetask.quantum.app.v78",
   "start_url": "index.html",
   "scope": "/",
   "display": "standalone",
@@ -33,19 +33,19 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "https://placehold.co/192x192/020617/00f3ff.png",
+      "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://placehold.co/512x512/020617/00f3ff.png",
+      "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://placehold.co/512x512/020617/00f3ff.png",
+      "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
@@ -74,7 +74,7 @@
       "url": "index.html?action=new",
       "icons": [
         {
-          "src": "https://placehold.co/192x192/020617/00f3ff.png?text=+",
+          "src": "https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo-192x192.png",
           "sizes": "192x192",
           "type": "image/png"
         }

@@ -14,7 +14,7 @@ import { KanbanBoard } from './components/KanbanBoard';
 
 // --- Database Engine (IndexedDB) ---
 let dbInstance: IDBDatabase | null = null;
-const DB_NAME = '5task_quantum_v77_db'; 
+const DB_NAME = '5task_quantum_v78_db'; 
 const STORE_NAME = 'tasks_store';
 
 const getDB = (): Promise<IDBDatabase> => {
@@ -242,7 +242,7 @@ const App: React.FC = () => {
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black font-mono tracking-widest ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
             {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'ONLINE' : 'OFFLINE'}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono">v77.0.0-QUANTUM</div>
+          <div className="text-[10px] text-slate-500 font-mono">v78.0.0-QUANTUM</div>
         </div>
       </footer>
     </div>

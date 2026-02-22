@@ -2,7 +2,7 @@
 // This is the "Offline page" service worker
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-const CACHE = "5task-quantum-v77-offline";
+const CACHE = "5task-quantum-v78-offline";
 const offlineFallbackPage = "index.html";
 
 const ASSETS_TO_CACHE = [
@@ -10,6 +10,7 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './manifest.json',
   'https://cdn.tailwindcss.com',
+  'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo-192x192.png',
   'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png',
   'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/einstein-happy.png',
   'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/einstein-skeptical.png',
