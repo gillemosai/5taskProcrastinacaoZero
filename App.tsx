@@ -14,7 +14,7 @@ import { KanbanBoard } from './components/KanbanBoard';
 
 // --- Database Engine (IndexedDB) ---
 let dbInstance: IDBDatabase | null = null;
-const DB_NAME = '5task_quantum_v78_db'; 
+const DB_NAME = '5task_quantum_v78_db';
 const STORE_NAME = 'tasks_store';
 
 const getDB = (): Promise<IDBDatabase> => {
@@ -93,7 +93,74 @@ const App: React.FC = () => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
+  // Rotina de Expiração Anti-Procrastinação e Atualização de Humor de Urgência
+  useEffect(() => {
+    const checkUrgencyAndExpiration = () => {
+      setTasks(prev => {
+        const now = Date.now();
+        const HOURS_24_MS = 24 * 60 * 60 * 1000;
+        const HOURS_27_MS = 27 * 60 * 60 * 1000;
+
+        let changed = false;
+        let urgencyMood: Mood | null = null;
+        let minTimeLeft = Infinity;
+
+        const validTasks = prev.filter(t => {
+          if (!t.completed) {
+            const age = now - t.createdAt;
+            if (age > HOURS_27_MS) {
+              changed = true;
+              return false; // remove tasks older than 27 hours
+            }
+
+            // Check for urgency
+            if (age > HOURS_24_MS) {
+              const timeLeftMs = HOURS_27_MS - age;
+              if (timeLeftMs < minTimeLeft) {
+                minTimeLeft = timeLeftMs;
+                if (timeLeftMs <= 60 * 60 * 1000) {
+                  urgencyMood = Mood.PANIC_1H;
+                } else if (timeLeftMs <= 2 * 60 * 60 * 1000) {
+                  urgencyMood = Mood.PANIC_2H;
+                } else {
+                  urgencyMood = Mood.PANIC_3H;
+                }
+              }
+            }
+          }
+          return true;
+        });
+
+        // Set the global mood if there's urgency, otherwise revert only if we were in panic
+        setMood(current => {
+          if (urgencyMood) return urgencyMood;
+          if (current === Mood.PANIC_1H || current === Mood.PANIC_2H || current === Mood.PANIC_3H) return Mood.HAPPY;
+          return current;
+        });
+
+        // Also update quote if in panic
+        setQuote(currentQuote => {
+          if (urgencyMood === Mood.PANIC_1H) return "É O FIM DOS TEMPOS! ACABE ESSA TAREFA AGORA! 🚨";
+          if (urgencyMood === Mood.PANIC_2H) return "Não há mais como fugir... O desespero se aproxima! Faltam menos de 2 horas! 😱";
+          if (urgencyMood === Mood.PANIC_3H) return "O tempo de tolerância começou... o relógio está correndo contra você! 😬";
+          return currentQuote;
+        });
+
+        return changed ? validTasks : prev;
+      });
+    };
+
+    // Check immediately and then every minute
+    checkUrgencyAndExpiration();
+    const interval = setInterval(checkUrgencyAndExpiration, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const updateEinstein = (type: QuoteType, customMood?: Mood) => {
+    // Prevent overriding panic expressions during normal actions
+    if (mood === Mood.PANIC_1H || mood === Mood.PANIC_2H || mood === Mood.PANIC_3H) return;
+
     const quotes = QUOTES[type];
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     setQuote(randomQuote);
@@ -170,7 +237,7 @@ const App: React.FC = () => {
   return (
     <div className={`min-h-screen transition-colors duration-500 font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <header className="p-6 flex flex-col items-center relative">
-        <button 
+        <button
           onClick={() => setIsDarkMode(!isDarkMode)}
           className={`absolute right-6 top-6 p-3 rounded-full transition-all shadow-lg active:scale-90 ${isDarkMode ? 'bg-slate-800 text-yellow-400 border-slate-700' : 'bg-white text-slate-800 border-slate-200'}`}
         >
@@ -178,11 +245,11 @@ const App: React.FC = () => {
         </button>
         <img src={LOGO_URL} alt="5TASK" className="h-10 mb-4 drop-shadow-md" />
         <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-widest ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'}`}>
-          <Database size={12} className="text-neon-blue" /> Quantum Storage
+          <Database size={12} className="text-neon-blue" /> Procrastinação Zero
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="max-w-4xl mx-auto px-4 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-8">
         <div className="lg:col-span-5">
           <EinsteinAvatar mood={mood} quote={quote} isDarkMode={isDarkMode} />
         </div>
@@ -190,10 +257,10 @@ const App: React.FC = () => {
         <div className="lg:col-span-7">
           {activeTaskId && tasks.find(t => t.id === activeTaskId) ? (
             <div className={`border rounded-3xl p-6 shadow-2xl min-h-[500px] ${isDarkMode ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-200'}`}>
-              <KanbanBoard 
-                task={tasks.find(t => t.id === activeTaskId)!} 
-                onClose={() => setActiveTaskId(null)} 
-                onUpdateSubtasks={(subs) => setTasks(prev => prev.map(t => t.id === activeTaskId ? {...t, subTasks: subs} : t))} 
+              <KanbanBoard
+                task={tasks.find(t => t.id === activeTaskId)!}
+                onClose={() => setActiveTaskId(null)}
+                onUpdateSubtasks={(subs) => setTasks(prev => prev.map(t => t.id === activeTaskId ? { ...t, subTasks: subs } : t))}
                 isDarkMode={isDarkMode}
               />
             </div>
@@ -201,11 +268,11 @@ const App: React.FC = () => {
             <div className="space-y-6">
               <form onSubmit={addTask} className="relative group">
                 <div className={`flex items-center border-2 rounded-2xl p-2 transition-all ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
-                  <input 
-                    type="text" 
-                    value={inputText} 
-                    onChange={(e) => setInputText(e.target.value)} 
-                    placeholder="O que vamos resolver agora?" 
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="O que vamos resolver agora?"
                     className="flex-1 bg-transparent border-none focus:ring-0 px-4 py-3 outline-none"
                   />
                   <button type="submit" className="bg-neon-blue text-slate-900 p-3 rounded-xl shadow-lg active:scale-95 disabled:opacity-50">
@@ -216,18 +283,18 @@ const App: React.FC = () => {
 
               <div className="space-y-3 relative">
                 {tasks.map((task, idx) => (
-                  <TaskItem 
-                    key={task.id} 
-                    task={task} 
-                    index={idx} 
-                    onComplete={toggleTask} 
-                    onDelete={deleteTask} 
-                    onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? {...t, text} : t))}
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    index={idx}
+                    onComplete={toggleTask}
+                    onDelete={deleteTask}
+                    onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
                     onUpdateProps={updateTaskProps}
-                    onOpenKanban={setActiveTaskId} 
-                    onDragStart={handleDragStart} 
-                    onDragEnter={handleDragEnter} 
-                    onDragEnd={handleDragEnd} 
+                    onOpenKanban={setActiveTaskId}
+                    onDragStart={handleDragStart}
+                    onDragEnter={handleDragEnter}
+                    onDragEnd={handleDragEnd}
                     isDarkMode={isDarkMode}
                   />
                 ))}
@@ -242,7 +309,7 @@ const App: React.FC = () => {
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black font-mono tracking-widest ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
             {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'ONLINE' : 'OFFLINE'}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono">v78.0.0-QUANTUM</div>
+          <div className="text-[10px] text-slate-500 font-mono">v79.0.0-PROC-ZERO</div>
         </div>
       </footer>
     </div>

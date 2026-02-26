@@ -20,7 +20,7 @@ export const EinsteinAvatar: React.FC<EinsteinAvatarProps> = ({ mood, quote, isD
   }, [quote]);
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 mb-6 relative w-full max-w-sm mx-auto">
+    <div className="flex flex-col items-center justify-center p-4 relative w-full max-w-sm mx-auto">
       {/* Balão de Fala */}
       <div 
         className={`rounded-2xl p-4 mb-6 shadow-xl w-full text-center border-2 relative transform transition-all duration-300

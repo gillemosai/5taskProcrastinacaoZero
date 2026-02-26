@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle } from 'lucide-react';
 import { Task, Priority, HighlightColor } from '../types';
 
 interface TaskItemProps {
@@ -17,11 +17,11 @@ interface TaskItemProps {
   isDarkMode?: boolean;
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({ 
-  task, 
-  index, 
-  onComplete, 
-  onDelete, 
+export const TaskItem: React.FC<TaskItemProps> = ({
+  task,
+  index,
+  onComplete,
+  onDelete,
   onEdit,
   onUpdateProps,
   onOpenKanban,
@@ -42,7 +42,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   };
 
   const getPriorityInfo = (p?: Priority) => {
-    switch(p) {
+    switch (p) {
       case 'urgent': return { color: 'bg-red-500', label: 'URGENTE' };
       case 'attention': return { color: 'bg-yellow-500', label: 'ATENÇÃO' };
       case 'critical': return { color: 'bg-black', label: 'CRÍTICO' };
@@ -51,7 +51,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   };
 
   const getHighlightStyle = (c?: HighlightColor) => {
-    switch(c) {
+    switch (c) {
       case 'blue': return 'border-neon-blue shadow-[0_0_15px_rgba(0,243,255,0.1)]';
       case 'purple': return 'border-neon-purple shadow-[0_0_15px_rgba(188,19,254,0.1)]';
       case 'pink': return 'border-neon-pink shadow-[0_0_15px_rgba(188,19,254,0.1)]';
@@ -61,15 +61,65 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
   const priority = getPriorityInfo(task.priority);
 
+  const [timeLeftStr, setTimeLeftStr] = useState<string>('');
+  const [isAlertTime, setIsAlertTime] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
+
+  useEffect(() => {
+    if (task.completed) {
+      setIsAlertTime(false);
+      setIsBlinking(false);
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const age = now - task.createdAt;
+
+      const HOURS_24 = 24 * 60 * 60 * 1000;
+      const HOURS_27 = 27 * 60 * 60 * 1000;
+      const HOUR_1 = 60 * 60 * 1000;
+
+      if (age > HOURS_24 && age <= HOURS_27) {
+        setIsAlertTime(true);
+        const timeLeftMs = HOURS_27 - age;
+
+        if (timeLeftMs <= HOUR_1) {
+          setIsBlinking(true);
+        } else {
+          setIsBlinking(false);
+        }
+
+        const hrs = Math.floor(timeLeftMs / (1000 * 60 * 60));
+        const mins = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
+
+        setTimeLeftStr(`${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
+      } else {
+        setIsAlertTime(false);
+        setIsBlinking(false);
+        setTimeLeftStr('');
+      }
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [task.createdAt, task.completed]);
+
+  const alertClasses = isAlertTime && !task.completed
+    ? `border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] ${isBlinking ? 'animate-pulse bg-red-950/20' : ''}`
+    : getHighlightStyle(task.highlightColor);
+
   return (
-    <div 
+    <div
       draggable={!isEditing}
       onDragStart={(e) => onDragStart(e, index)}
       onDragEnter={(e) => onDragEnter(e, index)}
       onDragEnd={onDragEnd}
       onDragOver={(e) => e.preventDefault()}
       className={`relative group rounded-2xl border-2 transition-all duration-500 ease-in-out cursor-default overflow-hidden
-        ${getHighlightStyle(task.highlightColor)}
+        ${alertClasses}
         ${task.completed ? 'opacity-50 grayscale' : (isDarkMode ? 'bg-slate-900' : 'bg-white shadow-sm')}
         hover:translate-x-1`}
     >
@@ -82,7 +132,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             <GripVertical size={20} />
           </div>
 
-          <button 
+          <button
             onClick={() => onComplete(task.id)}
             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
               ${task.completed ? 'bg-green-500 border-green-500' : 'border-slate-600 hover:border-neon-blue'}`}
@@ -91,7 +141,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           </button>
 
           {isEditing ? (
-            <input 
+            <input
               autoFocus
               className={`flex-1 border-none rounded px-2 py-1 outline-none font-medium ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-900'}`}
               value={editedText}
@@ -127,12 +177,19 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           </div>
         </div>
 
+        {isAlertTime && !task.completed && (
+          <div className={`flex items-center justify-center gap-2 p-3 rounded-xl transition-all ${isBlinking ? 'bg-red-600 text-white shadow-lg animate-pulse' : 'bg-red-500/10 text-red-500 border border-red-500/30'}`}>
+            <AlertCircle size={18} className={isBlinking ? 'animate-bounce' : ''} />
+            <span className="text-xs md:text-sm font-black font-mono tracking-widest uppercase">Tolerância: {timeLeftStr}</span>
+          </div>
+        )}
+
         {/* Menu de Configuração Rápida */}
         {showConfig && (
           <div className={`flex flex-wrap items-center gap-4 pt-3 border-t animate-fadeIn ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
             <div className="flex gap-2">
               {(['urgent', 'attention', 'critical', 'none'] as Priority[]).map(p => (
-                <button 
+                <button
                   key={p}
                   onClick={() => onUpdateProps(task.id, p, task.highlightColor || 'none')}
                   className={`w-6 h-6 rounded flex items-center justify-center border transition-all
@@ -147,7 +204,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             <div className={`h-4 w-[1px] ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`} />
             <div className="flex gap-2">
               {(['blue', 'purple', 'pink', 'none'] as HighlightColor[]).map(c => (
-                <button 
+                <button
                   key={c}
                   onClick={() => onUpdateProps(task.id, task.priority || 'none', c)}
                   className={`w-6 h-6 rounded-full transition-all border-2

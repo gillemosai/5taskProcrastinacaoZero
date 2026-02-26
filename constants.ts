@@ -7,14 +7,17 @@ import { Mood, QuoteType } from './types';
  * NÃO MODIFICAR ESTA PASTA EM NENHUM DEPLOY.
  */
 
-const VERSION_QUERY = '?v=75';
-const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/';
+const VERSION_QUERY = '?v=79';
+const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5task-android/main/assets/';
 
 export const AVATAR_IMAGES: Record<Mood, string> = {
   [Mood.HAPPY]: `${GITHUB_BASE}einstein-happy.png${VERSION_QUERY}`,
   [Mood.THINKING]: `${GITHUB_BASE}einstein-skeptical.png${VERSION_QUERY}`,
   [Mood.EXCITED]: `${GITHUB_BASE}einstein-ecstatic.png${VERSION_QUERY}`,
   [Mood.SHOCKED]: `${GITHUB_BASE}einstein-worried.png${VERSION_QUERY}`,
+  [Mood.PANIC_3H]: `${GITHUB_BASE}einstein-panic-3h.png${VERSION_QUERY}`,
+  [Mood.PANIC_2H]: `${GITHUB_BASE}einstein-panic-2h.png${VERSION_QUERY}`,
+  [Mood.PANIC_1H]: `${GITHUB_BASE}einstein-panic-1h.png${VERSION_QUERY}`,
 };
 
 export const LOGO_URL = `${GITHUB_BASE}5task-logo.png${VERSION_QUERY}`;

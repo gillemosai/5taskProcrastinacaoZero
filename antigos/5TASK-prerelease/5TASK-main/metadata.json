@@ -1,0 +1,5 @@
+{
+  "name": "5task",
+  "description": "Um gerenciador de tarefas focado, limitado a 5 itens, com uma experiência gamificada com o Einstein.",
+  "requestFramePermissions": []
+}
