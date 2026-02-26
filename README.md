@@ -1,4 +1,4 @@
-# 🧠 5task - Quantum Productivity Engine
+# 🧠 5task - Motor de Produtividade Procrastinação Zero
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png" width="160" alt="5task Logo">
@@ -44,7 +44,7 @@ Na versão **v79 (Procrastinação Zero)**, elevamos a experiência com um siste
 - **🎨 Sistema de Destaque Colorido:** Personalize seus cards com 3 cores base (Ciano, Roxo e Rosa).
 - **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas.
 - **📋 Micro-Kanban Integrado:** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído).
-- **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Quantum Storage" do navegador.
+- **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Armazenamento Procrastinação Zero" do navegador.
 - **📱 PWA Nativo:** Instalável em Android e iOS, pronto para empacotamento em Wrapper Nativo. (Otimizado com Sharp).
 
 ## 🛠️ Tecnologias de Ponta
