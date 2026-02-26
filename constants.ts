@@ -8,7 +8,7 @@ import { Mood, QuoteType } from './types';
  */
 
 const VERSION_QUERY = '?v=79';
-const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5task-android/main/assets/';
+const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/';
 
 export const AVATAR_IMAGES: Record<Mood, string> = {
   [Mood.HAPPY]: `${GITHUB_BASE}einstein-happy.png${VERSION_QUERY}`,
