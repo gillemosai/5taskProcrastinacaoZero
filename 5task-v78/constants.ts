@@ -7,7 +7,7 @@ import { Mood, QuoteType } from './types';
  * NÃO MODIFICAR ESTA PASTA EM NENHUM DEPLOY.
  */
 
-const VERSION_QUERY = '?v=75';
+const VERSION_QUERY = '?v=79';
 const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5task-android/main/assets/';
 
 export const AVATAR_IMAGES: Record<Mood, string> = {

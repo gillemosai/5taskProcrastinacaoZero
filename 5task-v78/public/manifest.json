@@ -1,27 +1,35 @@
-
 {
   "name": "5task - Foco Quântico",
   "short_name": "5task",
   "description": "Gerenciador de tarefas baseado na priorização radical. Limite de 5 itens para foco total e produtividade máxima.",
-  "id": "com.fivetask.quantum.app.v78",
+  "id": "com.fivetask.quantum.app.v79",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "tabbed", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "tabbed",
+    "minimal-ui"
+  ],
   "tab_strip": {
     "home_tab": {
       "scope": "/"
     }
   },
   "scope_extensions": [
-    { "origin": "*.run.app" }
+    {
+      "origin": "*.run.app"
+    }
   ],
   "theme_color": "#020617",
   "background_color": "#020617",
   "orientation": "portrait",
   "lang": "pt-BR",
   "dir": "ltr",
-  "categories": ["productivity", "utilities"],
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "iarc_rating_id": "e84f0778-3b5e-4c7b-8b5e-1234567890ab",
   "related_applications": [
     {
@@ -94,8 +102,12 @@
     {
       "action": "/open-file",
       "accept": {
-        "text/plain": [".txt"],
-        "application/json": [".json"]
+        "text/plain": [
+          ".txt"
+        ],
+        "application/json": [
+          ".json"
+        ]
       }
     }
   ],
