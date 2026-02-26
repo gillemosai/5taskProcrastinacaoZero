@@ -9,10 +9,11 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-78.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-79.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
+  <img src="https://img.shields.io/badge/Feature-Procrastinacao_Zero-red?style=for-the-badge" alt="Procrastinação Zero">
 </p>
 
 <p align="center">
@@ -27,22 +28,24 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **v78 (Quantum Engine)**, elevamos a experiência com um sistema de temas dinâmicos, priorização visual e uma fluidez de interface digna das leis da relatividade.
+Na versão **v79 (Procrastinação Zero)**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira.
 
-## ✨ Funcionalidades Principais (Atualizado v78)
+## ✨ Funcionalidades Principais (Atualizado v79)
 
 - **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
-- **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**, com ajustes automáticos de legibilidade e contraste.
-- **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo da lista, focando no que é imediato.
-- **🚥 Matriz de Prioridade:** Classificação visual para decisões rápidas:
-  *   🔴 **URGENTE:** Atenção imediata necessária.
-  *   🟡 **ATENÇÃO:** Requer cuidado especial.
-  *   ⚫ **CRÍTICO:** Item vital para ser resolvido no dia.
-- **🎨 Sistema de Destaque Colorido:** Personalize seus cards com 3 cores base (Ciano, Roxo e Rosa) para organizar visualmente categorias de trabalho.
-- **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas. Ao mover uma tarefa, o ecossistema de tarefas se ajusta suavemente.
+- **⏱️ Motor Procrastinação Zero (Novo):**
+  * **Ciclo de Vida de 24h:** Toda tarefa idealmente deve ser finalizada no mesmo dia em que foi criada.
+  * **Tempo de Tolerância (+3h):** Excedendo o prazo, a tarefa entra em alerta de tolerância com um contador regressivo (vermelho).
+  * **Pânico Global:** Nas 3 horas finais, o Einstein perde sua calma e adentra em três estados diferentes de puro Desespero/Pânico (`PANIC_3H`, `PANIC_2H`, `PANIC_1H`), clamando por foco!
+  * **Expurgo Automático:** Se 27 horas passarem, a tarefa será sumariamente e automaticamente destruída. Nenhuma procrastinação sobrevivente.
+- **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**.
+- **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo.
+- **🚥 Matriz de Prioridade:** Classificação visual `(Urgente, Atenção e Crítico)`.
+- **🎨 Sistema de Destaque Colorido:** Personalize seus cards com 3 cores base (Ciano, Roxo e Rosa).
+- **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas.
 - **📋 Micro-Kanban Integrado:** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído).
-- **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Quantum Storage" do navegador, funcionando perfeitamente sem internet.
-- **📱 PWA Nativo:** Instalável em Android e iOS, com suporte a Service Workers para carregamento instantâneo.
+- **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Quantum Storage" do navegador.
+- **📱 PWA Nativo:** Instalável em Android e iOS, pronto para empacotamento em Wrapper Nativo. (Otimizado com Sharp).
 
 ## 🛠️ Tecnologias de Ponta
 
@@ -55,8 +58,8 @@ Na versão **v78 (Quantum Engine)**, elevamos a experiência com um sistema de t
 
 1.  **Clone o repositório:**
     ```bash
-    git clone https://github.com/gillemosai/5task.git
-    cd 5task
+    git clone https://github.com/gillemosai/5task-android.git
+    cd 5task-android
     ```
 2.  **Instale as dependências:**
     ```bash
@@ -74,6 +77,9 @@ Na versão **v78 (Quantum Engine)**, elevamos a experiência com um sistema de t
 - [x] Micro-Kanban por tarefa.
 - [x] Sistema de Temas Claro/Escuro (v78).
 - [x] Priorização Colorida e Reordenação Animada (v78).
+- [x] Expiração de 27 horas (Procrastinação Zero - v79).
+- [x] Painel visual do Einstein em Pânico (v79).
+- [x] Otimização das imagens dos avatares para o PWA / Wrapper.
 - [ ] ☁️ Sincronização em nuvem (Firebase Integration).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
