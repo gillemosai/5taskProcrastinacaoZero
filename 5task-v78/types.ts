@@ -26,6 +26,9 @@ export enum Mood {
   THINKING = 'THINKING',
   EXCITED = 'EXCITED',
   SHOCKED = 'SHOCKED',
+  PANIC_3H = 'PANIC_3H',
+  PANIC_2H = 'PANIC_2H',
+  PANIC_1H = 'PANIC_1H',
 }
 
 export type QuoteType = 'welcome' | 'add' | 'complete' | 'delete' | 'full' | 'idle';

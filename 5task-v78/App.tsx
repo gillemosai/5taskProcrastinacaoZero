@@ -93,30 +93,74 @@ const App: React.FC = () => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
-  // Rotina de Expiração Anti-Procrastinação
+  // Rotina de Expiração Anti-Procrastinação e Atualização de Humor de Urgência
   useEffect(() => {
-    const interval = setInterval(() => {
+    const checkUrgencyAndExpiration = () => {
       setTasks(prev => {
         const now = Date.now();
+        const HOURS_24_MS = 24 * 60 * 60 * 1000;
         const HOURS_27_MS = 27 * 60 * 60 * 1000;
 
         let changed = false;
+        let urgencyMood: Mood | null = null;
+        let minTimeLeft = Infinity;
+
         const validTasks = prev.filter(t => {
-          if (!t.completed && (now - t.createdAt > HOURS_27_MS)) {
-            changed = true;
-            return false; // remove tasks older than 27 hours
+          if (!t.completed) {
+            const age = now - t.createdAt;
+            if (age > HOURS_27_MS) {
+              changed = true;
+              return false; // remove tasks older than 27 hours
+            }
+
+            // Check for urgency
+            if (age > HOURS_24_MS) {
+              const timeLeftMs = HOURS_27_MS - age;
+              if (timeLeftMs < minTimeLeft) {
+                minTimeLeft = timeLeftMs;
+                if (timeLeftMs <= 60 * 60 * 1000) {
+                  urgencyMood = Mood.PANIC_1H;
+                } else if (timeLeftMs <= 2 * 60 * 60 * 1000) {
+                  urgencyMood = Mood.PANIC_2H;
+                } else {
+                  urgencyMood = Mood.PANIC_3H;
+                }
+              }
+            }
           }
           return true;
         });
 
+        // Set the global mood if there's urgency, otherwise revert only if we were in panic
+        setMood(current => {
+          if (urgencyMood) return urgencyMood;
+          if (current === Mood.PANIC_1H || current === Mood.PANIC_2H || current === Mood.PANIC_3H) return Mood.HAPPY;
+          return current;
+        });
+
+        // Also update quote if in panic
+        setQuote(currentQuote => {
+          if (urgencyMood === Mood.PANIC_1H) return "É O FIM DOS TEMPOS! ACABE ESSA TAREFA AGORA! 🚨";
+          if (urgencyMood === Mood.PANIC_2H) return "Não há mais como fugir... O desespero se aproxima! Faltam menos de 2 horas! 😱";
+          if (urgencyMood === Mood.PANIC_3H) return "O tempo de tolerância começou... o relógio está correndo contra você! 😬";
+          return currentQuote;
+        });
+
         return changed ? validTasks : prev;
       });
-    }, 60000); // Check every minute
+    };
+
+    // Check immediately and then every minute
+    checkUrgencyAndExpiration();
+    const interval = setInterval(checkUrgencyAndExpiration, 60000);
 
     return () => clearInterval(interval);
   }, []);
 
   const updateEinstein = (type: QuoteType, customMood?: Mood) => {
+    // Prevent overriding panic expressions during normal actions
+    if (mood === Mood.PANIC_1H || mood === Mood.PANIC_2H || mood === Mood.PANIC_3H) return;
+
     const quotes = QUOTES[type];
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     setQuote(randomQuote);
