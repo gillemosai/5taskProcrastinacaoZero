@@ -9,104 +9,79 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-v65-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-78.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
-  <img src="https://img.shields.io/badge/Architecture-Fullstack-orange?style=for-the-badge" alt="Architecture">
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
+  <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
+</p>
+
+<p align="center">
+  <a href="https://ais-pre-rbphcnbbd3tt24q4lo3ejh-56623482366.us-west2.run.app" target="_blank">
+    <img src="https://img.shields.io/badge/TESTAR_AGORA-CLIQUE_AQUI-5e17eb?style=for-the-badge&logo=rocket" alt="Testar Agora">
+  </a>
 </p>
 
 ---
 
 ## 🚀 Sobre o Projeto
 
-O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. Se você não consegue focar em 5 coisas, não conseguirá focar em nada.
+O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-O app utiliza a figura de **Albert Einstein** como seu mentor quântico, reagindo ao seu fluxo de trabalho e oferecendo insights motivacionais baseados em seu progresso.
+Na versão **v78 (Quantum Engine)**, elevamos a experiência com um sistema de temas dinâmicos, priorização visual e uma fluidez de interface digna das leis da relatividade.
 
-## ✨ Funcionalidades Principais
+## ✨ Funcionalidades Principais (Atualizado v78)
 
-- **🛡️ Limite Quântico:** Sistema bloqueia a criação de mais de 5 tarefas para forçar o foco no que é essencial.
-- **👨‍🔬 Mentoria de Einstein:** Avatar dinâmico que muda de expressão (Feliz, Pensativo, Animado, Preocupado) conforme o estado da sua lista.
-- **📋 Quadro Kanban Integrado:** Cada tarefa principal pode ser expandida em um micro-gerenciamento com colunas *A Fazer*, *Andamento* e *Concluído*.
-- **🗄️ Backend SQL Persistente:** O sistema agora conta com um backend robusto (Node.js + Prisma + SQLite/PostgreSQL) para garantir que seus dados sejam salvos permanentemente, sem risco de perda ao limpar o cache do navegador.
-- **⚡ Interface Neon-Noir:** Design escuro e moderno com toques neon para reduzir a fadiga visual e aumentar a imersão.
-- **🔄 Updates em Tempo Real:** Interações instantâneas e feedback visual fluido.
+- **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
+- **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**, com ajustes automáticos de legibilidade e contraste.
+- **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo da lista, focando no que é imediato.
+- **🚥 Matriz de Prioridade:** Classificação visual para decisões rápidas:
+  *   🔴 **URGENTE:** Atenção imediata necessária.
+  *   🟡 **ATENÇÃO:** Requer cuidado especial.
+  *   ⚫ **CRÍTICO:** Item vital para ser resolvido no dia.
+- **🎨 Sistema de Destaque Colorido:** Personalize seus cards com 3 cores base (Ciano, Roxo e Rosa) para organizar visualmente categorias de trabalho.
+- **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas. Ao mover uma tarefa, o ecossistema de tarefas se ajusta suavemente.
+- **📋 Micro-Kanban Integrado:** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído).
+- **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Quantum Storage" do navegador, funcionando perfeitamente sem internet.
+- **📱 PWA Nativo:** Instalável em Android e iOS, com suporte a Service Workers para carregamento instantâneo.
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Tecnologias de Ponta
 
-### Frontend
-- **[React](https://react.dev/):** Biblioteca para interfaces de usuário modernas e reativas.
-- **[Tailwind CSS](https://tailwindcss.com/):** Framework CSS utilitário para design responsivo.
-- **[Lucide React](https://lucide.dev/):** Ícones elegantes e leves.
-
-### Backend
-- **[Node.js](https://nodejs.org/):** Runtime JavaScript para o servidor.
-- **[Express](https://expressjs.com/):** Framework web rápido e minimalista.
-- **[Prisma](https://www.prisma.io/):** ORM moderno para Node.js e TypeScript.
-- **[SQLite](https://www.sqlite.org/):** Banco de dados SQL leve e embarcado (padrão).
-- **[PostgreSQL](https://www.postgresql.org/):** Suporte nativo para produção via troca de provider.
+- **[React 19](https://react.dev/):** A fundação para uma interface reativa e ultra-veloz.
+- **[Tailwind CSS](https://tailwindcss.com/):** Design responsivo com utilitários customizados para efeitos Neon e Vidro (Glassmorphism).
+- **[Lucide React](https://lucide.dev/):** Ícones vetoriais modernos para uma navegação limpa.
+- **[IndexedDB API](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API):** Banco de dados persistente no lado do cliente.
 
 ## ⚙️ Instalação e Execução
 
-### 🚀 Instalação Rápida (Recomendado para Usuários)
-
-Se você está no Windows 10 ou 11, criamos um instalador automático que configura todo o ambiente (Node.js, Python, Dependências e Atalho) com um único clique.
-
-1.  Baixe o repositório.
-2.  Execute o arquivo **`Instalar Tudo.bat`** como Administrador.
-3.  Aguarde o término da instalação.
-4.  Use o atalho **`5Task App`** criado na sua área de trabalho.
-
-*Para um guia detalhado, consulte o arquivo [`MANUAL_INSTALACAO.md`](MANUAL_INSTALACAO.md).*
-
-### 🐧 Instalação no Linux / Mac
-
-Para usuários de Linux ou macOS, o processo é via terminal:
-
-1.  Abra o terminal na pasta do projeto.
-2.  Dê permissão de execução: `chmod +x install.sh`
-3.  Execute o instalador: `./install.sh`
-4.  O app pode ser iniciado com `python3 launcher.py` ou pelo atalho criado.
-
----
-
-### 💻 Instalação Manual (Para Desenvolvedores)
-
-Para rodar o projeto completo (Frontend + Backend) manualmente, você precisará de dois terminais abertos.
-
-#### 1. Clonar o repositório
-```bash
-git clone https://github.com/gillemosai/5task.git
-cd 5task
-```
-
-#### 2. Configurar o Backend
-```bash
-cd server
-npm install
-npx prisma migrate dev --name init # Cria o banco de dados
-npm run dev
-```
-*O servidor rodará em: `http://localhost:3001`*
-
-#### 3. Configurar o Frontend
-Em um novo terminal, na raiz do projeto:
-```bash
-npm install
-npm run dev
-```
-*O app abrirá em: `http://localhost:5173`*
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/gillemosai/5task.git
+    cd 5task
+    ```
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+3.  **Inicie o motor:**
+    ```bash
+    npm run dev
+    ```
 
 ## 🗺️ Roadmap de Evolução
 
-- [x] Limite de 5 tarefas e Gamificação inicial.
+- [x] Limite de 5 tarefas e Gamificação com Einstein.
+- [x] Persistência local com IndexedDB.
 - [x] Micro-Kanban por tarefa.
-- [x] Migração de IndexedDB para Backend SQL (v65).
-- [ ] ☁️ Autenticação de Usuários.
-- [ ] 🔔 Notificações Push.
-- [ ] 📊 Dashboard de Produtividade Quântica.
+- [x] Sistema de Temas Claro/Escuro (v78).
+- [x] Priorização Colorida e Reordenação Animada (v78).
+- [ ] ☁️ Sincronização em nuvem (Firebase Integration).
+- [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
 ---
+
+<p align="center">
+  <strong>⚠️ Aviso de Integridade:</strong> A pasta <code>assets/</code> contém recursos binários essenciais protegidos. Não modifique os arquivos de imagem para garantir a consistência da experiência visual.
+</p>
 
 <p align="center">
   Desenvolvido com 💜 por <strong>Gil Lemos</strong>

@@ -1,285 +1,250 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Undo2, X, Download, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload } from 'lucide-react';
-import { Task, Mood, QuoteType, SubTask } from './types';
-import { QUOTES, AVATAR_IMAGES } from './constants';
+import { Plus, Trash2, Undo2, X, Download, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon } from 'lucide-react';
+import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor } from './types';
+import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
 import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
 
+/**
+ * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
+ * NÃO APAGAR, NÃO RENOMEAR, NÃO ALTERAR NADA DENTRO DE "assets/".
+ */
+
 // --- Database Engine (IndexedDB) ---
-const API_URL = 'http://localhost:3001/tasks';
+let dbInstance: IDBDatabase | null = null;
+const DB_NAME = '5task_quantum_v78_db'; 
+const STORE_NAME = 'tasks_store';
+
+const getDB = (): Promise<IDBDatabase> => {
+  if (dbInstance) return Promise.resolve(dbInstance);
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 15);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => {
+      dbInstance = request.result;
+      resolve(dbInstance);
+    };
+    request.onerror = () => reject(request.error);
+  });
+};
 
 const saveTasksToDB = async (tasks: Task[]) => {
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tasks)
-    });
-  } catch (e) {
-    console.error("Erro ao salvar no servidor:", e);
-  }
+  const db = await getDB();
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  const store = tx.objectStore(STORE_NAME);
+  store.put(tasks, 'current_tasks');
 };
 
 const loadTasksFromDB = async (): Promise<Task[]> => {
-  try {
-    const response = await fetch(API_URL);
-    if (!response.ok) throw new Error('Falha ao carregar');
-    return await response.json();
-  } catch (e) {
-    console.error("Erro ao carregar do servidor:", e);
-    return [];
-  }
+  const db = await getDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.get('current_tasks');
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => resolve([]);
+  });
 };
-
-const MAX_TASKS = 5;
-import logoImg from './assets/5task-logo.png';
-const LOGO_URL = logoImg;
-const SUCCESS_SOUND_URL = 'https://codeskulptor-demos.commondatastorage.googleapis.com/pang/pop.mp3';
-const APP_VERSION = "v65";
 
 const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isPersistent, setIsPersistent] = useState(false);
-  const [logoError, setLogoError] = useState(false);
-  const [newTaskText, setNewTaskText] = useState('');
-  const [mood, setMood] = useState<Mood>(Mood.THINKING);
-  const [quote, setQuote] = useState<string>(QUOTES.welcome[0]);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [activeKanbanTaskId, setActiveKanbanTaskId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const dragItem = useRef<number | null>(null);
+  const [inputText, setInputText] = useState('');
+  const [mood, setMood] = useState<Mood>(Mood.HAPPY);
+  const [quote, setQuote] = useState(QUOTES.welcome[0]);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [lastDeletedTask, setLastDeletedTask] = useState<Task | null>(null);
-  const [showUndo, setShowUndo] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Carregamento inicial e verificação de persistência
   useEffect(() => {
-    const setupApp = async () => {
-      const savedTasks = await loadTasksFromDB();
-      setTasks(savedTasks);
-
-      // Se carregou (ou tentou carregar e retornou array vazio válido), assumimos que o backend está lá.
-      // Para ser mais preciso, poderíamos verificar se o fetch falhou, mas loadTasksFromDB retorna [] em erro.
-      // Vamos assumir persistencia verdadeira por padrão já que estamos com backend, 
-      // ou melhorar loadTasksFromDB para sinalizar erro.
-      setIsPersistent(true);
-
-      setIsLoading(false);
-      window.dispatchEvent(new Event('app-ready'));
+    const handleStatusChange = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', handleStatusChange);
+    window.addEventListener('offline', handleStatusChange);
+    return () => {
+      window.removeEventListener('online', handleStatusChange);
+      window.removeEventListener('offline', handleStatusChange);
     };
-    setupApp();
   }, []);
 
-  // Auto-Save
   useEffect(() => {
-    if (!isLoading) saveTasksToDB(tasks);
-  }, [tasks, isLoading]);
+    loadTasksFromDB().then(savedTasks => {
+      setTasks(savedTasks);
+      setIsLoaded(true);
+      window.dispatchEvent(new Event('app-ready'));
+    });
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') setIsDarkMode(false);
+  }, []);
 
-  // Gestão de humor de Einstein
   useEffect(() => {
-    if (isLoading) return;
-    if (tasks.length === 0) {
-      setMood(Mood.THINKING);
-      setQuote(QUOTES.welcome[Math.floor(Math.random() * QUOTES.welcome.length)]);
-    } else if (tasks.length >= MAX_TASKS) {
-      setMood(Mood.SHOCKED);
-      setQuote(QUOTES.full[Math.floor(Math.random() * QUOTES.full.length)]);
-    }
-  }, [tasks.length, isLoading]);
+    if (isLoaded) saveTasksToDB(tasks);
+  }, [tasks, isLoaded]);
+
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
+
+  const updateEinstein = (type: QuoteType, customMood?: Mood) => {
+    const quotes = QUOTES[type];
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    setQuote(randomQuote);
+    if (customMood) setMood(customMood);
+  };
 
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskText.trim() || tasks.length >= MAX_TASKS) return;
-
+    if (!inputText.trim()) return;
+    if (tasks.length >= 5) {
+      updateEinstein('full', Mood.SHOCKED);
+      return;
+    }
     const newTask: Task = {
       id: crypto.randomUUID(),
-      text: newTaskText.trim(),
+      text: inputText.trim(),
       completed: false,
       createdAt: Date.now(),
-      subTasks: []
+      subTasks: [],
+      priority: 'none',
+      highlightColor: 'none'
     };
-
-    setTasks(prev => [newTask, ...prev]);
-    setNewTaskText('');
-    setMood(Mood.HAPPY);
-    setQuote(QUOTES.add[Math.floor(Math.random() * QUOTES.add.length)]);
-
-    setTimeout(() => {
-      if (tasks.length + 1 < MAX_TASKS) setMood(Mood.THINKING);
-    }, 3000);
+    setTasks([newTask, ...tasks]); // Novas tarefas no topo
+    setInputText('');
+    updateEinstein('add', Mood.EXCITED);
   };
 
-  const toggleComplete = (id: string) => {
-    setTasks(prev => {
-      const newTasks = prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-      const task = newTasks.find(t => t.id === id);
-      if (task?.completed) {
-        setMood(Mood.EXCITED);
-        setQuote(QUOTES.complete[Math.floor(Math.random() * QUOTES.complete.length)]);
-        new Audio(SUCCESS_SOUND_URL).play().catch(() => { });
-        setTimeout(() => {
-          if (tasks.length < MAX_TASKS) setMood(Mood.THINKING);
-        }, 3000);
+  const toggleTask = (id: string) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const newState = !t.completed;
+        if (newState) updateEinstein('complete', Mood.HAPPY);
+        return { ...t, completed: newState };
       }
-      return newTasks;
-    });
+      return t;
+    }));
   };
 
   const deleteTask = (id: string) => {
     const taskToDelete = tasks.find(t => t.id === id);
     if (taskToDelete) {
       setLastDeletedTask(taskToDelete);
-      setShowUndo(true);
       setTasks(prev => prev.filter(t => t.id !== id));
-      if (activeKanbanTaskId === id) setActiveKanbanTaskId(null);
-      setMood(Mood.EXCITED);
-      setQuote(QUOTES.delete[Math.floor(Math.random() * QUOTES.delete.length)]);
-      setTimeout(() => setShowUndo(false), 5000);
+      updateEinstein('delete', Mood.SHOCKED);
     }
   };
 
+  const updateTaskProps = (id: string, priority: Priority, color: HighlightColor) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, priority, highlightColor: color } : t));
+  };
 
+  // Drag & Drop com reordenação suave
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
-  const activeTaskForKanban = tasks.find(t => t.id === activeKanbanTaskId);
-
-  if (isLoading) return null;
+  const handleDragStart = (e: React.DragEvent, position: number) => {
+    dragItem.current = position;
+  };
+  const handleDragEnter = (e: React.DragEvent, position: number) => {
+    dragOverItem.current = position;
+  };
+  const handleDragEnd = () => {
+    if (dragItem.current !== null && dragOverItem.current !== null && dragItem.current !== dragOverItem.current) {
+      const newList = [...tasks];
+      const movedItem = newList[dragItem.current];
+      newList.splice(dragItem.current, 1);
+      newList.splice(dragOverItem.current, 0, movedItem);
+      setTasks(newList);
+    }
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex justify-center py-4 md:py-8 px-4 selection:bg-neon-purple/30">
-      <div className={`w-full transition-all duration-500 flex flex-col md:flex-row gap-6 ${isSidebarOpen ? 'max-w-[1400px]' : 'max-w-lg'}`}>
+    <div className={`min-h-screen transition-colors duration-500 font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+      <header className="p-6 flex flex-col items-center relative">
+        <button 
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          className={`absolute right-6 top-6 p-3 rounded-full transition-all shadow-lg active:scale-90 ${isDarkMode ? 'bg-slate-800 text-yellow-400 border-slate-700' : 'bg-white text-slate-800 border-slate-200'}`}
+        >
+          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+        <img src={LOGO_URL} alt="5TASK" className="h-10 mb-4 drop-shadow-md" />
+        <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-widest ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'}`}>
+          <Database size={12} className="text-neon-blue" /> Quantum Storage
+        </div>
+      </header>
 
-        <main className={`flex flex-col w-full shrink-0 ${isSidebarOpen ? 'md:w-80 lg:w-96' : 'mx-auto'} ${activeKanbanTaskId && !isSidebarOpen ? 'hidden' : 'block'} pb-20`}>
-          <header className="flex items-center justify-between mb-6 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 backdrop-blur-xl">
-            <div className="flex items-center gap-3">
-              {!logoError ? (
-                <img
-                  src={LOGO_URL}
-                  alt="5task"
-                  onError={() => setLogoError(true)}
-                  className="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(0,243,255,0.4)]"
-                />
-              ) : (
-                <div className="w-9 h-9 flex items-center justify-center bg-neon-blue/20 rounded-lg text-neon-blue">
-                  <Database size={20} />
+      <main className="max-w-4xl mx-auto px-4 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-5">
+          <EinsteinAvatar mood={mood} quote={quote} isDarkMode={isDarkMode} />
+        </div>
+
+        <div className="lg:col-span-7">
+          {activeTaskId && tasks.find(t => t.id === activeTaskId) ? (
+            <div className={`border rounded-3xl p-6 shadow-2xl min-h-[500px] ${isDarkMode ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-200'}`}>
+              <KanbanBoard 
+                task={tasks.find(t => t.id === activeTaskId)!} 
+                onClose={() => setActiveTaskId(null)} 
+                onUpdateSubtasks={(subs) => setTasks(prev => prev.map(t => t.id === activeTaskId ? {...t, subTasks: subs} : t))} 
+                isDarkMode={isDarkMode}
+              />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <form onSubmit={addTask} className="relative group">
+                <div className={`flex items-center border-2 rounded-2xl p-2 transition-all ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <input 
+                    type="text" 
+                    value={inputText} 
+                    onChange={(e) => setInputText(e.target.value)} 
+                    placeholder="O que vamos resolver agora?" 
+                    className="flex-1 bg-transparent border-none focus:ring-0 px-4 py-3 outline-none"
+                  />
+                  <button type="submit" className="bg-neon-blue text-slate-900 p-3 rounded-xl shadow-lg active:scale-95 disabled:opacity-50">
+                    <Plus size={24} strokeWidth={3} />
+                  </button>
                 </div>
-              )}
-              <h1 className="text-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple">5task</h1>
-            </div>
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-xl border transition-all ${isSidebarOpen ? 'bg-neon-purple border-neon-blue' : 'bg-slate-800 border-slate-700'}`}>
-              <StickyNote size={18} className={isSidebarOpen ? 'text-white' : 'text-slate-400'} />
-            </button>
-          </header>
+              </form>
 
-          <EinsteinAvatar mood={mood} quote={quote} />
-
-          <div className="flex justify-between items-center mb-2 px-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Prioridades</span>
-            <span className={`text-xs font-mono px-3 py-1 rounded-full border ${tasks.length >= MAX_TASKS ? 'border-red-500/50 text-red-400' : 'border-neon-blue/30 text-neon-blue'}`}>
-              {tasks.length} / {MAX_TASKS}
-            </span>
-          </div>
-
-          <form onSubmit={addTask} className="relative mb-6">
-            <input
-              ref={inputRef}
-              type="text"
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              disabled={tasks.length >= MAX_TASKS}
-              placeholder={tasks.length >= MAX_TASKS ? "Massa Crítica Atingida" : "Nova observação..."}
-              className="w-full bg-slate-900/90 text-white pl-5 pr-14 py-4 rounded-2xl border-2 border-slate-800 focus:border-neon-blue/50 outline-none transition-all placeholder:text-slate-600 shadow-2xl"
-            />
-            <button type="submit" disabled={tasks.length >= MAX_TASKS || !newTaskText.trim()} className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-neon-purple text-white rounded-xl hover:scale-105 active:scale-95 disabled:opacity-30 transition-all">
-              <Plus size={20} />
-            </button>
-          </form>
-
-          <div className="space-y-3 mb-8">
-            {tasks.map((task, index) => (
-              <TaskItem
-                key={task.id}
-                index={index}
-                task={task}
-                isActive={activeKanbanTaskId === task.id}
-                onComplete={toggleComplete}
-                onDelete={deleteTask}
-                onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
-                onOpenKanban={(id) => setActiveKanbanTaskId(id)}
-                onDragStart={(e, pos) => { dragItem.current = pos; }}
-                onDragEnter={(e, pos) => {
-                  if (dragItem.current !== null && dragItem.current !== pos) {
-                    const _tasks = [...tasks];
-                    const dragged = _tasks[dragItem.current];
-                    _tasks.splice(dragItem.current, 1);
-                    _tasks.splice(pos, 0, dragged);
-                    dragItem.current = pos;
-                    setTasks(_tasks);
-                  }
-                }}
-                onDragEnd={() => { dragItem.current = null; }}
-              />
-            ))}
-            {tasks.length === 0 && (
-              <div className="py-12 text-center text-slate-700 border-2 border-dashed border-slate-800/40 rounded-3xl">
-                <p className="text-sm font-mono opacity-50">Espaço-tempo vazio. Adicione uma tarefa.</p>
+              <div className="space-y-3 relative">
+                {tasks.map((task, idx) => (
+                  <TaskItem 
+                    key={task.id} 
+                    task={task} 
+                    index={idx} 
+                    onComplete={toggleTask} 
+                    onDelete={deleteTask} 
+                    onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? {...t, text} : t))}
+                    onUpdateProps={updateTaskProps}
+                    onOpenKanban={setActiveTaskId} 
+                    onDragStart={handleDragStart} 
+                    onDragEnter={handleDragEnter} 
+                    onDragEnd={handleDragEnd} 
+                    isDarkMode={isDarkMode}
+                  />
+                ))}
               </div>
-            )}
-          </div>
-
-          <footer className="mt-auto py-6 text-center space-y-4">
-
-
-            <p className="text-[9px] text-slate-600 font-mono tracking-widest uppercase flex items-center justify-center gap-2">
-              Engine {APP_VERSION} <RefreshCw size={8} className="animate-spin-slow" />
-            </p>
-            <div
-              className={`text-[8px] font-bold inline-flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all cursor-help
-                  ${isPersistent ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-orange-500/10 border-orange-500/20 text-orange-500'}`}
-              title={isPersistent ? "Dados salvos permanentemente" : "Para memória permanente, instale o App no seu celular."}
-            >
-              {isPersistent ? <Database size={8} /> : <AlertCircle size={8} />}
-              {isPersistent ? 'MEMÓRIA PERMANENTE' : 'MEMÓRIA TEMPORÁRIA'}
             </div>
-          </footer>
-        </main>
+          )}
+        </div>
+      </main>
 
-        {(activeKanbanTaskId || isSidebarOpen) && (
-          <aside className={`transition-all duration-500 flex flex-col bg-slate-900/40 rounded-[2.5rem] border border-slate-800 p-6 backdrop-blur-md
-                ${isSidebarOpen ? 'flex-1 opacity-100' : activeKanbanTaskId ? 'fixed inset-0 z-50 rounded-none p-4' : 'w-0 opacity-0 overflow-hidden'}`}>
-            {activeTaskForKanban ? (
-              <KanbanBoard
-                task={activeTaskForKanban}
-                onClose={() => setActiveKanbanTaskId(null)}
-                onUpdateSubtasks={(subs) => setTasks(prev => prev.map(t => t.id === activeKanbanTaskId ? { ...t, subTasks: subs } : t))}
-                isSidebar={isSidebarOpen}
-              />
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-600">
-                <StickyNote size={48} className="mb-4 opacity-10" />
-                <p className="text-xs uppercase tracking-widest font-mono">Selecione uma tarefa</p>
-              </div>
-            )}
-          </aside>
-        )}
-
-        {showUndo && (
-          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-6 animate-slide-up">
-            <span className="text-sm">Matéria recuperada.</span>
-            <button onClick={() => {
-              if (lastDeletedTask && tasks.length < MAX_TASKS) {
-                setTasks(prev => [lastDeletedTask, ...prev]);
-                setShowUndo(false);
-                setLastDeletedTask(null);
-              }
-            }} className="text-neon-blue font-black text-xs flex items-center gap-2 hover:underline">
-              <Undo2 size={14} /> DESFAZER
-            </button>
-            <button onClick={() => setShowUndo(false)}><X size={14} className="text-slate-500" /></button>
+      <footer className="fixed bottom-0 left-0 right-0 p-4 flex justify-center z-50 pointer-events-none">
+        <div className={`backdrop-blur-md border px-6 py-2 rounded-full shadow-2xl flex items-center gap-4 pointer-events-auto ${isDarkMode ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-slate-200'}`}>
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black font-mono tracking-widest ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
+            {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'ONLINE' : 'OFFLINE'}
           </div>
-        )}
-      </div>
+          <div className="text-[10px] text-slate-500 font-mono">v78.0.0-QUANTUM</div>
+        </div>
+      </footer>
     </div>
   );
 };

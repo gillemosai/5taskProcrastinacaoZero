@@ -1,4 +1,8 @@
+
 export type KanbanColumn = 'todo' | 'doing' | 'done';
+
+export type Priority = 'urgent' | 'attention' | 'critical' | 'none';
+export type HighlightColor = 'blue' | 'purple' | 'pink' | 'none';
 
 export interface SubTask {
   id: string;
@@ -11,8 +15,10 @@ export interface Task {
   id: string;
   text: string;
   completed: boolean;
-  createdAt: number; // Timestamp
+  createdAt: number;
   subTasks?: SubTask[];
+  priority?: Priority;
+  highlightColor?: HighlightColor;
 }
 
 export enum Mood {
@@ -23,20 +29,3 @@ export enum Mood {
 }
 
 export type QuoteType = 'welcome' | 'add' | 'complete' | 'delete' | 'full' | 'idle';
-
-declare module '*.png' {
-  const value: string;
-  export default value;
-}
-declare module '*.jpg' {
-  const value: string;
-  export default value;
-}
-declare module '*.jpeg' {
-  const value: string;
-  export default value;
-}
-declare module '*.svg' {
-  const value: string;
-  export default value;
-}
