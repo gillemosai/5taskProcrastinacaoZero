@@ -6,6 +6,7 @@ import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
 import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
+import { WelcomeCarousel } from './components/WelcomeCarousel';
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -63,6 +64,7 @@ const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('5task_welcome_seen'));
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -236,6 +238,15 @@ const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-500 font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+      {showWelcome && (
+        <WelcomeCarousel
+          isDarkMode={isDarkMode}
+          onComplete={() => {
+            setShowWelcome(false);
+            localStorage.setItem('5task_welcome_seen', 'true');
+          }}
+        />
+      )}
       <header className="p-6 flex flex-col items-center relative">
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
