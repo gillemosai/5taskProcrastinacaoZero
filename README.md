@@ -1,7 +1,7 @@
 # 🧠 5task - Motor de Produtividade Procrastinação Zero
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/gillemosai/5TASK/main/assets/5task-logo.png" width="160" alt="5task Logo">
+  <img src="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png" width="160" alt="5task Logo">
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://ais-pre-rbphcnbbd3tt24q4lo3ejh-56623482366.us-west2.run.app" target="_blank">
+  <a href="5task-procrastinacao-zero.vercel.app" target="_blank">
     <img src="https://img.shields.io/badge/TESTAR_AGORA-CLIQUE_AQUI-5e17eb?style=for-the-badge&logo=rocket" alt="Testar Agora">
   </a>
 </p>
