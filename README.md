@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="5task-procrastinacao-zero.vercel.app" target="_blank">
+  <a href="https://5task-procrastinacao-zero.vercel.app/" target="_blank">
     <img src="https://img.shields.io/badge/TESTAR_AGORA-CLIQUE_AQUI-5e17eb?style=for-the-badge&logo=rocket" alt="Testar Agora">
   </a>
 </p>
