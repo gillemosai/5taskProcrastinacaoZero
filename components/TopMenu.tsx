@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, FileText, Target, Download } from 'lucide-react';
+import { Menu, FileText, Target, Download, ExternalLink } from 'lucide-react';
 import { Task } from '../types';
 import { exportUncompletedTasks } from '../utils/exportTasks';
-import { MarkdownViewer } from './MarkdownViewer';
 import { VisionBoard } from './VisionBoard';
+
+const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero#readme';
 
 interface TopMenuProps {
     tasks: Task[];
@@ -14,7 +15,6 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode }) => {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    const [showDocumentation, setShowDocumentation] = useState(false);
     const [showVisionBoard, setShowVisionBoard] = useState(false);
 
     useEffect(() => {
@@ -40,8 +40,8 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode }) => {
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className={`p-3 rounded-full transition-all shadow-lg active:scale-90 ${isDarkMode
-                            ? 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
-                            : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
+                        ? 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+                        : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
                         }`}
                 >
                     <Menu size={20} />
@@ -51,14 +51,18 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode }) => {
                     <div className={`absolute top-14 left-0 w-72 rounded-2xl shadow-2xl border overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-2 z-50 origin-top-left transition-all ${isDarkMode ? 'bg-slate-900/95 border-slate-700/80 shadow-black/50' : 'bg-white/95 border-slate-200 shadow-slate-300/50'
                         }`}>
                         <div className="p-2 space-y-1">
-                            <button
-                                onClick={() => handleAction(() => setShowDocumentation(true))}
+                            <a
+                                href={GITHUB_README_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setIsOpen(false)}
                                 className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors text-left ${isDarkMode ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : 'text-slate-700 hover:bg-slate-100 focus:bg-slate-100'
                                     }`}
                             >
                                 <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500"><FileText size={18} /></div>
-                                <span>Documentação</span>
-                            </button>
+                                <span className="flex-1">Documentação</span>
+                                <ExternalLink size={14} className={isDarkMode ? 'text-slate-500' : 'text-slate-400'} />
+                            </a>
 
                             <button
                                 onClick={() => handleAction(() => setShowVisionBoard(true))}
@@ -88,13 +92,6 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode }) => {
                     </div>
                 )}
             </div>
-
-            {showDocumentation && (
-                <MarkdownViewer
-                    isDarkMode={isDarkMode}
-                    onClose={() => setShowDocumentation(false)}
-                />
-            )}
 
             {showVisionBoard && (
                 <VisionBoard
