@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-80.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-81.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,9 +28,9 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **v80 (Procrastinação Zero)**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira, além de introduzirmos ferramentas essenciais como o Quadro Visão e Exportação de Tarefas.
+Na versão **v81**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira, além de ferramentas essenciais como o Quadro Visão (agora em formato wizard guiado) e Exportação de Tarefas.
 
-## ✨ Funcionalidades Principais (Atualizado v80)
+## ✨ Funcionalidades Principais (Atualizado v81)
 
 - **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
 - **⏱️ Motor Procrastinação Zero:**
@@ -47,8 +47,8 @@ Na versão **v80 (Procrastinação Zero)**, elevamos a experiência com um siste
     </p>
 
   * **Expurgo Automático:** Se 27 horas passarem, a tarefa será sumariamente e automaticamente destruída. Nenhuma procrastinação sobrevivente.
-- **🎯 Quadro Visão In-App (Novo na v80):** Um quadro de planejamento a longo prazo para estabelecer seus Valores Pessoais e Metas que se alinham com seu dia a dia, tudo salvo criptograficamente no seu navegador.
-- **📤 Exportação de Pendências (Novo na v80):** Possibilidade de baixar via Menu as suas últimas 30 tarefas não finalizadas num arquivo markdown legível.
+- **🎯 Quadro Visão Wizard (Atualizado na v81):** Um wizard passo a passo para construir sua Visão Pessoal (Valores → Visão de Longo Prazo → Metas e Projetos), com descrições orientadoras e exemplos práticos em cada etapa, reduzindo a sobrecarga cognitiva.
+- **📤 Exportação de Pendências:** Possibilidade de baixar via Menu as suas últimas 30 tarefas não finalizadas num arquivo markdown legível.
 - **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**.
 - **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo.
 - **🚥 Matriz de Prioridade:** Classificação visual `(Urgente, Atenção e Crítico)`.
@@ -94,6 +94,8 @@ Na versão **v80 (Procrastinação Zero)**, elevamos a experiência com um siste
 - [x] Menu Superior e Pop-up de Documentação README nativo (v80).
 - [x] Quadro Visão Pessoal Embutido e interativo (v80).
 - [x] Exportação das últimas tarefas em Markdown (v80).
+- [x] Quadro Visão refatorado como Wizard passo a passo com microcopy humanizado (v81).
+- [x] Markdown Parser aprimorado para renderização fiel ao GitHub (v81).
 - [ ] ☁️ Sincronização em nuvem (Firebase Integration).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 

@@ -322,7 +322,7 @@ const App: React.FC = () => {
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black font-mono tracking-widest ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
             {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'ONLINE' : 'OFFLINE'}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono">v80.0.0-PROC-ZERO</div>
+          <div className="text-[10px] text-slate-500 font-mono">v81.0.0-PROC-ZERO</div>
         </div>
       </footer>
     </div>
