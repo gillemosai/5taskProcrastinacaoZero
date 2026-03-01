@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-79.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-80.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,12 +28,12 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **v79 (Procrastinação Zero)**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira.
+Na versão **v80 (Procrastinação Zero)**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira, além de introduzirmos ferramentas essenciais como o Quadro Visão e Exportação de Tarefas.
 
-## ✨ Funcionalidades Principais (Atualizado v79)
+## ✨ Funcionalidades Principais (Atualizado v80)
 
 - **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
-- **⏱️ Motor Procrastinação Zero (Novo):**
+- **⏱️ Motor Procrastinação Zero:**
   * **Ciclo de Vida de 24h:** Toda tarefa idealmente deve ser finalizada no mesmo dia em que foi criada.
   * **Tempo de Tolerância (+3h):** Excedendo o prazo, a tarefa entra em alerta de tolerância com um contador regressivo (vermelho).
   * **Pânico Global:** Nas 3 horas finais, o Einstein perde sua calma e adentra em três estados diferentes de puro Desespero/Pânico (`PANIC_3H`, `PANIC_2H`, `PANIC_1H`), clamando por foco!
@@ -47,6 +47,8 @@ Na versão **v79 (Procrastinação Zero)**, elevamos a experiência com um siste
     </p>
 
   * **Expurgo Automático:** Se 27 horas passarem, a tarefa será sumariamente e automaticamente destruída. Nenhuma procrastinação sobrevivente.
+- **🎯 Quadro Visão In-App (Novo na v80):** Um quadro de planejamento a longo prazo para estabelecer seus Valores Pessoais e Metas que se alinham com seu dia a dia, tudo salvo criptograficamente no seu navegador.
+- **📤 Exportação de Pendências (Novo na v80):** Possibilidade de baixar via Menu as suas últimas 30 tarefas não finalizadas num arquivo markdown legível.
 - **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**.
 - **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo.
 - **🚥 Matriz de Prioridade:** Classificação visual `(Urgente, Atenção e Crítico)`.
@@ -89,6 +91,9 @@ Na versão **v79 (Procrastinação Zero)**, elevamos a experiência com um siste
 - [x] Expiração de 27 horas (Procrastinação Zero - v79).
 - [x] Painel visual do Einstein em Pânico (v79).
 - [x] Otimização das imagens dos avatares para o PWA / Wrapper.
+- [x] Menu Superior e Pop-up de Documentação README nativo (v80).
+- [x] Quadro Visão Pessoal Embutido e interativo (v80).
+- [x] Exportação das últimas tarefas em Markdown (v80).
 - [ ] ☁️ Sincronização em nuvem (Firebase Integration).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 

@@ -7,6 +7,7 @@ import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WelcomeCarousel } from './components/WelcomeCarousel';
+import { TopMenu } from './components/TopMenu';
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -248,6 +249,7 @@ const App: React.FC = () => {
         />
       )}
       <header className="p-6 flex flex-col items-center relative">
+        <TopMenu tasks={tasks} isDarkMode={isDarkMode} />
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
           className={`absolute right-6 top-6 p-3 rounded-full transition-all shadow-lg active:scale-90 ${isDarkMode ? 'bg-slate-800 text-yellow-400 border-slate-700' : 'bg-white text-slate-800 border-slate-200'}`}
@@ -320,7 +322,7 @@ const App: React.FC = () => {
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black font-mono tracking-widest ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
             {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'ONLINE' : 'OFFLINE'}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono">v79.0.0-PROC-ZERO</div>
+          <div className="text-[10px] text-slate-500 font-mono">v80.0.0-PROC-ZERO</div>
         </div>
       </footer>
     </div>
