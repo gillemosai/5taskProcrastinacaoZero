@@ -285,7 +285,7 @@ const App: React.FC = () => {
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="O que vamos resolver agora?"
+                    placeholder="O que vamos resolver hoje?"
                     className="flex-1 bg-transparent border-none focus:ring-0 px-4 py-3 outline-none"
                   />
                   <button type="submit" className="bg-neon-blue text-slate-900 p-3 rounded-xl shadow-lg active:scale-95 disabled:opacity-50">
