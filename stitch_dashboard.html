@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>5Task - Productivity Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ee00ff",
+                        "accent-cyan": "#00f2ff",
+                        "background-light": "#f8f5f8",
+                        "background-dark": "#0a0a1a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .cyan-glow {
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+        }
+        .progress-ring {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<!-- Header -->
+<header class="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-background-dark/80 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/20 rounded-lg">
+<span class="material-symbols-outlined text-primary">grid_view</span>
+</div>
+<img alt="5Task Logo" class="h-8 w-auto" src="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-slate-400">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDX2Xh4N8LAcf5JE1zQfElasSU97wRc8063CmgFDcykV3c2id5-Qr5Sl9q2fz1wc0MZ2xDsydUnyUhQaalBXJzMyiCbazMx293_AHQbYEDgf_nFqXetnQxjihMY2OoRgULJjg6wiX0ewZ9W2ZYtPjLMKOJOrN-9CxRcSZjSfWZZIUls0gGe8jiIfWB5cn6u_q3TeeJp7OwD5DxTq9n9vHTsZSTQXO5FNR2vcpcdyQBFfAfL1_OHiiiHZ0NGy9Dw3yMsKBAcwRPW2jc"/>
+</div>
+</div>
+</header>
+<main class="px-6 py-4 space-y-6 max-w-4xl mx-auto">
+<!-- Bento Box Top Section: Progress -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="md:col-span-2 glass-card rounded-xl p-6 flex items-center justify-between">
+<div class="space-y-2">
+<h2 class="text-slate-400 text-sm font-medium uppercase tracking-wider">PROGRESSO GERAL</h2>
+<p class="text-3xl font-bold">13/20 <span class="text-lg font-normal text-slate-500">Tarefas</span></p>
+<p class="text-primary text-sm font-medium">+12% desde ontem</p>
+</div>
+<div class="relative flex items-center justify-center">
+<svg class="w-24 h-24">
+<circle class="text-slate-800" cx="48" cy="48" fill="transparent" r="38" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary progress-ring" cx="48" cy="48" fill="transparent" r="38" stroke="currentColor" stroke-dasharray="238.76" stroke-dashoffset="83.56" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<span class="absolute text-lg font-bold">65%</span>
+</div>
+</div>
+<div class="glass-card rounded-xl p-6 flex flex-col justify-between bg-gradient-to-br from-primary/10 to-transparent">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">bolt</span>
+<span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-1 rounded-full uppercase">Streak</span>
+</div>
+<div>
+<p class="text-4xl font-bold italic">8</p>
+<p class="text-slate-400 text-sm">Dias Seguidos</p>
+</div>
+</div>
+</section>
+<!-- Bento Middle Section: Task Groups -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Today's Tasks -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold flex items-center gap-2">Hoje <span class="bg-slate-800 text-slate-400 text-xs px-2 py-0.5 rounded-full font-normal">5</span></h3>
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="space-y-3">
+<!-- Task Item -->
+<div class="glass-card group p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-primary hover:bg-white/5 transition-all">
+<div class="relative w-6 h-6 flex items-center justify-center border-2 border-primary rounded-lg cursor-pointer group-hover:bg-primary/10">
+<!-- Visual checkbox -->
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-slate-100 group-hover:text-primary transition-colors">Design System Audit</h4>
+<p class="text-xs text-slate-500">Alta Prioridade • 10:00 AM</p>
+</div>
+<span class="material-symbols-outlined text-slate-600 text-sm">drag_indicator</span>
+</div>
+<div class="glass-card group p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-accent-cyan hover:bg-white/5 transition-all">
+<div class="relative w-6 h-6 flex items-center justify-center border-2 border-slate-700 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-accent-cyan text-sm font-bold">check</span>
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-slate-400 line-through">Coffee with Marketing</h4>
+<p class="text-xs text-slate-600">Reunião • Concluído</p>
+</div>
+</div>
+<div class="glass-card group p-4 rounded-xl flex items-center gap-4 border-l-4 border-l-slate-600 hover:bg-white/5 transition-all">
+<div class="relative w-6 h-6 flex items-center justify-center border-2 border-slate-700 rounded-lg cursor-pointer"></div>
+<div class="flex-1">
+<h4 class="font-medium text-slate-100">Review PR #452</h4>
+<p class="text-xs text-slate-500">Desenvolvimento • 2:30 PM</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tomorrow & Upcoming -->
+<div class="space-y-6">
+<!-- Tomorrow Section -->
+<div class="space-y-4">
+<h3 class="text-lg font-bold flex items-center gap-2">Amanhã <span class="text-slate-500 text-xs font-normal">3 tarefas</span></h3>
+<div class="glass-card p-4 rounded-xl flex items-center gap-4 opacity-70">
+<div class="w-1.5 h-8 bg-slate-700 rounded-full"></div>
+<div>
+<h4 class="font-medium text-slate-300">Quarterly Planning</h4>
+<p class="text-xs text-slate-500">9:00 AM</p>
+</div>
+</div>
+</div>
+<!-- Upcoming Stats -->
+<div class="glass-card p-6 rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<div class="flex flex-col gap-4">
+<h3 class="text-slate-400 text-sm font-medium">Tendências de Atividade</h3>
+<div class="flex items-end gap-1 h-24">
+<div class="flex-1 bg-primary/20 rounded-t h-12"></div>
+<div class="flex-1 bg-primary/40 rounded-t h-16"></div>
+<div class="flex-1 bg-primary/20 rounded-t h-8"></div>
+<div class="flex-1 bg-primary rounded-t h-20"></div>
+<div class="flex-1 bg-primary/60 rounded-t h-14"></div>
+<div class="flex-1 bg-accent-cyan rounded-t h-24"></div>
+<div class="flex-1 bg-slate-800 rounded-t h-10"></div>
+</div>
+<div class="flex justify-between text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Action Area -->
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 glass-card rounded-full cyan-glow">
+<button class="flex items-center gap-2 text-slate-300 hover:text-white px-2">
+<span class="material-symbols-outlined">search</span>
+</button>
+<div class="h-6 w-[1px] bg-slate-700"></div>
+<button class="w-12 h-12 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+<div class="h-6 w-[1px] bg-slate-700"></div>
+<button class="flex items-center gap-2 text-slate-300 hover:text-white px-2">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<!-- Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-4 py-3 bg-background-dark/95 border-t border-slate-800/50 backdrop-blur-xl">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">home</span>
+<span class="text-[10px] font-bold">Painel</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300" href="#">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="text-[10px]">Tarefas</span>
+</a>
+<div class="w-12"></div> <!-- Space for FAB -->
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-[10px]">Agenda</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px]">Perfil</span>
+</a>
+</nav>
+</body></html>

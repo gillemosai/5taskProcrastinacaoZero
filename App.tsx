@@ -21,11 +21,12 @@ let dbInstance: IDBDatabase | null = null;
 const DB_NAME = '5task_quantum_v78_db';
 const STORE_NAME = 'tasks_store';
 const VISION_STORE = 'vision_store';
+const GAMIFICATION_STORE = 'gamification_store';
 
 const getDB = (): Promise<IDBDatabase> => {
   if (dbInstance) return Promise.resolve(dbInstance);
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 16);
+    const request = indexedDB.open(DB_NAME, 17); // Bumped to 17 for Gamification Store
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -33,6 +34,9 @@ const getDB = (): Promise<IDBDatabase> => {
       }
       if (!db.objectStoreNames.contains(VISION_STORE)) {
         db.createObjectStore(VISION_STORE);
+      }
+      if (!db.objectStoreNames.contains(GAMIFICATION_STORE)) {
+        db.createObjectStore(GAMIFICATION_STORE, { keyPath: 'id', autoIncrement: true });
       }
     };
     request.onsuccess = () => {
@@ -79,6 +83,24 @@ export const loadVisionFromDB = async (): Promise<any> => {
   });
 };
 
+export const saveCompletedTaskToDB = async (text: string) => {
+  const db = await getDB();
+  const tx = db.transaction(GAMIFICATION_STORE, 'readwrite');
+  const store = tx.objectStore(GAMIFICATION_STORE);
+  store.add({ task_text: text, completed_at: Date.now() });
+};
+
+export const getGamificationPoints = async (): Promise<number> => {
+  const db = await getDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(GAMIFICATION_STORE, 'readonly');
+    const store = tx.objectStore(GAMIFICATION_STORE);
+    const request = store.count();
+    request.onsuccess = () => resolve(request.result || 0);
+    request.onerror = () => resolve(0);
+  });
+};
+
 const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputText, setInputText] = useState('');
@@ -91,6 +113,7 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('5task_welcome_seen'));
   const [showVisionBoard, setShowVisionBoard] = useState(false);
+  const [totalPoints, setTotalPoints] = useState(0);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -108,6 +131,7 @@ const App: React.FC = () => {
       setIsLoaded(true);
       window.dispatchEvent(new Event('app-ready'));
     });
+    getGamificationPoints().then(pts => setTotalPoints(pts));
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') setIsDarkMode(false);
   }, []);
@@ -219,14 +243,23 @@ const App: React.FC = () => {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        const newState = !t.completed;
-        if (newState) updateEinstein('complete', Mood.HAPPY);
-        return { ...t, completed: newState };
-      }
-      return t;
-    }));
+    setTasks(prev => {
+      const updated = prev.map(t => {
+        if (t.id === id) {
+          const newState = !t.completed;
+          if (newState) {
+            updateEinstein('complete', Mood.HAPPY);
+            // Record task completion in offline Gamification DB
+            saveCompletedTaskToDB(t.text).then(() => {
+              getGamificationPoints().then(pts => setTotalPoints(pts));
+            }).catch(e => console.error("Error saving gamification:", e));
+          }
+          return { ...t, completed: newState };
+        }
+        return t;
+      });
+      return updated;
+    });
   };
 
   const deleteTask = (id: string) => {
@@ -265,7 +298,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen transition-colors duration-500 font-display ${isDarkMode ? 'bg-background-dark text-slate-100' : 'bg-background-light text-slate-900'}`}>
       {showWelcome && (
         <WelcomeCarousel
           isDarkMode={isDarkMode}
@@ -284,8 +317,14 @@ const App: React.FC = () => {
           {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
         <img src={LOGO_URL} alt="5TASK" className="h-10 mb-4 drop-shadow-md" />
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-widest ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'}`}>
-          <Database size={12} className="text-neon-blue" /> Procrastinação Zero
+        <div className="flex gap-4 items-center">
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-mono uppercase tracking-widest ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'}`}>
+            <Database size={12} className="text-accent-cyan" /> DB Offline (PWA)
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-mono tracking-widest ${isDarkMode ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-primary/5 border-primary/20 text-primary'}`}>
+            <span className="material-symbols-outlined text-sm font-bold">star</span>
+            <strong>{totalPoints}</strong> {totalPoints === 1 ? 'Tarefa Concluída' : 'Tarefas Concluídas'}
+          </div>
         </div>
       </header>
 
@@ -302,7 +341,7 @@ const App: React.FC = () => {
 
         <div className="lg:col-span-7">
           {activeTaskId && tasks.find(t => t.id === activeTaskId) ? (
-            <div className={`border rounded-3xl p-6 shadow-2xl min-h-[500px] ${isDarkMode ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-200'}`}>
+            <div className={`border rounded-3xl p-6 shadow-2xl min-h-[500px] ${isDarkMode ? 'glass-card border-none' : 'bg-white border-slate-200'}`}>
               <KanbanBoard
                 task={tasks.find(t => t.id === activeTaskId)!}
                 onClose={() => setActiveTaskId(null)}
@@ -313,7 +352,7 @@ const App: React.FC = () => {
           ) : (
             <div className="space-y-6">
               <form onSubmit={addTask} className="relative group">
-                <div className={`flex items-center border-2 rounded-2xl p-2 transition-all ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                <div className={`flex items-center rounded-2xl p-2 transition-all ${isDarkMode ? 'glass-card shadow-lg' : 'bg-white border-2 border-slate-200 shadow-sm'}`}>
                   <input
                     type="text"
                     value={inputText}
@@ -321,7 +360,7 @@ const App: React.FC = () => {
                     placeholder="O que vamos resolver hoje?"
                     className="flex-1 bg-transparent border-none focus:ring-0 px-4 py-3 outline-none"
                   />
-                  <button type="submit" className="bg-neon-blue text-slate-900 p-3 rounded-xl shadow-lg active:scale-95 disabled:opacity-50">
+                  <button type="submit" className="bg-primary text-slate-100 p-3 rounded-xl shadow-lg active:scale-95 disabled:opacity-50 cyan-glow">
                     <Plus size={24} strokeWidth={3} />
                   </button>
                 </div>
@@ -357,7 +396,7 @@ const App: React.FC = () => {
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black font-mono tracking-widest ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
             {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'ONLINE' : 'OFFLINE'}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono">v82.0.0-PROC-ZERO</div>
+          <div className="text-[10px] text-slate-500 font-mono">v3.0.0-PROC-ZERO</div>
         </div>
       </footer>
 

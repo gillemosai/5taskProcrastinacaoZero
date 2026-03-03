@@ -14,13 +14,23 @@
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo-192x192.png" />
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo-192x192.png" />
     
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
+        darkMode: "class",
         theme: {
           extend: {
             colors: {
+              "primary": "#ee00ff",
+              "accent-cyan": "#00f2ff",
+              "background-light": "#f8f5f8",
+              "background-dark": "#0a0a1a",
               neon: { blue: '#00f3ff', pink: '#bc13fe', purple: '#5e17eb' }
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
             },
             animation: {
               'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -36,10 +46,19 @@
     </script>
     <style>
       html, body { height: 100%; background-color: #020617; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-      body { margin: 0; padding: 0; overflow-y: auto; overscroll-behavior-y: none; }
+      body { margin: 0; padding: 0; overflow-y: auto; overscroll-behavior-y: none; font-family: 'Inter', sans-serif; }
       #root { width: 100vw; min-height: 100vh; }
       .splash-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #020617; z-index: 9999; transition: opacity 0.4s ease; }
       .splash-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+      
+      .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .cyan-glow {
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+      }
     </style>
     <script type="importmap">
 {

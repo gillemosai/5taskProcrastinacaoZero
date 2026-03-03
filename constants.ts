@@ -7,7 +7,7 @@ import { Mood, QuoteType } from './types';
  * NÃO MODIFICAR ESTA PASTA EM NENHUM DEPLOY.
  */
 
-const VERSION_QUERY = '?v=82';
+const VERSION_QUERY = '?v=3.0.0';
 const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/';
 
 export const AVATAR_IMAGES: Record<Mood, string> = {
@@ -24,7 +24,7 @@ export const LOGO_URL = `${GITHUB_BASE}5task-logo.png${VERSION_QUERY}`;
 
 export const QUOTES: Record<QuoteType, string[]> = {
   welcome: [
-    "A imaginação é mais importante que o conhecimento! Vamos trabalhar?",
+    "A mente que se abre a uma nova ideia jamais volta ao seu tamanho original.",
     "Não tenho talentos especiais, sou apenas apaixonadamente curioso.",
     "A mente que se abre a uma nova ideia jamais volta ao seu tamanho original.",
     "O tempo é relativo, mas sua produtividade não precisa ser.",

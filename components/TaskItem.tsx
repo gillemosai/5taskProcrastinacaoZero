@@ -109,8 +109,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   }, [task.createdAt, task.completed]);
 
   const alertClasses = isAlertTime && !task.completed
-    ? `border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.25)] ${isBlinking ? 'animate-pulse bg-red-950/20' : ''}`
-    : getHighlightStyle(task.highlightColor);
+    ? `border-l-red-500 shadow-[0_0_20px_rgba(239,68,68,0.25)] ${isBlinking ? 'animate-pulse bg-red-950/20' : ''}`
+    : (priority ? `border-l-${priority.color.replace('bg-', '')}` : (isDarkMode ? 'border-l-primary' : 'border-l-slate-200'));
 
   return (
     <motion.div
@@ -125,26 +125,25 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       onDragEnter={(e: any) => onDragEnter(e, index)}
       onDragEnd={onDragEnd as any}
       onDragOver={(e: any) => e.preventDefault()}
-      className={`relative group rounded-3xl border-2 transition-colors duration-300 ease-in-out cursor-default overflow-hidden
+      className={`relative group rounded-xl transition-colors duration-300 ease-in-out cursor-default overflow-hidden border-l-4 hover:bg-white/5
         ${alertClasses}
-        ${task.completed ? 'grayscale' : (isDarkMode ? 'bg-slate-900/90 backdrop-blur-xl shadow-lg shadow-black/40' : 'bg-white shadow-xl shadow-slate-200/60')}
+        ${task.completed ? 'grayscale opacity-70 border-l-slate-600' : (isDarkMode ? 'glass-card border-none' : 'bg-white shadow-xl shadow-slate-200/60')}
       `}
     >
-      {/* Barra de Prioridade Lateral */}
-      {priority && <div className={`absolute left-0 top-0 bottom-0 w-2 ${priority.color}`} />}
+      {/* Barra de Prioridade Lateral Substituída pela Borda Esquerda do Container */}
 
       <div className="p-4 md:p-5 flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <div className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-neon-blue transition-colors">
+        <div className="flex items-center gap-4">
+          <div className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-white transition-colors">
             <GripVertical size={20} />
           </div>
 
           <button
             onClick={() => onComplete(task.id)}
-            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
-              ${task.completed ? 'bg-green-500 border-green-500' : 'border-slate-600 hover:border-neon-blue'}`}
+            className={`relative w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all cursor-pointer group-hover:bg-primary/10
+              ${task.completed ? 'border-accent-cyan bg-transparent' : 'border-slate-700 hover:border-accent-cyan'}`}
           >
-            {task.completed && <Check size={14} className="text-white" />}
+            {task.completed && <Check size={14} className="text-accent-cyan font-bold" />}
           </button>
 
           {isEditing ? (
@@ -159,11 +158,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           ) : (
             <div className="flex-1 min-w-0 flex flex-col items-start gap-1" onClick={() => onOpenKanban(task.id)}>
               {priority && (
-                <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest text-white uppercase ${priority.color} shadow-sm`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${priority.color} text-white shadow-sm inline-block mb-1`}>
                   {priority.label}
                 </span>
               )}
-              <span className={`font-bold leading-snug break-words text-sm md:text-base transition-colors ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100' : 'text-slate-900')}`}>
+              <span className={`font-semibold leading-snug break-words text-sm md:text-base transition-colors ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100 group-hover:text-primary' : 'text-slate-900')}`}>
                 {task.text}
               </span>
             </div>

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-82.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.0.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,9 +28,9 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **v82**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira, além de ferramentas essenciais como o Quadro Visão (agora persistido no IndexedDB), animações suaves de Drag & Drop, e visuais inspirados no Google Stitch.
+Na versão **3.0.0**, nós transformamos a experiência final do aplicativo: trouxemos um design luxuoso estilo "Glass-Card" (vidro fosco) gerado e pensado por IAs conectadas (Google Stitch). Além disso, implementamos o **Sistema de Gamificação Offline**, onde todas as suas tarefas finalizadas são convertidas em pontos guardados com segurança e privacidade dentro do seu próprio celular (via IndexedDB), preparando o app pra ser um nativo Android!
 
-## ✨ Funcionalidades Principais (Atualizado v82)
+## ✨ Funcionalidades Principais (Atualizado v3.0.0)
 
 - **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
 - **⏱️ Motor Procrastinação Zero:**
@@ -48,15 +48,16 @@ Na versão **v82**, elevamos a experiência com um sistema implacável contra o 
 
   * **Expurgo Automático:** Se 27 horas passarem, a tarefa será sumariamente e automaticamente destruída. Nenhuma procrastinação sobrevivente.
 - **🎯 Quadro Visão Wizard:** Um wizard passo a passo persistido localmente no IndexedDB para construir sua Visão Pessoal (Valores → Visão de Longo Prazo → Metas e Projetos), acessível a qualquer momento com o botão "Ver Minha Visão".
+- **🏆 Gamificação Offline (Novidade):** Cada tarefa finalizada confere 1 ponto ao usuário. Os pontos são guardados localmente numa database de IndexedDB dedicada e atualizados ao vivo no novo Painel Dashboard brilhante.
+- **🎨 Glass-Card UI & Cores Neon:** Visuais refinados de fundo escuro cyberpunk ("background-dark") e bordas destacadas estilo neon cyano e magenta, baseados no design system "Google Stitch".
 - **📤 Exportação de Pendências:** Possibilidade de baixar via Menu as suas últimas 30 tarefas não finalizadas num arquivo markdown legível.
 - **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**.
 - **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo.
 - **🚥 Matriz de Prioridade:** Classificação visual `(Urgente, Atenção e Crítico)`.
-- **🎨 Sistema de Destaque Colorido:** Personalize seus cards com 3 cores base (Ciano, Roxo e Rosa).
 - **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas físicas (impulsionado por Framer Motion).
 - **📋 Micro-Kanban Integrado:** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído).
-- **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Armazenamento Procrastinação Zero" do navegador.
-- **📱 PWA Nativo:** Instalável em Android e iOS, pronto para empacotamento em Wrapper Nativo. (Otimizado com Sharp).
+- **💾 Offline-First Total:** Suas tarefas, sua Visão Pessoal e até seus Pontos de Conclusão sobrevivem sem internet permanentemente no "Armazenamento Procrastinação Zero".
+- **📱 PWA Nativo:** Instalável em Android e iOS, totalmente pronto e testado para ser convertido num App da Google Play Store!
 
 ## 🛠️ Tecnologias de Ponta
 
@@ -91,16 +92,13 @@ Na versão **v82**, elevamos a experiência com um sistema implacável contra o 
 - [x] Expiração de 27 horas (Procrastinação Zero - v79).
 - [x] Painel visual do Einstein em Pânico (v79).
 - [x] Otimização das imagens dos avatares para o PWA / Wrapper.
-- [x] Menu Superior e Pop-up de Documentação README nativo (v80).
-- [x] Quadro Visão Pessoal Embutido e interativo (v80).
-- [x] Exportação das últimas tarefas em Markdown (v80).
-- [x] Quadro Visão refatorado como Wizard passo a passo com microcopy humanizado (v81).
-- [x] Markdown Parser aprimorado para renderização fiel ao GitHub (v81).
-- [x] Correção de sobreposição de tags visuais em tarefas longas (v82).
-- [x] Refatoração do Drag & Drop e layouts com Framer Motion (Google Stitch visuals) (v82).
-- [x] Conserto da renderização React dos Avatares de Urgência (v82).
-- [x] Persistência do Wizard de Visão via IndexedDB e Botão de Acesso Direto (v82).
-- [ ] ☁️ Sincronização em nuvem (Firebase Integration).
+- [x] Conserto da renderização React dos Avatares de Urgência.
+- [x] Markdown Parser aprimorado para renderização fiel ao GitHub.
+- [x] Correção de sobreposição de tags visuais em tarefas longas.
+- [x] Refatoração do Drag & Drop e layouts com Framer Motion.
+- [x] Visuais aprimorados e reestilizados via "Google Stitch" (v3.0.0).
+- [x] Implementação do Banco de Pontos Offline / Gamification Local no IndexedDB (v3.0.0 - Play Store Wrapper Ready).
+- [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
 ---
