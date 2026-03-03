@@ -9,13 +9,12 @@ const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero
 interface TopMenuProps {
     tasks: Task[];
     isDarkMode: boolean;
+    onOpenVisionBoard: () => void;
 }
 
-export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode }) => {
+export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisionBoard }) => {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
-
-    const [showVisionBoard, setShowVisionBoard] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -65,7 +64,7 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode }) => {
                             </a>
 
                             <button
-                                onClick={() => handleAction(() => setShowVisionBoard(true))}
+                                onClick={() => handleAction(onOpenVisionBoard)}
                                 className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors text-left ${isDarkMode ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : 'text-slate-700 hover:bg-slate-100 focus:bg-slate-100'
                                     }`}
                             >
@@ -92,13 +91,6 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode }) => {
                     </div>
                 )}
             </div>
-
-            {showVisionBoard && (
-                <VisionBoard
-                    isDarkMode={isDarkMode}
-                    onClose={() => setShowVisionBoard(false)}
-                />
-            )}
         </>
     );
 };

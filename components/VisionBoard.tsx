@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Target, Save, Heart, Eye, Rocket, ChevronLeft, ChevronRight, BookOpen, Check } from 'lucide-react';
+import { loadVisionFromDB, saveVisionToDB } from '../App';
 
 interface VisionBoardProps {
     onClose: () => void;
@@ -63,21 +64,35 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode })
     };
 
     useEffect(() => {
-        const saved = localStorage.getItem('5task_vision_board');
-        if (saved) {
+        const loadInit = async () => {
             try {
-                const data = JSON.parse(saved);
-                setValores(data.valores || '');
-                setVisao(data.visao || '');
-                setMetas(data.metas || '');
+                const data = await loadVisionFromDB();
+                if (data) {
+                    setValores(data.valores || '');
+                    setVisao(data.visao || '');
+                    setMetas(data.metas || '');
+                } else {
+                    // Fallback para localStorage as migração
+                    const saved = localStorage.getItem('5task_vision_board');
+                    if (saved) {
+                        const lData = JSON.parse(saved);
+                        setValores(lData.valores || '');
+                        setVisao(lData.visao || '');
+                        setMetas(lData.metas || '');
+                        saveVisionToDB(lData); // Migra
+                    }
+                }
             } catch (e) {
                 console.error("Failed to parse vision board data", e);
             }
-        }
+        };
+        loadInit();
     }, []);
 
-    const handleSave = () => {
-        localStorage.setItem('5task_vision_board', JSON.stringify({ valores, visao, metas }));
+    const handleSave = async () => {
+        const data = { valores, visao, metas };
+        await saveVisionToDB(data);
+        localStorage.setItem('5task_vision_board', JSON.stringify(data)); // Mantém backup duplo por via das duvidas
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 2000);
     };
@@ -125,10 +140,10 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode })
                             className={`flex items-center gap-1.5 transition-all duration-300 ${i === currentStep ? 'flex-[2]' : 'flex-1'}`}
                         >
                             <div className={`h-1.5 w-full rounded-full transition-all duration-500 ${i < currentStep
-                                    ? 'bg-green-500'
-                                    : i === currentStep
-                                        ? (isDarkMode ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 'bg-gradient-to-r from-blue-500 to-purple-500')
-                                        : (isDarkMode ? 'bg-slate-800' : 'bg-slate-200')
+                                ? 'bg-green-500'
+                                : i === currentStep
+                                    ? (isDarkMode ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 'bg-gradient-to-r from-blue-500 to-purple-500')
+                                    : (isDarkMode ? 'bg-slate-800' : 'bg-slate-200')
                                 }`} />
                         </button>
                     ))}
@@ -189,8 +204,8 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode })
                                 onClick={() => goToStep(currentStep - 1)}
                                 disabled={isFirstStep}
                                 className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all active:scale-95 ${isFirstStep
-                                        ? 'opacity-0 pointer-events-none'
-                                        : (isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                                    ? 'opacity-0 pointer-events-none'
+                                    : (isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
                                     }`}
                             >
                                 <ChevronLeft size={18} /> Anterior
@@ -200,8 +215,8 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode })
                                 <button
                                     onClick={handleSave}
                                     className={`flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 ${isSaved
-                                            ? 'bg-green-500 text-white shadow-green-500/30'
-                                            : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-blue-500/20'
+                                        ? 'bg-green-500 text-white shadow-green-500/30'
+                                        : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-blue-500/20'
                                         }`}
                                 >
                                     <Save size={18} />

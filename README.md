@@ -9,7 +9,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-81.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-82.0-blueviolet?style=for-the-badge" alt="Version">
+</p>
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,9 +29,9 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **v81**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira, além de ferramentas essenciais como o Quadro Visão (agora em formato wizard guiado) e Exportação de Tarefas.
+Na versão **v82**, elevamos a experiência com um sistema implacável contra o acúmulo de tarefas, aplicando mecânicas de tempo limite e avatares de desespero conforme o prazo expira, além de ferramentas essenciais como o Quadro Visão (agora persistido no IndexedDB), animações suaves de Drag & Drop, e visuais inspirados no Google Stitch.
 
-## ✨ Funcionalidades Principais (Atualizado v81)
+## ✨ Funcionalidades Principais (Atualizado v82)
 
 - **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
 - **⏱️ Motor Procrastinação Zero:**
@@ -47,13 +48,13 @@ Na versão **v81**, elevamos a experiência com um sistema implacável contra o 
     </p>
 
   * **Expurgo Automático:** Se 27 horas passarem, a tarefa será sumariamente e automaticamente destruída. Nenhuma procrastinação sobrevivente.
-- **🎯 Quadro Visão Wizard (Atualizado na v81):** Um wizard passo a passo para construir sua Visão Pessoal (Valores → Visão de Longo Prazo → Metas e Projetos), com descrições orientadoras e exemplos práticos em cada etapa, reduzindo a sobrecarga cognitiva.
+- **🎯 Quadro Visão Wizard:** Um wizard passo a passo persistido localmente no IndexedDB para construir sua Visão Pessoal (Valores → Visão de Longo Prazo → Metas e Projetos), acessível a qualquer momento com o botão "Ver Minha Visão".
 - **📤 Exportação de Pendências:** Possibilidade de baixar via Menu as suas últimas 30 tarefas não finalizadas num arquivo markdown legível.
 - **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**.
 - **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo.
 - **🚥 Matriz de Prioridade:** Classificação visual `(Urgente, Atenção e Crítico)`.
 - **🎨 Sistema de Destaque Colorido:** Personalize seus cards com 3 cores base (Ciano, Roxo e Rosa).
-- **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas.
+- **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas físicas (impulsionado por Framer Motion).
 - **📋 Micro-Kanban Integrado:** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído).
 - **💾 Offline-First (IndexedDB):** Seus dados são salvos localmente no "Armazenamento Procrastinação Zero" do navegador.
 - **📱 PWA Nativo:** Instalável em Android e iOS, pronto para empacotamento em Wrapper Nativo. (Otimizado com Sharp).
@@ -96,6 +97,10 @@ Na versão **v81**, elevamos a experiência com um sistema implacável contra o 
 - [x] Exportação das últimas tarefas em Markdown (v80).
 - [x] Quadro Visão refatorado como Wizard passo a passo com microcopy humanizado (v81).
 - [x] Markdown Parser aprimorado para renderização fiel ao GitHub (v81).
+- [x] Correção de sobreposição de tags visuais em tarefas longas (v82).
+- [x] Refatoração do Drag & Drop e layouts com Framer Motion (Google Stitch visuals) (v82).
+- [x] Conserto da renderização React dos Avatares de Urgência (v82).
+- [x] Persistência do Wizard de Visão via IndexedDB e Botão de Acesso Direto (v82).
 - [ ] ☁️ Sincronização em nuvem (Firebase Integration).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 

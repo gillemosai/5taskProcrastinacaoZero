@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Undo2, X, Download, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon } from 'lucide-react';
+import { Plus, Trash2, Undo2, X, Download, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor } from './types';
 import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
 import { EinsteinAvatar } from './components/EinsteinAvatar';
@@ -8,6 +9,7 @@ import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WelcomeCarousel } from './components/WelcomeCarousel';
 import { TopMenu } from './components/TopMenu';
+import { VisionBoard } from './components/VisionBoard';
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -18,15 +20,19 @@ import { TopMenu } from './components/TopMenu';
 let dbInstance: IDBDatabase | null = null;
 const DB_NAME = '5task_quantum_v78_db';
 const STORE_NAME = 'tasks_store';
+const VISION_STORE = 'vision_store';
 
 const getDB = (): Promise<IDBDatabase> => {
   if (dbInstance) return Promise.resolve(dbInstance);
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 15);
+    const request = indexedDB.open(DB_NAME, 16);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME);
+      }
+      if (!db.objectStoreNames.contains(VISION_STORE)) {
+        db.createObjectStore(VISION_STORE);
       }
     };
     request.onsuccess = () => {
@@ -55,6 +61,24 @@ const loadTasksFromDB = async (): Promise<Task[]> => {
   });
 };
 
+export const saveVisionToDB = async (data: any) => {
+  const db = await getDB();
+  const tx = db.transaction(VISION_STORE, 'readwrite');
+  const store = tx.objectStore(VISION_STORE);
+  store.put(data, 'current_vision');
+};
+
+export const loadVisionFromDB = async (): Promise<any> => {
+  const db = await getDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(VISION_STORE, 'readonly');
+    const store = tx.objectStore(VISION_STORE);
+    const request = store.get('current_vision');
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => resolve(null);
+  });
+};
+
 const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputText, setInputText] = useState('');
@@ -66,6 +90,7 @@ const App: React.FC = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('5task_welcome_seen'));
+  const [showVisionBoard, setShowVisionBoard] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -134,20 +159,22 @@ const App: React.FC = () => {
           return true;
         });
 
-        // Set the global mood if there's urgency, otherwise revert only if we were in panic
-        setMood(current => {
-          if (urgencyMood) return urgencyMood;
-          if (current === Mood.PANIC_1H || current === Mood.PANIC_2H || current === Mood.PANIC_3H) return Mood.HAPPY;
-          return current;
-        });
+        // Set the global mood if there's urgency, asynchronously outside the reducer
+        setTimeout(() => {
+          setMood(current => {
+            if (urgencyMood) return urgencyMood;
+            if (current === Mood.PANIC_1H || current === Mood.PANIC_2H || current === Mood.PANIC_3H) return Mood.HAPPY;
+            return current;
+          });
 
-        // Also update quote if in panic
-        setQuote(currentQuote => {
-          if (urgencyMood === Mood.PANIC_1H) return "É O FIM DOS TEMPOS! ACABE ESSA TAREFA AGORA! 🚨";
-          if (urgencyMood === Mood.PANIC_2H) return "Não há mais como fugir... O desespero se aproxima! Faltam menos de 2 horas! 😱";
-          if (urgencyMood === Mood.PANIC_3H) return "O tempo de tolerância começou... o relógio está correndo contra você! 😬";
-          return currentQuote;
-        });
+          // Also update quote if in panic
+          setQuote(currentQuote => {
+            if (urgencyMood === Mood.PANIC_1H) return "É O FIM DOS TEMPOS! ACABE ESSA TAREFA AGORA! 🚨";
+            if (urgencyMood === Mood.PANIC_2H) return "Não há mais como fugir... O desespero se aproxima! Faltam menos de 2 horas! 😱";
+            if (urgencyMood === Mood.PANIC_3H) return "O tempo de tolerância começou... o relógio está correndo contra você! 😬";
+            return currentQuote;
+          });
+        }, 0);
 
         return changed ? validTasks : prev;
       });
@@ -249,7 +276,7 @@ const App: React.FC = () => {
         />
       )}
       <header className="p-6 flex flex-col items-center relative">
-        <TopMenu tasks={tasks} isDarkMode={isDarkMode} />
+        <TopMenu tasks={tasks} isDarkMode={isDarkMode} onOpenVisionBoard={() => setShowVisionBoard(true)} />
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
           className={`absolute right-6 top-6 p-3 rounded-full transition-all shadow-lg active:scale-90 ${isDarkMode ? 'bg-slate-800 text-yellow-400 border-slate-700' : 'bg-white text-slate-800 border-slate-200'}`}
@@ -263,8 +290,14 @@ const App: React.FC = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-8">
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 flex flex-col items-center">
           <EinsteinAvatar mood={mood} quote={quote} isDarkMode={isDarkMode} />
+          <button
+            onClick={() => setShowVisionBoard(true)}
+            className={`mt-0 px-6 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95 ${isDarkMode ? 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-slate-700' : 'bg-white text-amber-600 hover:bg-slate-50 border border-slate-200'}`}
+          >
+            <Target size={18} /> Ver Minha Visão
+          </button>
         </div>
 
         <div className="lg:col-span-7">
@@ -295,22 +328,24 @@ const App: React.FC = () => {
               </form>
 
               <div className="space-y-3 relative">
-                {tasks.map((task, idx) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    index={idx}
-                    onComplete={toggleTask}
-                    onDelete={deleteTask}
-                    onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
-                    onUpdateProps={updateTaskProps}
-                    onOpenKanban={setActiveTaskId}
-                    onDragStart={handleDragStart}
-                    onDragEnter={handleDragEnter}
-                    onDragEnd={handleDragEnd}
-                    isDarkMode={isDarkMode}
-                  />
-                ))}
+                <AnimatePresence>
+                  {tasks.map((task, idx) => (
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      index={idx}
+                      onComplete={toggleTask}
+                      onDelete={deleteTask}
+                      onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
+                      onUpdateProps={updateTaskProps}
+                      onOpenKanban={setActiveTaskId}
+                      onDragStart={handleDragStart}
+                      onDragEnter={handleDragEnter}
+                      onDragEnd={handleDragEnd}
+                      isDarkMode={isDarkMode}
+                    />
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
           )}
@@ -322,9 +357,16 @@ const App: React.FC = () => {
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black font-mono tracking-widest ${isOnline ? 'text-green-500' : 'text-red-500'}`}>
             {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'ONLINE' : 'OFFLINE'}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono">v81.0.0-PROC-ZERO</div>
+          <div className="text-[10px] text-slate-500 font-mono">v82.0.0-PROC-ZERO</div>
         </div>
       </footer>
+
+      {showVisionBoard && (
+        <VisionBoard
+          isDarkMode={isDarkMode}
+          onClose={() => setShowVisionBoard(false)}
+        />
+      )}
     </div>
   );
 };
