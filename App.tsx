@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Undo2, X, Download, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target } from 'lucide-react';
+import { Plus, Trash2, Undo2, X, Download, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor } from './types';
 import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
@@ -8,8 +8,9 @@ import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WelcomeCarousel } from './components/WelcomeCarousel';
-import { TopMenu } from './components/TopMenu';
+import { exportUncompletedTasks } from './utils/exportTasks';
 import { VisionBoard } from './components/VisionBoard';
+import { UserGuide } from './components/UserGuide';
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -113,8 +114,12 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('5task_welcome_seen'));
   const [showVisionBoard, setShowVisionBoard] = useState(false);
+  const [showVisionViewOnly, setShowVisionViewOnly] = useState(false);
   const [totalPoints, setTotalPoints] = useState(0);
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [showUserGuide, setShowUserGuide] = useState(false);
+  const [showQuoteBubble, setShowQuoteBubble] = useState(true);
+  const [visionText, setVisionText] = useState('');
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -133,6 +138,9 @@ const App: React.FC = () => {
       window.dispatchEvent(new Event('app-ready'));
     });
     getGamificationPoints().then(pts => setTotalPoints(pts));
+    loadVisionFromDB().then(data => {
+      if (data && data.visao) setVisionText(data.visao);
+    });
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') setIsDarkMode(false);
   }, []);
@@ -145,6 +153,12 @@ const App: React.FC = () => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
+
+  // Auto-hide quote bubble after 6 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowQuoteBubble(false), 6000);
+    return () => clearTimeout(timer);
+  }, [quote]);
 
   // Rotina de Expiração Anti-Procrastinação e Atualização de Humor de Urgência
   useEffect(() => {
@@ -210,6 +224,7 @@ const App: React.FC = () => {
     const quotes = QUOTES[type];
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     setQuote(randomQuote);
+    setShowQuoteBubble(true);
     if (customMood) setMood(customMood);
   };
 
@@ -290,8 +305,6 @@ const App: React.FC = () => {
   };
 
   const progressPercent = Math.min(Math.round((totalPoints / 20) * 100), 100);
-  const circumference = 251;
-  const strokeOffset = Math.max(0, circumference - (circumference * Math.min(totalPoints / 20, 1)));
 
   return (
     <div className={`min-h-screen transition-colors duration-500 font-display ${isDarkMode ? 'bg-background-dark text-slate-100' : 'bg-background-light text-slate-900'}`}>
@@ -305,74 +318,111 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* ===== STICKY HEADER (Stitch Style) ===== */}
-      <header className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 ${isDarkMode ? 'bg-background-dark/80' : 'bg-background-light/80'} backdrop-blur-md`}>
-        <div className="flex items-center gap-3">
-          <TopMenu tasks={tasks} isDarkMode={isDarkMode} onOpenVisionBoard={() => setShowVisionBoard(true)} />
-          <img src={LOGO_URL} alt="5TASK Logo" className="h-8 w-auto" />
-        </div>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setIsDarkMode(!isDarkMode)} className="relative p-2 text-slate-400 hover:text-white transition-colors">
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-          <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 transition-all overflow-hidden relative cursor-pointer group" onClick={() => setShowVisionBoard(true)}>
-            <div className="absolute inset-0 bg-primary/20 group-hover:bg-primary/40 transition-colors z-10"></div>
-            <img src={AVATAR_IMAGES[mood]} alt="Einstein Status" className="w-full h-full object-cover scale-150 origin-top" />
-          </div>
-        </div>
-      </header>
+
 
       {/* ===== MAIN DASHBOARD ===== */}
-      <main className="px-6 py-4 space-y-6 max-w-4xl mx-auto pb-32">
+      <main className="px-4 py-3 space-y-4 max-w-4xl mx-auto pb-32">
 
-        {/* --- Big Einstein Avatar Section --- */}
-        <section className="flex flex-col items-center">
-          <EinsteinAvatar mood={mood} quote={quote} isDarkMode={isDarkMode} />
-          <button
-            onClick={() => setShowVisionBoard(true)}
-            className={`mt-2 px-6 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95 ${isDarkMode ? 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-slate-700' : 'bg-white text-amber-600 hover:bg-slate-50 border border-slate-200'}`}
-          >
-            <Target size={18} /> Ver Minha Visão
-          </button>
-        </section>
-
-        {/* --- Bento Top: Progress + Streak --- */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Progress Card */}
-          <div className={`md:col-span-2 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between ${isDarkMode ? 'glass-card' : 'bg-white shadow-lg border-2 border-slate-100'}`}>
-            <div className="space-y-2 text-center sm:text-left">
-              <h2 className="text-slate-400 text-sm font-medium uppercase tracking-wider">Progresso Geral</h2>
-              <p className="text-4xl font-bold">
-                {totalPoints} <span className="text-lg font-normal text-slate-500">Tarefas</span>
-              </p>
-              {totalPoints > 0 && <p className="text-primary text-sm font-medium">+1 XP por tarefa</p>}
-            </div>
-            <div className="relative flex items-center justify-center mt-6 sm:mt-0">
-              <svg className="w-24 h-24 sm:w-28 sm:h-28">
-                <circle cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" strokeWidth="8" className={isDarkMode ? 'text-slate-800' : 'text-slate-200'}></circle>
-                <circle cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" strokeWidth="8" strokeLinecap="round"
-                  className="text-primary transition-all duration-1000 ease-out"
-                  style={{ strokeDasharray: `${circumference}`, strokeDashoffset: `${strokeOffset}`, transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
-                ></circle>
-              </svg>
-              <span className="absolute text-xl font-bold">{progressPercent}%</span>
+        {/* --- Hero Section: Avatar LEFT | Stats + Visão RIGHT --- */}
+        <section className="flex gap-3 items-start">
+          {/* Avatar Large (Left) */}
+          <div className="shrink-0 flex flex-col items-center" onClick={() => setShowQuoteBubble(!showQuoteBubble)}>
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32 cursor-pointer">
+              <div className="absolute inset-0 bg-neon-purple rounded-full blur-2xl opacity-15 animate-pulse"></div>
+              <div className={`relative w-full h-full rounded-full border-[3px] shadow-lg z-10 flex items-center justify-center overflow-hidden transition-colors ${isDarkMode ? 'border-neon-blue bg-slate-900' : 'border-slate-300 bg-white'}`}>
+                <img
+                  src={AVATAR_IMAGES[mood]}
+                  alt="Einstein"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
           </div>
 
-          {/* Streak Card */}
-          <div className={`rounded-xl p-6 flex flex-col justify-between bg-gradient-to-br ${isDarkMode ? 'from-primary/10 to-transparent glass-card' : 'from-primary/5 to-white shadow-lg border-2 border-primary/10'}`}>
-            <div className="flex justify-between items-start">
-              <span className="material-symbols-outlined text-primary text-3xl">bolt</span>
-              <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-1 rounded-full uppercase">Streak</span>
+          {/* Right Column: Quote + Stats + Visão */}
+          <div className="flex-1 min-w-0 flex flex-col gap-2">
+            {/* Quote Bubble */}
+            <AnimatePresence>
+              {showQuoteBubble && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div
+                    className={`rounded-xl px-3 py-2 text-[11px] font-bold font-mono shadow-lg relative cursor-pointer leading-snug
+                    ${isDarkMode ? 'bg-white/95 text-slate-900 border border-neon-blue/30' : 'bg-slate-900/95 text-white border border-slate-600'}`}
+                    onClick={() => setShowQuoteBubble(false)}
+                  >
+                    "{quote}"
+                    <div className={`absolute -left-1.5 top-4 w-2.5 h-2.5 rotate-45 ${isDarkMode ? 'bg-white border-l border-b border-neon-blue/30' : 'bg-slate-900 border-l border-b border-slate-600'}`}></div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 gap-2">
+              {/* Progress Card */}
+              <div className={`rounded-xl px-2.5 py-2 flex items-center gap-2 ${isDarkMode ? 'glass-card-vivid' : 'bg-white shadow-md border border-slate-100'}`}>
+                <div className="relative flex items-center justify-center shrink-0">
+                  <svg className="w-9 h-9 -rotate-90" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="15" fill="none" stroke={isDarkMode ? '#1e293b' : '#e2e8f0'} strokeWidth="3" />
+                    <circle cx="20" cy="20" r="15" fill="none" stroke="#ee00ff" strokeWidth="3" strokeLinecap="round"
+                      className="transition-all duration-1000 ease-out"
+                      style={{
+                        strokeDasharray: `${2 * Math.PI * 15}`,
+                        strokeDashoffset: `${Math.max(0, 2 * Math.PI * 15 - (2 * Math.PI * 15 * Math.min(totalPoints / 20, 1)))}`,
+                      }}
+                    />
+                  </svg>
+                  <span className="absolute text-[8px] font-black">{progressPercent}%</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Progresso</p>
+                  <p className="text-base font-black leading-none">{totalPoints} <span className="text-[9px] font-normal text-slate-500">XP</span></p>
+                </div>
+              </div>
+
+              {/* Sequência Card (was Streak) */}
+              <div className={`rounded-xl px-2.5 py-2 flex items-center gap-2 ${isDarkMode ? 'glass-card-vivid bg-gradient-to-br from-primary/8 to-transparent' : 'bg-white shadow-md border border-primary/10'}`}>
+                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 shrink-0">
+                  <span className="material-symbols-outlined text-primary text-lg">bolt</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Sequência</p>
+                  <p className="text-base font-black leading-none italic">0 <span className="text-[9px] font-normal text-slate-500 not-italic">dias</span></p>
+                </div>
+              </div>
             </div>
-            <div className="mt-8">
-              <p className="text-5xl font-bold italic">0</p>
-              <p className="text-slate-400 text-sm mt-1">Dias Seguidos</p>
-            </div>
+
+            {/* Visão: show text if filled, button if empty */}
+            {visionText.trim() ? (
+              <div
+                onClick={() => setShowVisionViewOnly(true)}
+                className={`w-full rounded-xl px-3 py-2 cursor-pointer transition-all active:scale-[0.98] ${isDarkMode ? 'glass-card-vivid hover:bg-white/5' : 'bg-white shadow-md border border-slate-100 hover:bg-amber-50'}`}
+              >
+                <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 flex items-center gap-1 ${isDarkMode ? 'text-amber-400/70' : 'text-amber-600/70'}`}>
+                  <Target size={10} /> Minha Visão
+                </p>
+                <p className={`text-[11px] leading-snug line-clamp-2 font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {visionText}
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowVisionViewOnly(true)}
+                className={`w-full rounded-xl px-3 py-2 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isDarkMode ? 'glass-card-vivid text-amber-400 hover:bg-white/5' : 'bg-white shadow-md border border-slate-100 text-amber-600 hover:bg-amber-50'}`}
+              >
+                <Target size={15} /> Visão
+              </button>
+            )}
           </div>
         </section>
 
-        {/* --- Task Lists Section --- */}
+        {/* --- Task Lists Section (HERO - Primary Focus) --- */}
         <section>
           {activeTaskId && tasks.find(t => t.id === activeTaskId) ? (
             <div className={`border rounded-3xl p-6 shadow-2xl min-h-[500px] ${isDarkMode ? 'glass-card border-none' : 'bg-white border-slate-200'}`}>
@@ -384,15 +434,15 @@ const App: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Today Tasks Column */}
-              <div className="space-y-4">
+            <>
+              {/* Today Tasks */}
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold flex items-center gap-2">
-                    Hoje <span className={`text-xs px-2 py-0.5 rounded-full font-normal ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-600'}`}>{tasks.length}</span>
+                  <h3 className="text-base font-black flex items-center gap-2">
+                    Hoje <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isDarkMode ? 'bg-accent-cyan/15 text-accent-cyan' : 'bg-accent-cyan/10 text-teal-700'}`}>{tasks.length}</span>
                   </h3>
                 </div>
-                <div className="space-y-3 relative">
+                <div className="space-y-2.5 relative">
                   <AnimatePresence>
                     {tasks.map((task, idx) => (
                       <TaskItem
@@ -419,29 +469,25 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Trends Column */}
-              <div className="space-y-6">
-                <div className={`p-6 rounded-xl relative overflow-hidden ${isDarkMode ? 'glass-card' : 'bg-slate-50 border border-slate-200'}`}>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                  <div className="flex flex-col gap-4">
-                    <h3 className="text-slate-400 text-sm font-medium">Níveis de Foco Diário</h3>
-                    <div className="flex items-end gap-1 h-32">
-                      {[1, 2, 3, 4, 5].map(n => (
-                        <div key={n} className={`flex-1 transition-opacity ${tasks.length >= n ? 'opacity-100' : 'opacity-20'}`}>
-                          <div className={`w-full rounded-t ${n === 5 ? 'bg-accent-cyan shadow-[0_0_15px_rgba(0,242,255,0.4)]' : `bg-primary/${n * 20}`}`}
-                            style={{ height: `${n * 24}px` }}
-                          ></div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase tracking-tighter w-full">
-                      <span>1</span><span>2</span><span>3</span><span>4</span>
-                      <span className={tasks.length >= 5 ? 'text-accent-cyan' : ''}>MAX (5)</span>
-                    </div>
+              {/* Focus Levels - Compact & Below Tasks */}
+              <div className={`mt-4 p-3 rounded-xl relative overflow-hidden ${isDarkMode ? 'glass-card-vivid' : 'bg-slate-50 border border-slate-200'}`}>
+                <div className="flex items-center justify-between gap-4">
+                  <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest shrink-0">Foco</h4>
+                  <div className="flex items-end gap-1.5 h-7 flex-1 max-w-[160px]">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <div key={n} className={`flex-1 transition-opacity ${tasks.length >= n ? 'opacity-100' : 'opacity-20'}`}>
+                        <div className={`w-full rounded-sm ${n === 5 ? 'bg-accent-cyan shadow-[0_0_8px_rgba(0,242,255,0.4)]' : `bg-primary/${n * 20}`}`}
+                          style={{ height: `${n * 4 + 3}px` }}
+                        ></div>
+                      </div>
+                    ))}
                   </div>
+                  <span className={`text-[10px] font-bold shrink-0 ${tasks.length >= 5 ? 'text-accent-cyan' : 'text-slate-500'}`}>
+                    {tasks.length}/5
+                  </span>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </section>
       </main>
@@ -453,7 +499,7 @@ const App: React.FC = () => {
             initial={{ opacity: 0, scale: 0.9, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 50 }}
-            className={`fixed bottom-28 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50 p-4 rounded-3xl shadow-2xl ${isDarkMode ? 'glass-card cyan-glow' : 'bg-white border-2 border-accent-cyan shadow-xl'}`}
+            className={`fixed bottom-28 inset-x-0 mx-auto w-[90%] max-w-md z-50 p-4 rounded-3xl shadow-2xl ${isDarkMode ? 'glass-card cyan-glow' : 'bg-white border-2 border-accent-cyan shadow-xl'}`}
           >
             <form onSubmit={addTask} className="flex flex-col gap-4">
               <div className="flex justify-between items-center px-2">
@@ -476,39 +522,130 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ===== FIXED BOTTOM NAV BAR (Stitch Style) ===== */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col items-center pb-4 pointer-events-none">
-        {/* FAB Row */}
-        <div className={`flex items-center gap-4 px-6 py-3 rounded-full pointer-events-auto ${isDarkMode ? 'glass-card' : 'bg-white shadow-xl border border-slate-200'}`}>
-          <div className={`flex flex-col items-center gap-1 ${isOnline ? 'text-green-500' : 'text-red-500'} px-2`}>
-            {isOnline ? <Wifi size={20} /> : <WifiOff size={20} />}
+      {/* ===== FIXED BOTTOM NAV BAR ===== */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col items-center pb-3 pointer-events-none">
+        <div className={`flex items-center justify-center gap-1 px-3 py-2 rounded-[28px] pointer-events-auto w-[95%] max-w-md ${isDarkMode ? 'glass-card border border-slate-700/50' : 'bg-white/95 shadow-2xl border border-slate-200'} backdrop-blur-xl`}>
+
+          {/* Visão */}
+          <div className="relative group">
+            <button
+              onClick={() => setShowVisionViewOnly(true)}
+              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-amber-400 hover:bg-amber-400/10' : 'text-amber-600 hover:bg-amber-50'
+                }`}
+            >
+              <Eye size={20} />
+              <span className="text-[9px] font-bold leading-none">Visão</span>
+            </button>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
+              📋 Ver seu Quadro de Visão
+              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
+            </div>
           </div>
-          <div className={`h-6 w-[1px] ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
 
-          {/* FAB Add Button */}
-          <button
-            onClick={() => setIsAddingTask(!isAddingTask)}
-            className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)] z-50"
-          >
-            <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
-          </button>
+          {/* Docs */}
+          <div className="relative group">
+            <button
+              onClick={() => setShowUserGuide(true)}
+              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-blue-400 hover:bg-blue-400/10' : 'text-blue-600 hover:bg-blue-50'
+                }`}
+            >
+              <FileText size={20} />
+              <span className="text-[9px] font-bold leading-none">Docs</span>
+            </button>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
+              📖 Guia de uso do 5Task
+              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
+            </div>
+          </div>
 
-          <div className={`h-6 w-[1px] ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
-          <button onClick={() => window.open('https://github.com/gillemosai/5taskProcrastinacaoZero#readme', '_blank')} className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary px-2 cursor-pointer transition-colors">
-            <span className="material-symbols-outlined text-xl">help</span>
-          </button>
+          {/* Divider */}
+          <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700/60' : 'bg-slate-200'}`}></div>
+
+          {/* FAB Add Button (Center) */}
+          <div className="relative group">
+            <button
+              onClick={() => setIsAddingTask(!isAddingTask)}
+              className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)] z-50 -my-3"
+            >
+              <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
+            </button>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-5 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
+              ✨ Criar nova tarefa
+              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700/60' : 'bg-slate-200'}`}></div>
+
+          {/* Exportar */}
+          <div className="relative group">
+            <button
+              onClick={() => exportUncompletedTasks(tasks)}
+              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-400/10' : 'text-emerald-600 hover:bg-emerald-50'
+                }`}
+            >
+              <Download size={20} />
+              <span className="text-[9px] font-bold leading-none">Exportar</span>
+            </button>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
+              💾 Baixar tarefas pendentes (.md)
+              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
+            </div>
+          </div>
+
+          {/* Tema */}
+          <div className="relative group">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-purple-400 hover:bg-purple-400/10' : 'text-purple-600 hover:bg-purple-50'
+                }`}
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+              <span className="text-[9px] font-bold leading-none">Tema</span>
+            </button>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
+              🎨 Alternar modo claro/escuro
+              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
+            </div>
+          </div>
         </div>
         {/* Copyright */}
-        <p className={`mt-2 text-[10px] font-mono pointer-events-auto ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+        <p className={`mt-1.5 text-[10px] font-mono pointer-events-auto ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
           Copyright @gillemosai | Todos os direitos reservados
         </p>
       </div>
 
+      {/* ===== VISION BOARD: Full Editor (from TopMenu) ===== */}
       {showVisionBoard && (
         <VisionBoard
           isDarkMode={isDarkMode}
-          onClose={() => setShowVisionBoard(false)}
+          onClose={() => {
+            setShowVisionBoard(false);
+            loadVisionFromDB().then(data => {
+              if (data && data.visao) setVisionText(data.visao);
+            });
+          }}
         />
+      )}
+
+      {/* ===== VISION BOARD: View-Only Popup (from dashboard button) ===== */}
+      {showVisionViewOnly && (
+        <VisionBoard
+          isDarkMode={isDarkMode}
+          onClose={() => {
+            setShowVisionViewOnly(false);
+            loadVisionFromDB().then(data => {
+              if (data && data.visao) setVisionText(data.visao);
+            });
+          }}
+          viewOnly={true}
+        />
+      )}
+
+      {/* ===== USER GUIDE ===== */}
+      {showUserGuide && (
+        <UserGuide isDarkMode={isDarkMode} onClose={() => setShowUserGuide(false)} />
       )}
     </div>
   );

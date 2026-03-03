@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Target, Save, Heart, Eye, Rocket, ChevronLeft, ChevronRight, BookOpen, Check } from 'lucide-react';
+import { X, Target, Save, Heart, Eye, Rocket, ChevronLeft, ChevronRight, BookOpen, Check, Pencil } from 'lucide-react';
 import { loadVisionFromDB, saveVisionToDB } from '../App';
 
 interface VisionBoardProps {
     onClose: () => void;
     isDarkMode: boolean;
+    viewOnly?: boolean;
 }
 
 interface WizardStep {
@@ -47,7 +48,7 @@ const STEPS: WizardStep[] = [
     },
 ];
 
-export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode }) => {
+export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode, viewOnly = false }) => {
     const [valores, setValores] = useState('');
     const [visao, setVisao] = useState('');
     const [metas, setMetas] = useState('');
@@ -55,6 +56,7 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode })
     const [currentStep, setCurrentStep] = useState(0);
     const [direction, setDirection] = useState<'next' | 'prev'>('next');
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(!viewOnly);
 
     const fieldValues: Record<string, string> = { valores, visao, metas };
     const setters: Record<string, (v: string) => void> = {
@@ -107,6 +109,112 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode })
         }, 200);
     };
 
+    const hasVision = valores.trim() || visao.trim() || metas.trim();
+
+    // ============= VIEW-ONLY MODE =============
+    if (!isEditMode) {
+        return (
+            <div className={`fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md ${isDarkMode ? 'bg-slate-950/80' : 'bg-slate-900/40'}`}
+                onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+            >
+                <div className={`w-full max-w-lg max-h-[85vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl border ${isDarkMode ? 'bg-slate-900/95 border-slate-700/50' : 'bg-white/95 border-slate-200'}`}>
+                    {/* Header */}
+                    <div className={`flex items-center justify-between p-4 px-5 border-b shrink-0 ${isDarkMode ? 'border-slate-800 bg-slate-900/50' : 'border-slate-100 bg-slate-50/50'}`}>
+                        <div className="flex items-center gap-2.5">
+                            <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/20">
+                                <Target size={16} className="text-white" />
+                            </div>
+                            <h2 className="text-lg font-black font-mono tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-400">Minha Visão</h2>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsEditMode(true)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                            >
+                                <Pencil size={12} /> Editar
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className={`p-1.5 rounded-full transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* View-Only Content */}
+                    <div className="px-5 py-4 overflow-y-auto flex-1 custom-scrollbar space-y-3">
+                        {!hasVision ? (
+                            <div className={`text-center py-12 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                                <Target size={40} className="mx-auto mb-3 opacity-40" />
+                                <p className="font-medium text-sm">Você ainda não definiu sua visão.</p>
+                                <button
+                                    onClick={() => setIsEditMode(true)}
+                                    className="mt-4 px-5 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg active:scale-95 transition-transform"
+                                >
+                                    Criar Minha Visão
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Valores */}
+                                {valores.trim() && (
+                                    <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-pink-500/5 border-pink-500/15' : 'bg-pink-50 border-pink-100'}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Heart size={14} className="text-pink-500" />
+                                            <h4 className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-pink-400' : 'text-pink-600'}`}>Valores</h4>
+                                        </div>
+                                        <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{valores}</p>
+                                    </div>
+                                )}
+
+                                {/* Visão */}
+                                {visao.trim() && (
+                                    <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-blue-500/5 border-blue-500/15' : 'bg-blue-50 border-blue-100'}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Eye size={14} className="text-blue-500" />
+                                            <h4 className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Visão</h4>
+                                        </div>
+                                        <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{visao}</p>
+                                    </div>
+                                )}
+
+                                {/* Metas */}
+                                {metas.trim() && (
+                                    <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-amber-500/5 border-amber-500/15' : 'bg-amber-50 border-amber-100'}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Rocket size={14} className="text-amber-500" />
+                                            <h4 className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>Metas</h4>
+                                        </div>
+                                        <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{metas}</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {/* Banner Promo */}
+                    <div className={`px-5 pb-4`}>
+                        <a href="https://amzn.to/4aX5epU" target="_blank" rel="noopener noreferrer" className={`block p-3 rounded-xl border transition-all group overflow-hidden relative ${isDarkMode ? 'bg-gradient-to-br from-amber-950/60 to-orange-950/60 border-amber-900/40 hover:border-amber-700/80' : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:border-amber-400'}`}>
+                            <div className="flex items-center gap-3 relative z-10">
+                                <div className="p-2 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/30 shrink-0">
+                                    <BookOpen size={16} className="text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className={`text-xs font-black ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>📘 O Fim da Procrastinação</h4>
+                                </div>
+                                <div className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 font-bold text-white text-xs whitespace-nowrap">
+                                    Ver
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ============= EDIT MODE (Wizard Carousel) =============
     const step = STEPS[currentStep];
     const isLastStep = currentStep === STEPS.length - 1;
     const isFirstStep = currentStep === 0;
