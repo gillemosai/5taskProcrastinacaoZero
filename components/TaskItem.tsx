@@ -127,7 +127,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       onDragOver={(e: any) => e.preventDefault()}
       className={`relative group rounded-xl transition-colors duration-300 ease-in-out cursor-default overflow-hidden border-l-4 hover:bg-white/5
         ${alertClasses}
-        ${task.completed ? 'grayscale opacity-70 border-l-slate-600' : (isDarkMode ? 'glass-card border-none' : 'bg-white shadow-xl shadow-slate-200/60')}
+        ${task.highlightColor && task.highlightColor !== 'none' ? getHighlightStyle(task.highlightColor) + ' border-2' : ''}
+        ${task.completed ? 'grayscale opacity-70 border-l-slate-600' : (isDarkMode ? 'glass-card' : 'bg-white shadow-xl shadow-slate-200/60')}
       `}
     >
       {/* Barra de Prioridade Lateral Substituída pela Borda Esquerda do Container */}

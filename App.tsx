@@ -325,6 +325,17 @@ const App: React.FC = () => {
       {/* ===== MAIN DASHBOARD ===== */}
       <main className="px-6 py-4 space-y-6 max-w-4xl mx-auto pb-32">
 
+        {/* --- Big Einstein Avatar Section --- */}
+        <section className="flex flex-col items-center">
+          <EinsteinAvatar mood={mood} quote={quote} isDarkMode={isDarkMode} />
+          <button
+            onClick={() => setShowVisionBoard(true)}
+            className={`mt-2 px-6 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg active:scale-95 ${isDarkMode ? 'bg-slate-800 text-amber-400 hover:bg-slate-700 border border-slate-700' : 'bg-white text-amber-600 hover:bg-slate-50 border border-slate-200'}`}
+          >
+            <Target size={18} /> Ver Minha Visão
+          </button>
+        </section>
+
         {/* --- Bento Top: Progress + Streak --- */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Progress Card */}
@@ -335,11 +346,6 @@ const App: React.FC = () => {
                 {totalPoints} <span className="text-lg font-normal text-slate-500">Tarefas</span>
               </p>
               {totalPoints > 0 && <p className="text-primary text-sm font-medium">+1 XP por tarefa</p>}
-              {quote && (
-                <p className={`mt-2 text-sm italic py-2 px-4 rounded-lg border-l-2 border-primary ${isDarkMode ? 'bg-white/5' : 'bg-slate-50'}`}>
-                  {quote}
-                </p>
-              )}
             </div>
             <div className="relative flex items-center justify-center mt-6 sm:mt-0">
               <svg className="w-24 h-24 sm:w-28 sm:h-28">
@@ -471,24 +477,31 @@ const App: React.FC = () => {
       </AnimatePresence>
 
       {/* ===== FIXED BOTTOM NAV BAR (Stitch Style) ===== */}
-      <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-6 py-3 rounded-full ${isDarkMode ? 'glass-card' : 'bg-white shadow-xl border border-slate-200'}`}>
-        <div className={`flex flex-col items-center gap-1 ${isOnline ? 'text-green-500' : 'text-red-500'} px-2`}>
-          {isOnline ? <Wifi size={20} /> : <WifiOff size={20} />}
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col items-center pb-4 pointer-events-none">
+        {/* FAB Row */}
+        <div className={`flex items-center gap-4 px-6 py-3 rounded-full pointer-events-auto ${isDarkMode ? 'glass-card' : 'bg-white shadow-xl border border-slate-200'}`}>
+          <div className={`flex flex-col items-center gap-1 ${isOnline ? 'text-green-500' : 'text-red-500'} px-2`}>
+            {isOnline ? <Wifi size={20} /> : <WifiOff size={20} />}
+          </div>
+          <div className={`h-6 w-[1px] ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
+
+          {/* FAB Add Button */}
+          <button
+            onClick={() => setIsAddingTask(!isAddingTask)}
+            className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)] z-50"
+          >
+            <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
+          </button>
+
+          <div className={`h-6 w-[1px] ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
+          <button onClick={() => window.open('https://github.com/gillemosai/5taskProcrastinacaoZero#readme', '_blank')} className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary px-2 cursor-pointer transition-colors">
+            <span className="material-symbols-outlined text-xl">help</span>
+          </button>
         </div>
-        <div className={`h-6 w-[1px] ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
-
-        {/* FAB Add Button */}
-        <button
-          onClick={() => setIsAddingTask(!isAddingTask)}
-          className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)] z-50"
-        >
-          <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
-        </button>
-
-        <div className={`h-6 w-[1px] ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
-        <button onClick={() => window.open('https://github.com/gillemosai/5taskProcrastinacaoZero#readme', '_blank')} className="flex flex-col items-center gap-1 text-slate-400 hover:text-primary px-2 cursor-pointer transition-colors">
-          <span className="material-symbols-outlined text-xl">help</span>
-        </button>
+        {/* Copyright */}
+        <p className={`mt-2 text-[10px] font-mono pointer-events-auto ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+          Copyright @gillemosai | Todos os direitos reservados
+        </p>
       </div>
 
       {showVisionBoard && (

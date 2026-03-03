@@ -35,7 +35,7 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisio
 
     return (
         <>
-            <div className="absolute left-6 top-6 z-40" ref={menuRef}>
+            <div className="relative z-40" ref={menuRef}>
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className={`p-3 rounded-full transition-all shadow-lg active:scale-90 ${isDarkMode
