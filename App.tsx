@@ -567,7 +567,7 @@ const App: React.FC = () => {
 
           {/* FAB Add Button (Center) */}
           <div className="relative group">
-            <div className="relative">
+            <div className="relative w-14">
               <AnimatePresence>
                 {tasks.length === 0 && (
                   <motion.div
