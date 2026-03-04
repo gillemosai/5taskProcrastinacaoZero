@@ -102,6 +102,32 @@ export const getGamificationPoints = async (): Promise<number> => {
   });
 };
 
+const playPulseSound = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
+
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  } catch (e) {
+    console.warn('Audio feedback failed', e);
+  }
+};
+
 const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputText, setInputText] = useState('');
@@ -466,6 +492,7 @@ const App: React.FC = () => {
                     {tasks.length === 0 && (
                       <div
                         onClick={() => {
+                          playPulseSound();
                           setPulseButton(true);
                           setTimeout(() => setPulseButton(false), 800);
                         }}
@@ -627,7 +654,7 @@ const App: React.FC = () => {
         </div>
         {/* Copyright */}
         <div className={`mt-1.5 text-[10px] text-center font-mono pointer-events-auto leading-relaxed ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-          <p>5Task - Procrastinacao Zero - V 4.0.3</p>
+          <p>5Task - Procrastinacao Zero - V 4.0.4</p>
           <p>Copyright @gillemosai | Todos os direitos reservados</p>
         </div>
       </div>
