@@ -566,32 +566,30 @@ const App: React.FC = () => {
           <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700/60' : 'bg-slate-200'}`}></div>
 
           {/* FAB Add Button (Center) */}
-          <div className="relative group">
-            <div className="relative w-14">
-              <AnimatePresence>
-                {tasks.length === 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex flex-col items-center pointer-events-none drop-shadow-2xl"
-                  >
-                    <div className={`whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-black shadow-lg animate-bounce mb-1 tracking-wide ${isDarkMode ? 'bg-accent-cyan text-background-dark' : 'bg-slate-900 text-accent-cyan'}`}>
-                      CRIAR TAREFA
-                    </div>
-                    <div className={`w-1.5 h-8 bg-gradient-to-b opacity-80 animate-pulse rounded-full ${isDarkMode ? 'from-accent-cyan to-transparent' : 'from-slate-900 to-transparent'}`}></div>
-                    <div className={`w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] animate-pulse mt-0.5 ${isDarkMode ? 'border-t-accent-cyan/80' : 'border-t-slate-900/80'}`}></div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <button
-                onClick={() => setIsAddingTask(!isAddingTask)}
-                className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)] z-50 -my-3"
-              >
-                <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
-              </button>
-            </div>
-            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-5 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
+          <div className="relative group w-14 h-14 flex items-center justify-center -my-3 z-50">
+            <AnimatePresence>
+              {tasks.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-5 flex flex-col items-center pointer-events-none drop-shadow-2xl"
+                >
+                  <div className={`whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-black shadow-lg animate-bounce mb-1 tracking-wide ${isDarkMode ? 'bg-accent-cyan text-background-dark' : 'bg-slate-900 text-accent-cyan'}`}>
+                    CRIAR TAREFA
+                  </div>
+                  <div className={`w-1.5 h-8 bg-gradient-to-b opacity-80 animate-pulse rounded-full ${isDarkMode ? 'from-accent-cyan to-transparent' : 'from-slate-900 to-transparent'}`}></div>
+                  <div className={`w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] animate-pulse mt-0.5 ${isDarkMode ? 'border-t-accent-cyan/80' : 'border-t-slate-900/80'}`}></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <button
+              onClick={() => setIsAddingTask(!isAddingTask)}
+              className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)]"
+            >
+              <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
+            </button>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-8 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
               ✨ Criar nova tarefa
               <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
             </div>
