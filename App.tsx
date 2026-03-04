@@ -639,9 +639,10 @@ const App: React.FC = () => {
           </div>
         </div>
         {/* Copyright */}
-        <p className={`mt-1.5 text-[10px] font-mono pointer-events-auto ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-          Copyright @gillemosai | Todos os direitos reservados
-        </p>
+        <div className={`mt-1.5 text-[10px] text-center font-mono pointer-events-auto leading-relaxed ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+          <p>5Task - Procrastinacao Zero - V 4.0.0</p>
+          <p>Copyright @gillemosai | Todos os direitos reservados</p>
+        </div>
       </div>
 
       {/* ===== VISION BOARD: Full Editor (from TopMenu) ===== */}
