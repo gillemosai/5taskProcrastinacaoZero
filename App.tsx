@@ -120,6 +120,7 @@ const App: React.FC = () => {
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
+  const [pulseButton, setPulseButton] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -464,7 +465,11 @@ const App: React.FC = () => {
                     ))}
                     {tasks.length === 0 && (
                       <div
-                        className={`p-8 rounded-xl text-center border-2 border-dashed transition-colors ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800/50 hover:border-accent-cyan' : 'border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-accent-cyan'}`}
+                        onClick={() => {
+                          setPulseButton(true);
+                          setTimeout(() => setPulseButton(false), 800);
+                        }}
+                        className={`p-8 rounded-xl text-center border-2 border-dashed transition-colors cursor-pointer active:scale-95 duration-200 ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800/50 hover:border-accent-cyan' : 'border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-accent-cyan'}`}
                       >
                         Nenhuma tarefa ativa. Clique aqui ou no <strong className="text-accent-cyan">+</strong> para criar.
                       </div>
@@ -567,25 +572,15 @@ const App: React.FC = () => {
 
           {/* FAB Add Button (Center) */}
           <div className="relative group w-14 h-14 flex items-center justify-center -my-3 z-50">
-            <AnimatePresence>
-              {tasks.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-5 flex flex-col items-center pointer-events-none drop-shadow-2xl"
-                >
-                  <div className={`whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-black shadow-lg animate-bounce mb-1 tracking-wide ${isDarkMode ? 'bg-accent-cyan text-background-dark' : 'bg-slate-900 text-accent-cyan'}`}>
-                    CRIAR TAREFA
-                  </div>
-                  <div className={`w-1.5 h-8 bg-gradient-to-b opacity-80 animate-pulse rounded-full ${isDarkMode ? 'from-accent-cyan to-transparent' : 'from-slate-900 to-transparent'}`}></div>
-                  <div className={`w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] animate-pulse mt-0.5 ${isDarkMode ? 'border-t-accent-cyan/80' : 'border-t-slate-900/80'}`}></div>
-                </motion.div>
-              )}
-            </AnimatePresence>
             <button
               onClick={() => setIsAddingTask(!isAddingTask)}
-              className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)]"
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 z-50
+                ${isDarkMode ? 'text-background-dark' : 'text-slate-900'}
+                ${pulseButton
+                  ? 'bg-accent-cyan scale-125 shadow-[0_0_40px_rgba(0,242,255,1)] animate-pulse border-4 border-white/50'
+                  : 'bg-accent-cyan hover:scale-105 shadow-[0_0_20px_rgba(0,242,255,0.4)]'
+                }
+              `}
             >
               <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
             </button>
@@ -632,7 +627,7 @@ const App: React.FC = () => {
         </div>
         {/* Copyright */}
         <div className={`mt-1.5 text-[10px] text-center font-mono pointer-events-auto leading-relaxed ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-          <p>5Task - Procrastinacao Zero - V 4.0.2</p>
+          <p>5Task - Procrastinacao Zero - V 4.0.3</p>
           <p>Copyright @gillemosai | Todos os direitos reservados</p>
         </div>
       </div>
