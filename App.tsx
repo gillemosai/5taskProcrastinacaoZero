@@ -120,6 +120,7 @@ const App: React.FC = () => {
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
+  const [showEmptyStateArrow, setShowEmptyStateArrow] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -159,6 +160,14 @@ const App: React.FC = () => {
     const timer = setTimeout(() => setShowQuoteBubble(false), 6000);
     return () => clearTimeout(timer);
   }, [quote]);
+
+  // Auto-hide empty state arrow after 3 seconds
+  useEffect(() => {
+    if (showEmptyStateArrow) {
+      const timer = setTimeout(() => setShowEmptyStateArrow(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showEmptyStateArrow]);
 
   // Rotina de Expiração Anti-Procrastinação e Atualização de Humor de Urgência
   useEffect(() => {
@@ -461,8 +470,11 @@ const App: React.FC = () => {
                       />
                     ))}
                     {tasks.length === 0 && (
-                      <div className={`p-8 rounded-xl text-center border-2 border-dashed ${isDarkMode ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'}`}>
-                        Nenhuma tarefa ativa. Clique no <strong className="text-accent-cyan">+</strong> para criar.
+                      <div
+                        onClick={() => setShowEmptyStateArrow(true)}
+                        className={`p-8 rounded-xl text-center border-2 border-dashed cursor-pointer transition-colors ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800/50 hover:border-accent-cyan' : 'border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-accent-cyan'}`}
+                      >
+                        Nenhuma tarefa ativa. Clique aqui ou no <strong className="text-accent-cyan">+</strong> para criar.
                       </div>
                     )}
                   </AnimatePresence>
@@ -563,6 +575,22 @@ const App: React.FC = () => {
 
           {/* FAB Add Button (Center) */}
           <div className="relative group">
+            <AnimatePresence>
+              {showEmptyStateArrow && tasks.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                  className="absolute bottom-[130%] left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none drop-shadow-2xl"
+                >
+                  <div className={`whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-black shadow-lg animate-bounce mb-1 tracking-wide ${isDarkMode ? 'bg-accent-cyan text-background-dark' : 'bg-slate-900 text-accent-cyan'}`}>
+                    CRIAR TAREFA
+                  </div>
+                  <div className={`w-1.5 h-10 bg-gradient-to-b opacity-80 animate-pulse rounded-full ${isDarkMode ? 'from-accent-cyan to-transparent' : 'from-slate-900 to-transparent'}`}></div>
+                  <div className={`w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] animate-pulse mt-0.5 ${isDarkMode ? 'border-t-accent-cyan/80' : 'border-t-slate-900/80'}`}></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <button
               onClick={() => setIsAddingTask(!isAddingTask)}
               className="w-14 h-14 bg-accent-cyan text-background-dark rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,242,255,0.4)] z-50 -my-3"

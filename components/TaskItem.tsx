@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Task, Priority, HighlightColor } from '../types';
@@ -34,6 +34,21 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(task.text);
   const [showConfig, setShowConfig] = useState(false);
+  const itemRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (itemRef.current && !itemRef.current.contains(event.target as Node)) {
+        setShowConfig(false);
+      }
+    };
+    if (showConfig) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showConfig]);
 
   const handleSave = () => {
     if (editedText.trim()) {
@@ -114,6 +129,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
   return (
     <motion.div
+      ref={itemRef}
       layout
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: task.completed ? 0.6 : 1, y: 0 }}
