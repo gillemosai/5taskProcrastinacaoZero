@@ -120,7 +120,6 @@ const App: React.FC = () => {
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
-  const [showEmptyStateArrow, setShowEmptyStateArrow] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -161,13 +160,7 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, [quote]);
 
-  // Auto-hide empty state arrow after 3 seconds
-  useEffect(() => {
-    if (showEmptyStateArrow) {
-      const timer = setTimeout(() => setShowEmptyStateArrow(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showEmptyStateArrow]);
+
 
   // Rotina de Expiração Anti-Procrastinação e Atualização de Humor de Urgência
   useEffect(() => {
@@ -471,8 +464,7 @@ const App: React.FC = () => {
                     ))}
                     {tasks.length === 0 && (
                       <div
-                        onClick={() => setShowEmptyStateArrow(true)}
-                        className={`p-8 rounded-xl text-center border-2 border-dashed cursor-pointer transition-colors ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800/50 hover:border-accent-cyan' : 'border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-accent-cyan'}`}
+                        className={`p-8 rounded-xl text-center border-2 border-dashed transition-colors ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800/50 hover:border-accent-cyan' : 'border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-accent-cyan'}`}
                       >
                         Nenhuma tarefa ativa. Clique aqui ou no <strong className="text-accent-cyan">+</strong> para criar.
                       </div>
@@ -576,7 +568,7 @@ const App: React.FC = () => {
           {/* FAB Add Button (Center) */}
           <div className="relative group">
             <AnimatePresence>
-              {showEmptyStateArrow && tasks.length === 0 && (
+              {tasks.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8, y: -20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -640,7 +632,7 @@ const App: React.FC = () => {
         </div>
         {/* Copyright */}
         <div className={`mt-1.5 text-[10px] text-center font-mono pointer-events-auto leading-relaxed ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-          <p>5Task - Procrastinacao Zero - V 4.0.0</p>
+          <p>5Task - Procrastinacao Zero - V 4.0.1</p>
           <p>Copyright @gillemosai | Todos os direitos reservados</p>
         </div>
       </div>

@@ -2,7 +2,7 @@
 // This is the "Offline page" service worker
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-const CACHE = "5task-quantum-v4-0-0-offline";
+const CACHE = "5task-quantum-v4-0-1-offline";
 const offlineFallbackPage = "index.html";
 
 const ASSETS_TO_CACHE = [
