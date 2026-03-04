@@ -632,7 +632,7 @@ const App: React.FC = () => {
         </div>
         {/* Copyright */}
         <div className={`mt-1.5 text-[10px] text-center font-mono pointer-events-auto leading-relaxed ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-          <p>5Task - Procrastinacao Zero - V 4.0.1</p>
+          <p>5Task - Procrastinacao Zero - V 4.0.2</p>
           <p>Copyright @gillemosai | Todos os direitos reservados</p>
         </div>
       </div>

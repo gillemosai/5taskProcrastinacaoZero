@@ -2,7 +2,7 @@
 // This is the "Offline page" service worker
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-const CACHE = "5task-quantum-v4-0-1-offline";
+const CACHE = "5task-quantum-v4-0-2-offline";
 const offlineFallbackPage = "index.html";
 
 const ASSETS_TO_CACHE = [
@@ -86,15 +86,21 @@ self.addEventListener('fetch', (event) => {
       }
     })());
   } else {
+    // Stale-While-Revalidate strategy for assets
     event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request).then((networkResponse) => {
-          if (networkResponse.status === 200) {
+      caches.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
             const cacheCopy = networkResponse.clone();
             caches.open(CACHE).then((cache) => cache.put(event.request, cacheCopy));
           }
           return networkResponse;
+        }).catch(() => {
+          // Ignore network errors on revalidation
         });
+
+        // Return cached response immediately if present, otherwise wait for network
+        return cachedResponse || fetchPromise;
       })
     );
   }
