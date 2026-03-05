@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Download, Sun } from 'lucide-react';
+import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun } from 'lucide-react';
 
 const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero#readme';
 
@@ -112,8 +112,8 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                                 <p className={`text-[12px] ${muted}`}><strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Visão</strong> — Abre seu Quadro de Visão</p>
                             </div>
                             <div className="flex items-center gap-2.5">
-                                <Download size={14} className="text-emerald-400 shrink-0" />
-                                <p className={`text-[12px] ${muted}`}><strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Exportar</strong> — Baixa tarefas pendentes em .md</p>
+                                <Archive size={14} className="text-emerald-400 shrink-0" />
+                                <p className={`text-[12px] ${muted}`}><strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Arquivo</strong> — Resgate até 3 vezes suas tarefas não concluídas e limitadas a 5 exibidas</p>
                             </div>
                             <div className="flex items-center gap-2.5">
                                 <Sun size={14} className="text-purple-400 shrink-0" />

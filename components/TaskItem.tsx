@@ -77,6 +77,15 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
   const priority = getPriorityInfo(task.priority);
 
+  const rescueCount = task.rescueCount || 0;
+  const getRescueLabel = (count: number) => {
+    if (count === 1) return "RESGATADA";
+    if (count === 2) return "RESGATADA NOVAMENTE";
+    if (count >= 3) return "ÚLTIMO RESGATE";
+    return null;
+  };
+  const rescueLabel = getRescueLabel(rescueCount);
+
   const [timeLeftStr, setTimeLeftStr] = useState<string>('');
   const [isAlertTime, setIsAlertTime] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
@@ -174,11 +183,18 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             />
           ) : (
             <div className="flex-1 min-w-0 flex flex-col items-start gap-1" onClick={() => onOpenKanban(task.id)}>
-              {priority && (
-                <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${priority.color} text-white shadow-sm inline-block mb-1`}>
-                  {priority.label}
-                </span>
-              )}
+              <div className="flex flex-wrap gap-2 mb-1">
+                {priority && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${priority.color} text-white shadow-sm inline-block`}>
+                    {priority.label}
+                  </span>
+                )}
+                {rescueLabel && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase bg-amber-500 text-white shadow-sm inline-block`}>
+                    {rescueLabel}
+                  </span>
+                )}
+              </div>
               <span className={`font-semibold leading-snug break-words text-sm md:text-base transition-colors ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100 group-hover:text-primary' : 'text-slate-900')}`}>
                 {task.text}
               </span>
@@ -186,12 +202,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           )}
 
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
-              <Palette size={16} />
-            </button>
-            <button onClick={() => setIsEditing(true)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
-              <Edit2 size={16} />
-            </button>
+            {rescueCount === 0 && (
+              <>
+                <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
+                  <Palette size={16} />
+                </button>
+                <button onClick={() => setIsEditing(true)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
+                  <Edit2 size={16} />
+                </button>
+              </>
+            )}
             <button onClick={() => onDelete(task.id)} className={`p-2 rounded-lg text-red-400 ${isDarkMode ? 'hover:bg-red-500/20' : 'hover:bg-red-50'}`}>
               <Trash2 size={16} />
             </button>

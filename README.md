@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-3.0.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-4.1.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,9 +28,9 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **3.0.0**, nós transformamos a experiência final do aplicativo: trouxemos um design luxuoso estilo "Glass-Card" (vidro fosco) gerado e pensado por IAs conectadas (Google Stitch). Além disso, implementamos o **Sistema de Gamificação Offline**, onde todas as suas tarefas finalizadas são convertidas em pontos guardados com segurança e privacidade dentro do seu próprio celular (via IndexedDB), preparando o app pra ser um nativo Android!
+Na versão **4.1.0**, nós transformamos a experiência final do aplicativo: trouxemos um design luxuoso estilo "Glass-Card" (vidro fosco) gerado e pensado por IAs conectadas (Google Stitch). Além disso, implementamos o **Sistema de Gamificação Offline**, onde todas as suas tarefas finalizadas são convertidas em pontos guardados com segurança e privacidade dentro do seu próprio celular (via IndexedDB), preparando o app pra ser um nativo Android!
 
-## ✨ Funcionalidades Principais (Atualizado v3.0.0)
+## ✨ Funcionalidades Principais (Atualizado v4.1.0)
 
 - **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
 - **⏱️ Motor Procrastinação Zero:**
@@ -50,7 +50,7 @@ Na versão **3.0.0**, nós transformamos a experiência final do aplicativo: tro
 - **🎯 Quadro Visão Wizard:** Um wizard passo a passo persistido localmente no IndexedDB para construir sua Visão Pessoal (Valores → Visão de Longo Prazo → Metas e Projetos), acessível a qualquer momento com o botão "Ver Minha Visão".
 - **🏆 Gamificação Offline (Novidade):** Cada tarefa finalizada confere 1 ponto ao usuário. Os pontos são guardados localmente numa database de IndexedDB dedicada e atualizados ao vivo no novo Painel Dashboard brilhante.
 - **🎨 Glass-Card UI & Cores Neon:** Visuais refinados de fundo escuro cyberpunk ("background-dark") e bordas destacadas estilo neon cyano e magenta, baseados no design system "Google Stitch".
-- **📤 Exportação de Pendências:** Possibilidade de baixar via Menu as suas últimas 30 tarefas não finalizadas num arquivo markdown legível.
+- **📁 Arquivos & Resgates:** Tarefas perdidas caem no seu Arquivo ao invés de sumirem de uma vez. Você tem a opção de "Resgatar" falhas em suas missões caso não haja mais de 5 atividades em tela, possuindo um total de 3 vidas de resgate por item até sua completa auto-destruição.
 - **🌗 Dual Theme Engine:** Alternância instantânea entre **Modo Escuro (Neon-Noir)** e **Modo Claro (High-Contrast)**.
 - **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo.
 - **🚥 Matriz de Prioridade:** Classificação visual `(Urgente, Atenção e Crítico)`.
@@ -98,6 +98,7 @@ Na versão **3.0.0**, nós transformamos a experiência final do aplicativo: tro
 - [x] Refatoração do Drag & Drop e layouts com Framer Motion.
 - [x] Visuais aprimorados e reestilizados via "Google Stitch" (v3.0.0).
 - [x] Implementação do Banco de Pontos Offline / Gamification Local no IndexedDB (v3.0.0 - Play Store Wrapper Ready).
+- [x] Nova Funcionalidade de Arquivos e Vidas de Resgate substituindo o Export de Tarefas para aumentar o foco (v4.1.0).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 

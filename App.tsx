@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Undo2, X, Download, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText } from 'lucide-react';
+import { Plus, Trash2, Undo2, X, Archive, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor } from './types';
 import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
@@ -8,7 +8,7 @@ import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WelcomeCarousel } from './components/WelcomeCarousel';
-import { exportUncompletedTasks } from './utils/exportTasks';
+import { ArchiveModal } from './components/ArchiveModal';
 import { VisionBoard } from './components/VisionBoard';
 import { UserGuide } from './components/UserGuide';
 
@@ -24,10 +24,12 @@ const STORE_NAME = 'tasks_store';
 const VISION_STORE = 'vision_store';
 const GAMIFICATION_STORE = 'gamification_store';
 
+const ARCHIVE_STORE = 'archive_store';
+
 const getDB = (): Promise<IDBDatabase> => {
   if (dbInstance) return Promise.resolve(dbInstance);
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 17);
+    const request = indexedDB.open(DB_NAME, 18);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -37,7 +39,9 @@ const getDB = (): Promise<IDBDatabase> => {
         db.createObjectStore(VISION_STORE);
       }
       if (!db.objectStoreNames.contains(GAMIFICATION_STORE)) {
-        db.createObjectStore(GAMIFICATION_STORE, { keyPath: 'id', autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains(ARCHIVE_STORE)) {
+        db.createObjectStore(ARCHIVE_STORE);
       }
     };
     request.onsuccess = () => {
@@ -61,6 +65,24 @@ const loadTasksFromDB = async (): Promise<Task[]> => {
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
     const request = store.get('current_tasks');
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => resolve([]);
+  });
+};
+
+const saveArchivedTasksToDB = async (tasks: Task[]) => {
+  const db = await getDB();
+  const tx = db.transaction(ARCHIVE_STORE, 'readwrite');
+  const store = tx.objectStore(ARCHIVE_STORE);
+  store.put(tasks, 'current_archive');
+};
+
+const loadArchivedTasksFromDB = async (): Promise<Task[]> => {
+  const db = await getDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(ARCHIVE_STORE, 'readonly');
+    const store = tx.objectStore(ARCHIVE_STORE);
+    const request = store.get('current_archive');
     request.onsuccess = () => resolve(request.result || []);
     request.onerror = () => resolve([]);
   });
@@ -147,6 +169,8 @@ const App: React.FC = () => {
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
   const [pulseButton, setPulseButton] = useState(false);
+  const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -164,6 +188,7 @@ const App: React.FC = () => {
       setIsLoaded(true);
       window.dispatchEvent(new Event('app-ready'));
     });
+    loadArchivedTasksFromDB().then(savedArchive => setArchivedTasks(savedArchive));
     getGamificationPoints().then(pts => setTotalPoints(pts));
     loadVisionFromDB().then(data => {
       if (data && data.visao) setVisionText(data.visao);
@@ -173,8 +198,11 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isLoaded) saveTasksToDB(tasks);
-  }, [tasks, isLoaded]);
+    if (isLoaded) {
+      saveTasksToDB(tasks);
+      saveArchivedTasksToDB(archivedTasks);
+    }
+  }, [tasks, archivedTasks, isLoaded]);
 
   useEffect(() => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
@@ -205,6 +233,10 @@ const App: React.FC = () => {
           if (!t.completed) {
             const age = now - t.createdAt;
             if (age > HOURS_27_MS) {
+              const rCount = t.rescueCount || 0;
+              if (rCount < 3) {
+                setArchivedTasks(oldArchive => [t, ...oldArchive].slice(0, 10));
+              }
               changed = true;
               return false;
             }
@@ -331,6 +363,36 @@ const App: React.FC = () => {
     }
     dragItem.current = null;
     dragOverItem.current = null;
+  };
+
+  const handleRescueTask = (taskToRescue: Task) => {
+    if (tasks.length >= 5) {
+      const freeSlots = 5 - tasks.length;
+      alert(`Você só pode ter no máximo 5 tarefas ativas simultaneamente. ${freeSlots === 0 ? 'Conclua alguma atividade para liberar espaço!' : `Você tem espaço para resgatar apenas ${freeSlots} tarefa(s).`}`);
+      return;
+    }
+
+    const currentRescue = taskToRescue.rescueCount || 0;
+    const newRescueCount = currentRescue + 1;
+
+    if (newRescueCount === 3) {
+      alert("ATENÇÃO: Este é o seu ÚLTIMO RESGATE para esta tarefa. Se não for concluída dentro do prazo, ela será excluída permanentemente do sistema pois está atrapalhando a produtividade.");
+    }
+
+    const rescuedTask: Task = {
+      ...taskToRescue,
+      rescueCount: newRescueCount,
+      createdAt: Date.now(),
+      priority: 'none',
+      highlightColor: 'none'
+    };
+
+    setArchivedTasks(prev => prev.filter(t => t.id !== taskToRescue.id));
+    setTasks(prev => [rescuedTask, ...prev]);
+
+    if (archivedTasks.length <= 1) {
+      setShowArchiveModal(false);
+    }
   };
 
   const progressPercent = Math.min(Math.round((totalPoints / 20) * 100), 100);
@@ -620,18 +682,18 @@ const App: React.FC = () => {
           {/* Divider */}
           <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700/60' : 'bg-slate-200'}`}></div>
 
-          {/* Exportar */}
+          {/* Arquivo */}
           <div className="relative group">
             <button
-              onClick={() => exportUncompletedTasks(tasks)}
+              onClick={() => setShowArchiveModal(true)}
               className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-400/10' : 'text-emerald-600 hover:bg-emerald-50'
                 }`}
             >
-              <Download size={20} />
-              <span className="text-[9px] font-bold leading-none">Exportar</span>
+              <Archive size={20} />
+              <span className="text-[9px] font-bold leading-none">Arquivo</span>
             </button>
             <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
-              💾 Baixar tarefas pendentes (.md)
+              📂 Resgatar tarefas não concluídas
               <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
             </div>
           </div>
@@ -654,7 +716,7 @@ const App: React.FC = () => {
         </div>
         {/* Copyright */}
         <div className={`mt-1.5 text-[10px] text-center font-mono pointer-events-auto leading-relaxed ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-          <p>5Task - Procrastinacao Zero - V 4.0.4</p>
+          <p>5Task - Procrastinacao Zero - V 4.1.0</p>
           <p>Copyright @gillemosai | Todos os direitos reservados</p>
         </div>
       </div>
@@ -685,6 +747,18 @@ const App: React.FC = () => {
           viewOnly={true}
         />
       )}
+
+      {/* ===== ARCHIVE MODAL ===== */}
+      <AnimatePresence>
+        {showArchiveModal && (
+          <ArchiveModal
+            archivedTasks={archivedTasks}
+            isDarkMode={isDarkMode}
+            onClose={() => setShowArchiveModal(false)}
+            onRescue={handleRescueTask}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ===== USER GUIDE ===== */}
       {showUserGuide && (

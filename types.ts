@@ -19,6 +19,7 @@ export interface Task {
   subTasks?: SubTask[];
   priority?: Priority;
   highlightColor?: HighlightColor;
+  rescueCount?: number;
 }
 
 export enum Mood {
