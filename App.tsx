@@ -29,7 +29,7 @@ const ARCHIVE_STORE = 'archive_store';
 const getDB = (): Promise<IDBDatabase> => {
   if (dbInstance) return Promise.resolve(dbInstance);
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 18);
+    const request = indexedDB.open(DB_NAME, 19);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -39,6 +39,7 @@ const getDB = (): Promise<IDBDatabase> => {
         db.createObjectStore(VISION_STORE);
       }
       if (!db.objectStoreNames.contains(GAMIFICATION_STORE)) {
+        db.createObjectStore(GAMIFICATION_STORE, { autoIncrement: true });
       }
       if (!db.objectStoreNames.contains(ARCHIVE_STORE)) {
         db.createObjectStore(ARCHIVE_STORE);
@@ -110,17 +111,57 @@ export const saveCompletedTaskToDB = async (text: string) => {
   const db = await getDB();
   const tx = db.transaction(GAMIFICATION_STORE, 'readwrite');
   const store = tx.objectStore(GAMIFICATION_STORE);
-  store.add({ task_text: text, completed_at: Date.now() });
+  const data = { task_text: text, completed_at: Date.now() };
+  if (store.autoIncrement) {
+    store.add(data);
+  } else {
+    store.add(data, Date.now());
+  }
 };
 
-export const getGamificationPoints = async (): Promise<number> => {
+export const getGamificationStats = async (): Promise<{ totalXP: number, streak: number, todayCount: number }> => {
   const db = await getDB();
   return new Promise((resolve) => {
-    const tx = db.transaction(GAMIFICATION_STORE, 'readonly');
-    const store = tx.objectStore(GAMIFICATION_STORE);
-    const request = store.count();
-    request.onsuccess = () => resolve(request.result || 0);
-    request.onerror = () => resolve(0);
+    try {
+      const tx = db.transaction(GAMIFICATION_STORE, 'readonly');
+      const store = tx.objectStore(GAMIFICATION_STORE);
+      const request = store.getAll();
+      request.onsuccess = () => {
+        const entries: { task_text: string, completed_at: number }[] = request.result || [];
+        const tasksByDay: Record<string, number> = {};
+        entries.forEach(entry => {
+          const date = new Date(entry.completed_at);
+          const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          tasksByDay[dateStr] = (tasksByDay[dateStr] || 0) + 1;
+        });
+        let totalXP = 0;
+        Object.keys(tasksByDay).forEach(dateStr => {
+          const count = tasksByDay[dateStr];
+          totalXP += count * 10;
+          if (count >= 5) totalXP += 50;
+        });
+        let streak = 0;
+        let currentCheckDate = new Date();
+        let daysChecked = 0;
+        while (true) {
+          const dateStr = `${currentCheckDate.getFullYear()}-${String(currentCheckDate.getMonth() + 1).padStart(2, '0')}-${String(currentCheckDate.getDate()).padStart(2, '0')}`;
+          const count = tasksByDay[dateStr] || 0;
+          if (count >= 3) {
+            streak++;
+          } else if (daysChecked > 0) {
+            break;
+          }
+          currentCheckDate.setDate(currentCheckDate.getDate() - 1);
+          daysChecked++;
+        }
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        resolve({ totalXP, streak, todayCount: tasksByDay[todayStr] || 0 });
+      };
+      request.onerror = () => resolve({ totalXP: 0, streak: 0, todayCount: 0 });
+    } catch (e) {
+      resolve({ totalXP: 0, streak: 0, todayCount: 0 });
+    }
   });
 };
 
@@ -164,6 +205,8 @@ const App: React.FC = () => {
   const [showVisionBoard, setShowVisionBoard] = useState(false);
   const [showVisionViewOnly, setShowVisionViewOnly] = useState(false);
   const [totalPoints, setTotalPoints] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showProductiveModal, setShowProductiveModal] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
@@ -189,7 +232,10 @@ const App: React.FC = () => {
       window.dispatchEvent(new Event('app-ready'));
     });
     loadArchivedTasksFromDB().then(savedArchive => setArchivedTasks(savedArchive));
-    getGamificationPoints().then(pts => setTotalPoints(pts));
+    getGamificationStats().then(stats => {
+      setTotalPoints(stats.totalXP);
+      setStreak(stats.streak);
+    });
     loadVisionFromDB().then(data => {
       if (data && data.visao) setVisionText(data.visao);
     });
@@ -319,7 +365,13 @@ const App: React.FC = () => {
           if (newState) {
             updateEinstein('complete', Mood.HAPPY);
             saveCompletedTaskToDB(t.text).then(() => {
-              getGamificationPoints().then(pts => setTotalPoints(pts));
+              getGamificationStats().then(stats => {
+                setTotalPoints(stats.totalXP);
+                setStreak(stats.streak);
+                if (stats.todayCount === 3) {
+                  setShowProductiveModal(true);
+                }
+              });
             }).catch(e => console.error("Error saving gamification:", e));
           }
           return { ...t, completed: newState };
@@ -395,7 +447,8 @@ const App: React.FC = () => {
     }
   };
 
-  const progressPercent = Math.min(Math.round((totalPoints / 20) * 100), 100);
+  const currentLevelProgress = totalPoints % 100;
+  const progressPercent = totalPoints === 0 ? 0 : (currentLevelProgress === 0 ? 100 : currentLevelProgress);
 
   return (
     <div className={`min-h-screen transition-colors duration-500 font-display ${isDarkMode ? 'bg-background-dark text-slate-100' : 'bg-background-light text-slate-900'}`}>
@@ -465,7 +518,7 @@ const App: React.FC = () => {
                       className="transition-all duration-1000 ease-out"
                       style={{
                         strokeDasharray: `${2 * Math.PI * 15}`,
-                        strokeDashoffset: `${Math.max(0, 2 * Math.PI * 15 - (2 * Math.PI * 15 * Math.min(totalPoints / 20, 1)))}`,
+                        strokeDashoffset: `${Math.max(0, 2 * Math.PI * 15 - (2 * Math.PI * 15 * Math.min(progressPercent / 100, 1)))}`,
                       }}
                     />
                   </svg>
@@ -484,7 +537,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[8px] sm:text-[9px] text-slate-400 font-bold uppercase tracking-normal sm:tracking-wider truncate">Sequência</p>
-                  <p className="text-base font-black leading-none italic">0 <span className="text-[9px] font-normal text-slate-500 not-italic">dias</span></p>
+                  <p className="text-base font-black leading-none italic">{streak} <span className="text-[9px] font-normal text-slate-500 not-italic">{streak === 1 ? 'dia' : 'dias'}</span></p>
                 </div>
               </div>
             </div>
@@ -757,6 +810,57 @@ const App: React.FC = () => {
             onClose={() => setShowArchiveModal(false)}
             onRescue={handleRescueTask}
           />
+        )}
+      </AnimatePresence>
+
+      {/* ===== PRODUCTIVE DAY MODAL ===== */}
+      <AnimatePresence>
+        {showProductiveModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setShowProductiveModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 50 }}
+              className={`relative max-w-sm w-full p-8 rounded-3xl shadow-2xl flex flex-col items-center text-center ${isDarkMode ? 'glass-card-vivid border-2 border-accent-cyan/50' : 'bg-white border-2 border-accent-cyan/50'}`}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowProductiveModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+                title="Fechar"
+              >
+                <X size={24} />
+              </button>
+
+              <div className="w-40 h-40 mb-6 rounded-full border-4 border-accent-cyan shadow-[0_0_30px_rgba(0,242,255,0.4)] overflow-hidden shrink-0">
+                <img
+                  src={AVATAR_IMAGES[Mood.HAPPY]}
+                  alt="Einstein Feliz"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <h2 className={`text-2xl font-black mb-3 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                Parabéns! 🎉
+              </h2>
+              <p className={`text-lg font-medium mb-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                Hoje foi um dia produtivo! Você cumpriu 3 metas e garantiu seu dia na sequência!
+              </p>
+
+              <button
+                onClick={() => setShowProductiveModal(false)}
+                className="w-full bg-accent-cyan text-background-dark font-black text-lg p-4 rounded-xl shadow-[0_4px_14px_0_rgba(0,242,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,242,255,0.23)] hover:scale-105 transition-all active:scale-95"
+              >
+                Continuar Vencendo! 🚀
+              </button>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
