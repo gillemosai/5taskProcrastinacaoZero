@@ -457,7 +457,7 @@ const App: React.FC = () => {
             {/* Stats Row */}
             <div className="grid grid-cols-2 gap-2">
               {/* Progress Card */}
-              <div className={`rounded-xl px-2.5 py-2 flex items-center gap-2 ${isDarkMode ? 'glass-card-vivid' : 'bg-white shadow-md border border-slate-100'}`}>
+              <div className={`rounded-xl px-2 sm:px-2.5 py-2 flex items-center gap-1.5 sm:gap-2 ${isDarkMode ? 'glass-card-vivid' : 'bg-white shadow-md border border-slate-100'}`}>
                 <div className="relative flex items-center justify-center shrink-0">
                   <svg className="w-9 h-9 -rotate-90" viewBox="0 0 40 40">
                     <circle cx="20" cy="20" r="15" fill="none" stroke={isDarkMode ? '#1e293b' : '#e2e8f0'} strokeWidth="3" />
@@ -471,19 +471,19 @@ const App: React.FC = () => {
                   </svg>
                   <span className="absolute text-[8px] font-black">{progressPercent}%</span>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Progresso</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[8px] sm:text-[9px] text-slate-400 font-bold uppercase tracking-normal sm:tracking-wider truncate">Progresso</p>
                   <p className="text-base font-black leading-none">{totalPoints} <span className="text-[9px] font-normal text-slate-500">XP</span></p>
                 </div>
               </div>
 
               {/* Sequência Card (was Streak) */}
-              <div className={`rounded-xl px-2.5 py-2 flex items-center gap-2 ${isDarkMode ? 'glass-card-vivid bg-gradient-to-br from-primary/8 to-transparent' : 'bg-white shadow-md border border-primary/10'}`}>
+              <div className={`rounded-xl px-2 sm:px-2.5 py-2 flex items-center gap-1.5 sm:gap-2 ${isDarkMode ? 'glass-card-vivid bg-gradient-to-br from-primary/8 to-transparent' : 'bg-white shadow-md border border-primary/10'}`}>
                 <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 shrink-0">
                   <span className="material-symbols-outlined text-primary text-lg">bolt</span>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Sequência</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[8px] sm:text-[9px] text-slate-400 font-bold uppercase tracking-normal sm:tracking-wider truncate">Sequência</p>
                   <p className="text-base font-black leading-none italic">0 <span className="text-[9px] font-normal text-slate-500 not-italic">dias</span></p>
                 </div>
               </div>
