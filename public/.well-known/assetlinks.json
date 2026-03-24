@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.gillemosai.cincotask",
+            "sha256_cert_fingerprints": [
+                "2F:FF:6D:E1:4D:D3:B8:A0:F5:22:28:ED:E7:38:44:65:55:F7:7A:9B:75:E1:B2:8B:A1:C3:6B:9E:DF:60:44:8E"
+            ]
+        }
+    }
+]
