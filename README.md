@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-4.1.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-4.2.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,11 +28,13 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **4.1.0**, nós transformamos a experiência final do aplicativo: trouxemos um design luxuoso estilo "Glass-Card" (vidro fosco) gerado e pensado por IAs conectadas (Google Stitch). Além disso, implementamos o **Sistema de Gamificação Offline**, onde todas as suas tarefas finalizadas são convertidas em pontos guardados com segurança e privacidade dentro do seu próprio celular (via IndexedDB), preparando o app pra ser um nativo Android!
+Na versão **4.2.0**, nós polimos a experiência na Google Play Store resolvendo problemas de segurança TWA, inserimos o sistema de **Recorrência de Tarefas**, além de turbinar o UX garantindo limpeza automática em tela das atividades prontas sem ferir as interações originais.
 
-## ✨ Funcionalidades Principais (Atualizado v4.1.0)
+## ✨ Funcionalidades Principais (Atualizado v4.2.0)
 
-- **🛡️ Limite Quântico:** O sistema bloqueia a criação de mais de 5 tarefas para garantir que sua energia mental não se disperse.
+- **🔄 Recorrência Automática (Novidade):** Programe e esqueça. Ative repetições em tarefas já existentes (ex: Diária, Dias Úteis) com um menu interno prático (Limite de 2 tarefas fixas por dia para evitar ruído mental).
+- **🌟 Expansão de Gamificação:** Receba badges visuais ao vivo na tela mostrando quantas missões de foco você aniquilou no dia, além de feedback instantâneo da sua pontuação após a linda animação de desaparecimento de tarefas cumpridas.
+- **🛡️ Limite Quântico Inteligente:** O limite de criar até 5 tarefas só leva em consideração as que estão em andamento. Tarefas finalizadas contam na sua pontuação e desaparecem imediatamente da contagem de carga ativa.
 - **⏱️ Motor Procrastinação Zero:**
   * **Ciclo de Vida de 24h:** Toda tarefa idealmente deve ser finalizada no mesmo dia em que foi criada.
   * **Tempo de Tolerância (+3h):** Excedendo o prazo, a tarefa entra em alerta de tolerância com um contador regressivo (vermelho).
@@ -92,13 +94,11 @@ Na versão **4.1.0**, nós transformamos a experiência final do aplicativo: tro
 - [x] Expiração de 27 horas (Procrastinação Zero - v79).
 - [x] Painel visual do Einstein em Pânico (v79).
 - [x] Otimização das imagens dos avatares para o PWA / Wrapper.
-- [x] Conserto da renderização React dos Avatares de Urgência.
-- [x] Markdown Parser aprimorado para renderização fiel ao GitHub.
 - [x] Correção de sobreposição de tags visuais em tarefas longas.
-- [x] Refatoração do Drag & Drop e layouts com Framer Motion.
-- [x] Visuais aprimorados e reestilizados via "Google Stitch" (v3.0.0).
-- [x] Implementação do Banco de Pontos Offline / Gamification Local no IndexedDB (v3.0.0 - Play Store Wrapper Ready).
-- [x] Nova Funcionalidade de Arquivos e Vidas de Resgate substituindo o Export de Tarefas para aumentar o foco (v4.1.0).
+- [x] Implementação do Banco de Pontos Offline / Gamification Local no IndexedDB.
+- [x] Nova Funcionalidade de Arquivos e Vidas de Resgate (v4.1.0).
+- [x] TWA Experience em Full Screen: Integração resolvida com Google Play Developer signatures (v4.2.0).
+- [x] Tarefas Recorrentes e Painel Analógico de Foco Diário (v4.2.0).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
