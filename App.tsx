@@ -8,6 +8,8 @@ import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WelcomeCarousel } from './components/WelcomeCarousel';
+import { ArchiveModal } from './components/ArchiveModal';
+import { VisionBoard } from './components/VisionBoard';
 import { UserGuide } from './components/UserGuide';
 import { RecurrenceSelector } from './components/RecurrenceSelector';
 import { UpdateModal } from './components/UpdateModal';
