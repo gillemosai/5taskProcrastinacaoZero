@@ -8,10 +8,9 @@ import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
 import { KanbanBoard } from './components/KanbanBoard';
 import { WelcomeCarousel } from './components/WelcomeCarousel';
-import { ArchiveModal } from './components/ArchiveModal';
-import { VisionBoard } from './components/VisionBoard';
 import { UserGuide } from './components/UserGuide';
 import { RecurrenceSelector } from './components/RecurrenceSelector';
+import { UpdateModal } from './components/UpdateModal';
 import { RecurrenceType } from './types';
 
 /**
@@ -213,6 +212,7 @@ const App: React.FC = () => {
   const [newTaskRecurrence, setNewTaskRecurrence] = useState<RecurrenceType>('none');
   const [newTaskInterval, setNewTaskInterval] = useState(2);
   const [showUserGuide, setShowUserGuide] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(() => !localStorage.getItem('5task_v4.2.0_notified'));
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
   const [pulseButton, setPulseButton] = useState(false);
@@ -792,7 +792,7 @@ const App: React.FC = () => {
                 }`}
             >
               <FileText size={20} />
-              <span className="text-[9px] font-bold leading-none">Docs</span>
+              <span className="text-[9px] font-bold leading-none">Guia</span>
             </button>
             <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
               📖 Guia de uso do 5Task
@@ -959,6 +959,16 @@ const App: React.FC = () => {
       {showUserGuide && (
         <UserGuide isDarkMode={isDarkMode} onClose={() => setShowUserGuide(false)} />
       )}
+
+      {/* ===== UPDATE MODAL ===== */}
+      <UpdateModal 
+        isOpen={showUpdateModal}
+        onClose={() => {
+          localStorage.setItem('5task_version_4.2.0_notified', 'true');
+          setShowUpdateModal(false);
+        }}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };
