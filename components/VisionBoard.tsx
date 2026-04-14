@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Target, Save, Heart, Eye, Rocket, ChevronLeft, ChevronRight, BookOpen, Check, Pencil } from 'lucide-react';
+import { X, Target, Save, Heart, Eye, Rocket, ChevronLeft, ChevronRight, BookOpen, Check, Pencil, ArrowLeft } from 'lucide-react';
 import { loadVisionFromDB, saveVisionToDB } from '../App';
 
 interface VisionBoardProps {
@@ -135,9 +135,9 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode, v
                             </button>
                             <button
                                 onClick={onClose}
-                                className={`p-1.5 rounded-full transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}
                             >
-                                <X size={20} />
+                                <ArrowLeft size={16} /> <span className="text-xs font-bold">Voltar</span>
                             </button>
                         </div>
                     </div>
@@ -233,9 +233,9 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode, v
                     </div>
                     <button
                         onClick={onClose}
-                        className={`p-2 rounded-full transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}
                     >
-                        <X size={24} />
+                        <ArrowLeft size={18} /> <span className="text-sm font-bold hidden sm:inline">Voltar</span>
                     </button>
                 </div>
 

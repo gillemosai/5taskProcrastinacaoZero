@@ -11,6 +11,8 @@ export interface SubTask {
   createdAt: number;
 }
 
+export type RecurrenceType = 'none' | 'daily' | 'weekdays' | 'weekly' | 'custom';
+
 export interface Task {
   id: string;
   text: string;
@@ -20,6 +22,11 @@ export interface Task {
   priority?: Priority;
   highlightColor?: HighlightColor;
   rescueCount?: number;
+  completedAt?: number;
+  recurrence?: RecurrenceType;
+  recurrenceInterval?: number; // Em dias, para 'custom'
+  lastRecurredAt?: number;
+  isRecurring?: boolean;
 }
 
 export enum Mood {

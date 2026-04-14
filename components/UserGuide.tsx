@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun } from 'lucide-react';
+import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun, ArrowLeft } from 'lucide-react';
 
 const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero#readme';
 
@@ -29,8 +29,8 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                         <h2 className="text-lg font-black">📘 Como Usar o 5Task</h2>
                         <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido das funcionalidades</p>
                     </div>
-                    <button onClick={onClose} className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-200 text-slate-500'}`}>
-                        <X size={20} />
+                    <button onClick={onClose} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}>
+                        <ArrowLeft size={18} /> <span className="text-sm font-bold">Voltar</span>
                     </button>
                 </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, RefreshCw, Archive } from 'lucide-react';
+import { X, RefreshCw, Archive, ArrowLeft } from 'lucide-react';
 import { Task } from '../types';
 
 interface ArchiveModalProps {
@@ -35,10 +35,10 @@ export const ArchiveModal: React.FC<ArchiveModalProps> = ({
                     </h2>
                     <button
                         onClick={onClose}
-                        className={`p-2 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
                             }`}
                     >
-                        <X size={20} />
+                        <ArrowLeft size={18} /> <span className="text-sm font-bold hidden sm:inline">Voltar</span>
                     </button>
                 </div>
 

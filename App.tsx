@@ -11,6 +11,8 @@ import { WelcomeCarousel } from './components/WelcomeCarousel';
 import { ArchiveModal } from './components/ArchiveModal';
 import { VisionBoard } from './components/VisionBoard';
 import { UserGuide } from './components/UserGuide';
+import { RecurrenceSelector } from './components/RecurrenceSelector';
+import { RecurrenceType } from './types';
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -208,6 +210,8 @@ const App: React.FC = () => {
   const [streak, setStreak] = useState(0);
   const [showProductiveModal, setShowProductiveModal] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [newTaskRecurrence, setNewTaskRecurrence] = useState<RecurrenceType>('none');
+  const [newTaskInterval, setNewTaskInterval] = useState(2);
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
@@ -276,7 +280,16 @@ const App: React.FC = () => {
         let minTimeLeft = Infinity;
 
         const validTasks = prev.filter(t => {
-          if (!t.completed) {
+          if (t.completed) {
+            const completedTs = t.completedAt || t.createdAt;
+            const ONE_HOUR = 60 * 60 * 1000;
+            const isNextDay = new Date(completedTs).toDateString() !== new Date().toDateString();
+            
+            if ((now - completedTs) > ONE_HOUR || isNextDay) {
+              changed = true;
+              return false; // Autodelete complete tasks after expiration
+            }
+          } else {
             const age = now - t.createdAt;
             if (age > HOURS_27_MS) {
               const rCount = t.rescueCount || 0;
@@ -302,6 +315,63 @@ const App: React.FC = () => {
           }
           return true;
         });
+
+        // Recriação de tarefas recorrentes:
+        const activeRecurringCount = validTasks.filter(t => !t.completed && t.isRecurring).length;
+        const newRecurringTasks: Task[] = [];
+        
+        validTasks.forEach(t => {
+          if (t.completed && t.isRecurring && t.recurrence && t.recurrence !== 'none') {
+            const completedDate = new Date(t.completedAt || t.createdAt);
+            const todayDate = new Date();
+            
+            // Verifica se a última recriação já foi feita hoje (ou mais recentemente que a data de completada)
+            const wasRecreated = t.lastRecurredAt && new Date(t.lastRecurredAt).toDateString() === todayDate.toDateString();
+            
+            if (!wasRecreated) {
+               // Regras simples de recriação para o próximo dia válido
+               let shouldRecreate = false;
+               if (t.recurrence === 'daily') {
+                 shouldRecreate = completedDate.toDateString() !== todayDate.toDateString();
+               } else if (t.recurrence === 'weekdays') {
+                 const isWeekday = todayDate.getDay() > 0 && todayDate.getDay() < 6;
+                 shouldRecreate = isWeekday && completedDate.toDateString() !== todayDate.toDateString();
+               } else if (t.recurrence === 'weekly') {
+                 const daysDiff = Math.floor((todayDate.getTime() - completedDate.getTime()) / (1000 * 3600 * 24));
+                 shouldRecreate = daysDiff >= 7;
+               } else if (t.recurrence === 'custom' && t.recurrenceInterval) {
+                 const daysDiff = Math.floor((todayDate.getTime() - completedDate.getTime()) / (1000 * 3600 * 24));
+                 shouldRecreate = daysDiff >= t.recurrenceInterval;
+               }
+
+               if (shouldRecreate && (activeRecurringCount + newRecurringTasks.length) < 2) {
+                 // Clone
+                 newRecurringTasks.push({
+                   ...t,
+                   id: crypto.randomUUID(),
+                   completed: false,
+                   createdAt: Date.now(),
+                   completedAt: undefined,
+                   lastRecurredAt: Date.now(),
+                   priority: 'none',
+                   highlightColor: 'none',
+                   rescueCount: 0,
+                 });
+                 // Update the old task so we don't recreate it again while it's still waiting to autodelete
+                 t.lastRecurredAt = Date.now();
+                 changed = true;
+               }
+            }
+          }
+        });
+
+        if (newRecurringTasks.length > 0) {
+          // Só conseguimos adicionar se não passar de 5 ativas (limitado pelas recorrentes ativas)
+          const availableSlots = 5 - validTasks.filter(t => !t.completed).length;
+          const toAdd = newRecurringTasks.slice(0, availableSlots);
+          validTasks.push(...toAdd);
+          changed = true;
+        }
 
         setTimeout(() => {
           setMood(current => {
@@ -342,6 +412,13 @@ const App: React.FC = () => {
       updateEinstein('full', Mood.SHOCKED);
       return;
     }
+    const activeRecurringCount = tasks.filter(t => !t.completed && t.isRecurring).length;
+    let allowedRecurrence = newTaskRecurrence;
+    if (newTaskRecurrence !== 'none' && activeRecurringCount >= 2) {
+      allowedRecurrence = 'none';
+      alert('Aviso: Limite de 2 tarefas recorrentes atingido. Esta tarefa será criada como normal.');
+    }
+
     const newTask: Task = {
       id: crypto.randomUUID(),
       text: inputText.trim(),
@@ -349,10 +426,15 @@ const App: React.FC = () => {
       createdAt: Date.now(),
       subTasks: [],
       priority: 'none',
-      highlightColor: 'none'
+      highlightColor: 'none',
+      isRecurring: allowedRecurrence !== 'none',
+      recurrence: allowedRecurrence,
+      recurrenceInterval: allowedRecurrence === 'custom' ? newTaskInterval : undefined,
     };
     setTasks([newTask, ...tasks]);
     setInputText('');
+    setNewTaskRecurrence('none');
+    setNewTaskInterval(2);
     setIsAddingTask(false);
     updateEinstein('add', Mood.EXCITED);
   };
@@ -373,8 +455,10 @@ const App: React.FC = () => {
                 }
               });
             }).catch(e => console.error("Error saving gamification:", e));
+            return { ...t, completed: newState, completedAt: Date.now() };
+          } else {
+            return { ...t, completed: newState, completedAt: undefined };
           }
-          return { ...t, completed: newState };
         }
         return t;
       });
@@ -655,7 +739,7 @@ const App: React.FC = () => {
             <form onSubmit={addTask} className="flex flex-col gap-4">
               <div className="flex justify-between items-center px-2">
                 <h3 className="font-bold">Nova Tarefa</h3>
-                <button type="button" onClick={() => setIsAddingTask(false)} className="text-slate-400 p-1"><X size={18} /></button>
+                <button type="button" onClick={() => { setIsAddingTask(false); setNewTaskRecurrence('none'); }} className="text-slate-400 p-1"><X size={18} /></button>
               </div>
               <input
                 autoFocus
@@ -665,7 +749,14 @@ const App: React.FC = () => {
                 placeholder="O que vamos resolver hoje?"
                 className={`w-full rounded-2xl p-4 outline-none font-medium ${isDarkMode ? 'bg-background-dark text-white border border-slate-700 focus:border-accent-cyan' : 'bg-slate-50 border-2 border-slate-200 focus:border-accent-cyan'}`}
               />
-              <button type="submit" className="w-full bg-accent-cyan text-background-dark font-bold p-4 rounded-xl shadow-lg active:scale-95 disabled:opacity-50">
+              <RecurrenceSelector 
+                isDarkMode={isDarkMode} 
+                value={newTaskRecurrence} 
+                onChange={setNewTaskRecurrence}
+                intervalValue={newTaskInterval}
+                onIntervalChange={setNewTaskInterval}
+              />
+              <button type="submit" className="w-full bg-accent-cyan text-background-dark font-bold p-4 rounded-xl shadow-lg active:scale-95 disabled:opacity-50 mt-1">
                 Criar Tarefa
               </button>
             </form>
