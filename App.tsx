@@ -220,6 +220,8 @@ const App: React.FC = () => {
   const [pulseButton, setPulseButton] = useState(false);
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [swUpdateReady, setSwUpdateReady] = useState(false);
+  const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -230,6 +232,27 @@ const App: React.FC = () => {
       window.removeEventListener('offline', handleStatusChange);
     };
   }, []);
+
+  // Detecta quando o Service Worker tem uma nova versão disponível
+  useEffect(() => {
+    const handleSwUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      swRegistrationRef.current = customEvent.detail?.registration || null;
+      setSwUpdateReady(true);
+    };
+    window.addEventListener('sw-update-available', handleSwUpdate);
+    return () => window.removeEventListener('sw-update-available', handleSwUpdate);
+  }, []);
+
+  const handleAppUpdate = () => {
+    // Instrui o SW em espera a assumir o controle imediatamente
+    if (swRegistrationRef.current?.waiting) {
+      swRegistrationRef.current.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      // Fallback: recarrega forçado
+      window.location.reload();
+    }
+  };
 
   useEffect(() => {
     loadTasksFromDB().then(savedTasks => {
@@ -762,6 +785,35 @@ const App: React.FC = () => {
                 Criar Tarefa
               </button>
             </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== SW UPDATE BANNER ===== */}
+      <AnimatePresence>
+        {swUpdateReady && (
+          <motion.div
+            initial={{ opacity: 0, y: -60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -60 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-between gap-3 px-4 py-3 shadow-2xl"
+            style={{
+              background: 'linear-gradient(135deg, #00f2ff 0%, #bc13fe 100%)',
+            }}
+          >
+            <div className="flex items-center gap-2 text-slate-900">
+              <RefreshCw size={18} className="shrink-0 animate-spin" style={{ animationDuration: '2s' }} />
+              <span className="text-[13px] font-black leading-tight">
+                Nova versão disponível!
+              </span>
+            </div>
+            <button
+              onClick={handleAppUpdate}
+              className="shrink-0 bg-slate-900 text-white text-[12px] font-black px-4 py-1.5 rounded-full active:scale-95 transition-transform shadow-lg hover:bg-slate-800"
+            >
+              Atualizar
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
