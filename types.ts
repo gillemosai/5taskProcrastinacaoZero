@@ -2,7 +2,7 @@
 export type KanbanColumn = 'todo' | 'doing' | 'done';
 
 export type Priority = 'urgent' | 'attention' | 'critical' | 'none';
-export type HighlightColor = 'blue' | 'purple' | 'pink' | 'none';
+export type HighlightColor = 'blue' | 'purple' | 'pink' | 'yellow' | 'none';
 
 export interface SubTask {
   id: string;

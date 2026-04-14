@@ -123,7 +123,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/assets/index-Dy2Od_cI.js"></script>
+  <script type="module" crossorigin src="/assets/index-Ts-s42Il.js"></script>
 </head>
 
 <body class="text-slate-100 antialiased">
@@ -145,9 +145,43 @@
     });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW Registered'))
-          .catch(err => console.log('SW Error:', err));
+        navigator.serviceWorker.register('./sw.js?v=4.2.0').then(reg => {
+          console.log('[SW] Registrado com sucesso.');
+
+          // Detecta quando um novo SW está esperando para ser ativado
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (!newWorker) return;
+            newWorker.addEventListener('statechange', () => {
+              // Quando o novo SW está instalado e há um SW ativo (não é primeira visita)
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[SW] Nova versão disponível!');
+                // Notifica o app React via evento customizado
+                window.dispatchEvent(new CustomEvent('sw-update-available', {
+                  detail: { registration: reg }
+                }));
+              }
+            });
+          });
+
+          // Verifica se já há um SW esperando (caso de reload após update)
+          if (reg.waiting && navigator.serviceWorker.controller) {
+            window.dispatchEvent(new CustomEvent('sw-update-available', {
+              detail: { registration: reg }
+            }));
+          }
+
+        }).catch(err => console.log('[SW] Erro:', err));
+
+        // Quando o SW assume o controle (após skipWaiting), recarrega a página
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[SW] Controlador mudou, recarregando...');
+            window.location.reload();
+          }
+        });
       });
     }
   </script>

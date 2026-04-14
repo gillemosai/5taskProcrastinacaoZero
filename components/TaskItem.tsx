@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle } from 'lucide-react';
+import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle, Repeat } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Task, Priority, HighlightColor } from '../types';
+import { Task, Priority, HighlightColor, RecurrenceType } from '../types';
+import { RecurrenceSelector } from './RecurrenceSelector';
 
 interface TaskItemProps {
   task: Task;
@@ -11,6 +12,7 @@ interface TaskItemProps {
   onDelete: (id: string) => void;
   onEdit: (id: string, newText: string) => void;
   onUpdateProps: (id: string, priority: Priority, color: HighlightColor) => void;
+  onUpdateRecurrence: (id: string, recurrence: RecurrenceType, interval?: number) => void;
   onOpenKanban: (id: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, position: number) => void;
   onDragEnter: (e: React.DragEvent<HTMLDivElement>, position: number) => void;
@@ -25,6 +27,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onDelete,
   onEdit,
   onUpdateProps,
+  onUpdateRecurrence,
   onOpenKanban,
   onDragStart,
   onDragEnter,
@@ -71,6 +74,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       case 'blue': return 'border-neon-blue shadow-[0_0_15px_rgba(0,243,255,0.1)]';
       case 'purple': return 'border-neon-purple shadow-[0_0_15px_rgba(188,19,254,0.1)]';
       case 'pink': return 'border-neon-pink shadow-[0_0_15px_rgba(188,19,254,0.1)]';
+      case 'yellow': return 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.15)]';
       default: return isDarkMode ? 'border-slate-800' : 'border-slate-200';
     }
   };
@@ -194,6 +198,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                     {rescueLabel}
                   </span>
                 )}
+                {task.isRecurring && task.recurrence !== 'none' && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
+                    <Repeat size={10} /> 
+                    {task.recurrence === 'daily' ? 'Diária' : task.recurrence === 'weekdays' ? 'Dias Úteis' : task.recurrence === 'weekly' ? 'Semanal' : 'Custom'}
+                  </span>
+                )}
               </div>
               <span className={`font-semibold leading-snug break-words text-sm md:text-base transition-colors ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100 group-hover:text-primary' : 'text-slate-900')}`}>
                 {task.text}
@@ -230,9 +240,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className={`flex flex-wrap items-center gap-4 pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}
+            className={`flex flex-col gap-4 pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}
           >
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex gap-2">
               {(['urgent', 'attention', 'critical', 'none'] as Priority[]).map(p => (
                 <button
                   key={p}
@@ -248,15 +259,27 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             </div>
             <div className={`h-6 w-[2px] rounded-full ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`} />
             <div className="flex gap-2">
-              {(['blue', 'purple', 'pink', 'none'] as HighlightColor[]).map(c => (
+              {(['blue', 'purple', 'pink', 'yellow', 'none'] as HighlightColor[]).map(c => (
                 <button
                   key={c}
                   onClick={() => onUpdateProps(task.id, task.priority || 'none', c)}
                   className={`w-7 h-7 rounded-full transition-all border-2 shadow-sm
-                    ${c === 'blue' ? 'bg-neon-blue border-cyan-400' : c === 'purple' ? 'bg-neon-purple border-purple-400' : c === 'pink' ? 'bg-neon-pink border-pink-400' : (isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200')}
+                    ${c === 'blue' ? 'bg-neon-blue border-cyan-400' : c === 'purple' ? 'bg-neon-purple border-purple-400' : c === 'pink' ? 'bg-neon-pink border-pink-400' : c === 'yellow' ? 'bg-yellow-400 border-yellow-300' : (isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200')}
                     ${task.highlightColor === c ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100 hover:scale-105'}`}
                 />
               ))}
+            </div>
+            </div>
+
+            {/* Menu de Recorrência */}
+            <div className={`pt-3 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+              <RecurrenceSelector 
+                isDarkMode={isDarkMode}
+                value={task.recurrence || 'none'}
+                onChange={(rec) => onUpdateRecurrence(task.id, rec, task.recurrenceInterval)}
+                intervalValue={task.recurrenceInterval || 2}
+                onIntervalChange={(inv) => onUpdateRecurrence(task.id, task.recurrence || 'custom', inv)}
+              />
             </div>
           </motion.div>
         )}

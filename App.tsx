@@ -213,6 +213,7 @@ const App: React.FC = () => {
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskRecurrence, setNewTaskRecurrence] = useState<RecurrenceType>('none');
   const [newTaskInterval, setNewTaskInterval] = useState(2);
+  const [todayCompletedCount, setTodayCompletedCount] = useState(0);
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(() => !localStorage.getItem('5task_v4.2.0_notified'));
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
@@ -264,6 +265,7 @@ const App: React.FC = () => {
     getGamificationStats().then(stats => {
       setTotalPoints(stats.totalXP);
       setStreak(stats.streak);
+      setTodayCompletedCount(stats.todayCount);
     });
     loadVisionFromDB().then(data => {
       if (data && data.visao) setVisionText(data.visao);
@@ -433,7 +435,7 @@ const App: React.FC = () => {
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
-    if (tasks.length >= 5) {
+    if (tasks.filter(t => !t.completed).length >= 5) {
       updateEinstein('full', Mood.SHOCKED);
       return;
     }
@@ -475,6 +477,7 @@ const App: React.FC = () => {
               getGamificationStats().then(stats => {
                 setTotalPoints(stats.totalXP);
                 setStreak(stats.streak);
+                setTodayCompletedCount(stats.todayCount);
                 if (stats.todayCount === 3) {
                   setShowProductiveModal(true);
                 }
@@ -504,6 +507,15 @@ const App: React.FC = () => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, priority, highlightColor: color } : t));
   };
 
+  const updateTaskRecurrence = (id: string, recurrence: RecurrenceType, interval?: number) => {
+    const activeRecurringCount = tasks.filter(t => !t.completed && t.isRecurring && t.id !== id).length;
+    if (recurrence !== 'none' && activeRecurringCount >= 2) {
+      alert('Aviso: Limite de 2 tarefas recorrentes ativas atingido.');
+      return;
+    }
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, recurrence, recurrenceInterval: interval, isRecurring: recurrence !== 'none' } : t));
+  };
+
   // Drag & Drop
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
@@ -527,8 +539,9 @@ const App: React.FC = () => {
   };
 
   const handleRescueTask = (taskToRescue: Task) => {
-    if (tasks.length >= 5) {
-      const freeSlots = 5 - tasks.length;
+    const activeTasksCount = tasks.filter(t => !t.completed).length;
+    if (activeTasksCount >= 5) {
+      const freeSlots = 5 - activeTasksCount;
       alert(`Você só pode ter no máximo 5 tarefas ativas simultaneamente. ${freeSlots === 0 ? 'Conclua alguma atividade para liberar espaço!' : `Você tem espaço para resgatar apenas ${freeSlots} tarefa(s).`}`);
       return;
     }
@@ -692,12 +705,17 @@ const App: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-black flex items-center gap-2">
-                    Hoje <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isDarkMode ? 'bg-accent-cyan/15 text-accent-cyan' : 'bg-accent-cyan/10 text-teal-700'}`}>{tasks.length}</span>
+                    Hoje <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isDarkMode ? 'bg-accent-cyan/15 text-accent-cyan' : 'bg-accent-cyan/10 text-teal-700'}`}>{tasks.filter(t => !t.completed).length}</span>
+                    {todayCompletedCount > 0 && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-auto ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
+                        ✨ Concluídas: {todayCompletedCount}
+                      </span>
+                    )}
                   </h3>
                 </div>
                 <div className="space-y-2.5 relative">
                   <AnimatePresence>
-                    {tasks.map((task, idx) => (
+                    {tasks.filter(t => !t.completed).map((task, idx) => (
                       <TaskItem
                         key={task.id}
                         task={task}
@@ -706,6 +724,7 @@ const App: React.FC = () => {
                         onDelete={deleteTask}
                         onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
                         onUpdateProps={updateTaskProps}
+                        onUpdateRecurrence={updateTaskRecurrence}
                         onOpenKanban={setActiveTaskId}
                         onDragStart={handleDragStart}
                         onDragEnter={handleDragEnter}
@@ -713,7 +732,7 @@ const App: React.FC = () => {
                         isDarkMode={isDarkMode}
                       />
                     ))}
-                    {tasks.length === 0 && (
+                    {tasks.filter(t => !t.completed).length === 0 && (
                       <div
                         onClick={() => {
                           playPulseSound();
@@ -735,15 +754,15 @@ const App: React.FC = () => {
                   <h4 className="text-slate-400 text-[10px] font-bold uppercase tracking-widest shrink-0">Foco</h4>
                   <div className="flex items-end gap-1.5 h-7 flex-1 max-w-[160px]">
                     {[1, 2, 3, 4, 5].map(n => (
-                      <div key={n} className={`flex-1 transition-opacity ${tasks.length >= n ? 'opacity-100' : 'opacity-20'}`}>
+                      <div key={n} className={`flex-1 transition-opacity ${tasks.filter(t => !t.completed).length >= n ? 'opacity-100' : 'opacity-20'}`}>
                         <div className={`w-full rounded-sm ${n === 5 ? 'bg-accent-cyan shadow-[0_0_8px_rgba(0,242,255,0.4)]' : `bg-primary/${n * 20}`}`}
                           style={{ height: `${n * 4 + 3}px` }}
                         ></div>
                       </div>
                     ))}
                   </div>
-                  <span className={`text-[10px] font-bold shrink-0 ${tasks.length >= 5 ? 'text-accent-cyan' : 'text-slate-500'}`}>
-                    {tasks.length}/5
+                  <span className={`text-[10px] font-bold shrink-0 ${tasks.filter(t => !t.completed).length >= 5 ? 'text-accent-cyan' : 'text-slate-500'}`}>
+                    {tasks.filter(t => !t.completed).length}/5
                   </span>
                 </div>
               </div>
