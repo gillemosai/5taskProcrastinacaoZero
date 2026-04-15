@@ -215,7 +215,7 @@ const App: React.FC = () => {
   const [newTaskInterval, setNewTaskInterval] = useState(2);
   const [todayCompletedCount, setTodayCompletedCount] = useState(0);
   const [showUserGuide, setShowUserGuide] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(() => !localStorage.getItem('5task_v4.2.0_notified'));
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
   const [pulseButton, setPulseButton] = useState(false);
