@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Undo2, X, Archive, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText } from 'lucide-react';
+import { Plus, Trash2, Undo2, X, Archive, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText, Repeat } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor } from './types';
 import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
@@ -12,7 +12,6 @@ import { ArchiveModal } from './components/ArchiveModal';
 import { VisionBoard } from './components/VisionBoard';
 import { UserGuide } from './components/UserGuide';
 import { RecurrenceSelector } from './components/RecurrenceSelector';
-import { UpdateModal } from './components/UpdateModal';
 import { RecurrenceType } from './types';
 
 /**
@@ -28,11 +27,14 @@ const VISION_STORE = 'vision_store';
 const GAMIFICATION_STORE = 'gamification_store';
 
 const ARCHIVE_STORE = 'archive_store';
+const COMPLETED_STORE = 'completed_store';
+
+type ActiveTab = 'today' | 'completed' | 'recurring';
 
 const getDB = (): Promise<IDBDatabase> => {
   if (dbInstance) return Promise.resolve(dbInstance);
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 19);
+    const request = indexedDB.open(DB_NAME, 20);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -46,6 +48,9 @@ const getDB = (): Promise<IDBDatabase> => {
       }
       if (!db.objectStoreNames.contains(ARCHIVE_STORE)) {
         db.createObjectStore(ARCHIVE_STORE);
+      }
+      if (!db.objectStoreNames.contains(COMPLETED_STORE)) {
+        db.createObjectStore(COMPLETED_STORE);
       }
     };
     request.onsuccess = () => {
@@ -87,6 +92,24 @@ const loadArchivedTasksFromDB = async (): Promise<Task[]> => {
     const tx = db.transaction(ARCHIVE_STORE, 'readonly');
     const store = tx.objectStore(ARCHIVE_STORE);
     const request = store.get('current_archive');
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => resolve([]);
+  });
+};
+
+const saveCompletedTasksToDB = async (tasks: Task[]) => {
+  const db = await getDB();
+  const tx = db.transaction(COMPLETED_STORE, 'readwrite');
+  const store = tx.objectStore(COMPLETED_STORE);
+  store.put(tasks, 'completed_tasks');
+};
+
+const loadCompletedTasksFromDB = async (): Promise<Task[]> => {
+  const db = await getDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(COMPLETED_STORE, 'readonly');
+    const store = tx.objectStore(COMPLETED_STORE);
+    const request = store.get('completed_tasks');
     request.onsuccess = () => resolve(request.result || []);
     request.onerror = () => resolve([]);
   });
@@ -215,7 +238,6 @@ const App: React.FC = () => {
   const [newTaskInterval, setNewTaskInterval] = useState(2);
   const [todayCompletedCount, setTodayCompletedCount] = useState(0);
   const [showUserGuide, setShowUserGuide] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
   const [visionText, setVisionText] = useState('');
   const [pulseButton, setPulseButton] = useState(false);
@@ -223,6 +245,9 @@ const App: React.FC = () => {
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [swUpdateReady, setSwUpdateReady] = useState(false);
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('today');
+  const [showRecurringBanner, setShowRecurringBanner] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -262,6 +287,7 @@ const App: React.FC = () => {
       window.dispatchEvent(new Event('app-ready'));
     });
     loadArchivedTasksFromDB().then(savedArchive => setArchivedTasks(savedArchive));
+    loadCompletedTasksFromDB().then(savedCompleted => setCompletedTasks(savedCompleted));
     getGamificationStats().then(stats => {
       setTotalPoints(stats.totalXP);
       setStreak(stats.streak);
@@ -278,8 +304,9 @@ const App: React.FC = () => {
     if (isLoaded) {
       saveTasksToDB(tasks);
       saveArchivedTasksToDB(archivedTasks);
+      saveCompletedTasksToDB(completedTasks);
     }
-  }, [tasks, archivedTasks, isLoaded]);
+  }, [tasks, archivedTasks, completedTasks, isLoaded]);
 
   useEffect(() => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
@@ -291,6 +318,13 @@ const App: React.FC = () => {
     const timer = setTimeout(() => setShowQuoteBubble(false), 6000);
     return () => clearTimeout(timer);
   }, [quote]);
+
+  // Auto-hide recurring banner after 5 seconds
+  useEffect(() => {
+    if (!showRecurringBanner) return;
+    const timer = setTimeout(() => setShowRecurringBanner(false), 5000);
+    return () => clearTimeout(timer);
+  }, [showRecurringBanner]);
 
 
 
@@ -307,21 +341,15 @@ const App: React.FC = () => {
         let minTimeLeft = Infinity;
 
         const validTasks = prev.filter(t => {
+          // Tarefas concluídas agora são gerenciadas pelo toggleTask, não mais aqui
           if (t.completed) {
-            const completedTs = t.completedAt || t.createdAt;
-            const ONE_HOUR = 60 * 60 * 1000;
-            const isNextDay = new Date(completedTs).toDateString() !== new Date().toDateString();
-            
-            if ((now - completedTs) > ONE_HOUR || isNextDay) {
-              changed = true;
-              return false; // Autodelete complete tasks after expiration
-            }
+            return true; // Manter — toggleTask cuida de mover para completedTasks
           } else {
             const age = now - t.createdAt;
             if (age > HOURS_27_MS) {
               const rCount = t.rescueCount || 0;
               if (rCount < 3) {
-                setArchivedTasks(oldArchive => [t, ...oldArchive].slice(0, 10));
+                setArchivedTasks(oldArchive => [{ ...t, rescueSource: 'expiration' as const }, ...oldArchive].slice(0, 10));
               }
               changed = true;
               return false;
@@ -342,63 +370,6 @@ const App: React.FC = () => {
           }
           return true;
         });
-
-        // Recriação de tarefas recorrentes:
-        const activeRecurringCount = validTasks.filter(t => !t.completed && t.isRecurring).length;
-        const newRecurringTasks: Task[] = [];
-        
-        validTasks.forEach(t => {
-          if (t.completed && t.isRecurring && t.recurrence && t.recurrence !== 'none') {
-            const completedDate = new Date(t.completedAt || t.createdAt);
-            const todayDate = new Date();
-            
-            // Verifica se a última recriação já foi feita hoje (ou mais recentemente que a data de completada)
-            const wasRecreated = t.lastRecurredAt && new Date(t.lastRecurredAt).toDateString() === todayDate.toDateString();
-            
-            if (!wasRecreated) {
-               // Regras simples de recriação para o próximo dia válido
-               let shouldRecreate = false;
-               if (t.recurrence === 'daily') {
-                 shouldRecreate = completedDate.toDateString() !== todayDate.toDateString();
-               } else if (t.recurrence === 'weekdays') {
-                 const isWeekday = todayDate.getDay() > 0 && todayDate.getDay() < 6;
-                 shouldRecreate = isWeekday && completedDate.toDateString() !== todayDate.toDateString();
-               } else if (t.recurrence === 'weekly') {
-                 const daysDiff = Math.floor((todayDate.getTime() - completedDate.getTime()) / (1000 * 3600 * 24));
-                 shouldRecreate = daysDiff >= 7;
-               } else if (t.recurrence === 'custom' && t.recurrenceInterval) {
-                 const daysDiff = Math.floor((todayDate.getTime() - completedDate.getTime()) / (1000 * 3600 * 24));
-                 shouldRecreate = daysDiff >= t.recurrenceInterval;
-               }
-
-               if (shouldRecreate && (activeRecurringCount + newRecurringTasks.length) < 2) {
-                 // Clone
-                 newRecurringTasks.push({
-                   ...t,
-                   id: crypto.randomUUID(),
-                   completed: false,
-                   createdAt: Date.now(),
-                   completedAt: undefined,
-                   lastRecurredAt: Date.now(),
-                   priority: 'none',
-                   highlightColor: 'none',
-                   rescueCount: 0,
-                 });
-                 // Update the old task so we don't recreate it again while it's still waiting to autodelete
-                 t.lastRecurredAt = Date.now();
-                 changed = true;
-               }
-            }
-          }
-        });
-
-        if (newRecurringTasks.length > 0) {
-          // Só conseguimos adicionar se não passar de 5 ativas (limitado pelas recorrentes ativas)
-          const availableSlots = 5 - validTasks.filter(t => !t.completed).length;
-          const toAdd = newRecurringTasks.slice(0, availableSlots);
-          validTasks.push(...toAdd);
-          changed = true;
-        }
 
         setTimeout(() => {
           setMood(current => {
@@ -423,6 +394,78 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Rotina de Recriação de Tarefas Recorrentes (verifica a cada 1 minuto)
+  useEffect(() => {
+    const checkRecurringTasks = () => {
+      setCompletedTasks(prevCompleted => {
+        const todayDate = new Date();
+        const newRecurringTasks: Task[] = [];
+        let changed = false;
+
+        const updatedCompleted = prevCompleted.map(t => {
+          if (!t.isRecurring || !t.recurrence || t.recurrence === 'none') return t;
+
+          const completedDate = new Date(t.completedAt || t.createdAt);
+          const wasRecreated = t.lastRecurredAt && new Date(t.lastRecurredAt).toDateString() === todayDate.toDateString();
+
+          if (wasRecreated) return t;
+
+          let shouldRecreate = false;
+          if (t.recurrence === 'daily') {
+            shouldRecreate = completedDate.toDateString() !== todayDate.toDateString();
+          } else if (t.recurrence === 'weekdays') {
+            const isWeekday = todayDate.getDay() > 0 && todayDate.getDay() < 6;
+            shouldRecreate = isWeekday && completedDate.toDateString() !== todayDate.toDateString();
+          } else if (t.recurrence === 'weekly') {
+            const daysDiff = Math.floor((todayDate.getTime() - completedDate.getTime()) / (1000 * 3600 * 24));
+            shouldRecreate = daysDiff >= 7;
+          } else if (t.recurrence === 'custom' && t.recurrenceInterval) {
+            const daysDiff = Math.floor((todayDate.getTime() - completedDate.getTime()) / (1000 * 3600 * 24));
+            shouldRecreate = daysDiff >= t.recurrenceInterval;
+          }
+
+          if (shouldRecreate) {
+            newRecurringTasks.push({
+              ...t,
+              id: crypto.randomUUID(),
+              completed: false,
+              createdAt: Date.now(),
+              completedAt: undefined,
+              lastRecurredAt: Date.now(),
+              priority: 'none',
+              highlightColor: 'none',
+              rescueCount: 0,
+              isRecreatedRecurring: true,
+            });
+            changed = true;
+            return { ...t, lastRecurredAt: Date.now() };
+          }
+          return t;
+        });
+
+        if (newRecurringTasks.length > 0) {
+          setTasks(prevTasks => {
+            const activeCount = prevTasks.filter(t => !t.completed).length;
+            const activeRecurringCount = prevTasks.filter(t => !t.completed && t.isRecurring).length;
+            const availableSlots = 5 - activeCount;
+            const availableRecurringSlots = 2 - activeRecurringCount;
+            // Respeitar ambos os limites: 5 tarefas ativas e 2 recorrentes na tela principal
+            const maxToAdd = Math.min(Math.max(0, availableSlots), Math.max(0, availableRecurringSlots));
+            const toAdd = newRecurringTasks.slice(0, maxToAdd);
+            if (toAdd.length > 0) return [...toAdd, ...prevTasks];
+            return prevTasks;
+          });
+        }
+
+        return changed ? updatedCompleted : prevCompleted;
+      });
+    };
+
+    checkRecurringTasks();
+    const interval = setInterval(checkRecurringTasks, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const updateEinstein = (type: QuoteType, customMood?: Mood) => {
     if (mood === Mood.PANIC_1H || mood === Mood.PANIC_2H || mood === Mood.PANIC_3H) return;
     const quotes = QUOTES[type];
@@ -435,15 +478,52 @@ const App: React.FC = () => {
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
+
+    const isRecurringNew = newTaskRecurrence !== 'none';
+
+    // Conta recorrentes GLOBAIS (tasks + completedTasks)
+    const globalRecurringCount = [
+      ...tasks.filter(t => t.isRecurring),
+      ...completedTasks.filter(t => t.isRecurring),
+    ].length;
+
+    // Limite absoluto de 5 recorrentes no sistema
+    if (isRecurringNew && globalRecurringCount >= 5) {
+      alert('Limite máximo de 5 tarefas recorrentes atingido. Remova uma recorrente antes de criar outra.');
+      return;
+    }
+
+    // Conta recorrentes ativas na lista principal
+    const activeRecurringCount = tasks.filter(t => !t.completed && t.isRecurring).length;
+
+    // 3ª+ recorrente → vai para completedTasks como template
+    if (isRecurringNew && activeRecurringCount >= 2) {
+      const recurringTemplate: Task = {
+        id: crypto.randomUUID(),
+        text: inputText.trim(),
+        completed: false,
+        createdAt: Date.now(),
+        subTasks: [],
+        priority: 'none',
+        highlightColor: 'none',
+        isRecurring: true,
+        recurrence: newTaskRecurrence,
+        recurrenceInterval: newTaskRecurrence === 'custom' ? newTaskInterval : undefined,
+      };
+      setCompletedTasks(prev => [recurringTemplate, ...prev]);
+      setInputText('');
+      setNewTaskRecurrence('none');
+      setNewTaskInterval(2);
+      setIsAddingTask(false);
+      setShowRecurringBanner(true);
+      updateEinstein('add', Mood.EXCITED);
+      return;
+    }
+
+    // Verifica limite de 5 tarefas ativas na lista principal
     if (tasks.filter(t => !t.completed).length >= 5) {
       updateEinstein('full', Mood.SHOCKED);
       return;
-    }
-    const activeRecurringCount = tasks.filter(t => !t.completed && t.isRecurring).length;
-    let allowedRecurrence = newTaskRecurrence;
-    if (newTaskRecurrence !== 'none' && activeRecurringCount >= 2) {
-      allowedRecurrence = 'none';
-      alert('Aviso: Limite de 2 tarefas recorrentes atingido. Esta tarefa será criada como normal.');
     }
 
     const newTask: Task = {
@@ -454,9 +534,9 @@ const App: React.FC = () => {
       subTasks: [],
       priority: 'none',
       highlightColor: 'none',
-      isRecurring: allowedRecurrence !== 'none',
-      recurrence: allowedRecurrence,
-      recurrenceInterval: allowedRecurrence === 'custom' ? newTaskInterval : undefined,
+      isRecurring: isRecurringNew,
+      recurrence: newTaskRecurrence,
+      recurrenceInterval: newTaskRecurrence === 'custom' ? newTaskInterval : undefined,
     };
     setTasks([newTask, ...tasks]);
     setInputText('');
@@ -467,31 +547,33 @@ const App: React.FC = () => {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(prev => {
-      const updated = prev.map(t => {
-        if (t.id === id) {
-          const newState = !t.completed;
-          if (newState) {
-            updateEinstein('complete', Mood.HAPPY);
-            saveCompletedTaskToDB(t.text).then(() => {
-              getGamificationStats().then(stats => {
-                setTotalPoints(stats.totalXP);
-                setStreak(stats.streak);
-                setTodayCompletedCount(stats.todayCount);
-                if (stats.todayCount === 3) {
-                  setShowProductiveModal(true);
-                }
-              });
-            }).catch(e => console.error("Error saving gamification:", e));
-            return { ...t, completed: newState, completedAt: Date.now() };
-          } else {
-            return { ...t, completed: newState, completedAt: undefined };
+    const taskToComplete = tasks.find(t => t.id === id);
+    if (!taskToComplete) return;
+
+    if (!taskToComplete.completed) {
+      // Completando a tarefa → move para completedTasks
+      const completedTask: Task = { ...taskToComplete, completed: true, completedAt: Date.now() };
+
+      // Remove da lista principal
+      setTasks(prev => prev.filter(t => t.id !== id));
+
+      // Adiciona à lista de concluídas (máximo 15, FIFO)
+      setCompletedTasks(prev => [completedTask, ...prev].slice(0, 15));
+
+      updateEinstein('complete', Mood.HAPPY);
+      saveCompletedTaskToDB(taskToComplete.text).then(() => {
+        getGamificationStats().then(stats => {
+          const previousCount = todayCompletedCount;
+          setTotalPoints(stats.totalXP);
+          setStreak(stats.streak);
+          setTodayCompletedCount(stats.todayCount);
+          // Só mostra o modal ao cruzar a marca de 3 tarefas (transição de <3 para >=3)
+          if (previousCount < 3 && stats.todayCount >= 3) {
+            setShowProductiveModal(true);
           }
-        }
-        return t;
-      });
-      return updated;
-    });
+        });
+      }).catch(e => console.error("Error saving gamification:", e));
+    }
   };
 
   const deleteTask = (id: string) => {
@@ -508,9 +590,13 @@ const App: React.FC = () => {
   };
 
   const updateTaskRecurrence = (id: string, recurrence: RecurrenceType, interval?: number) => {
-    const activeRecurringCount = tasks.filter(t => !t.completed && t.isRecurring && t.id !== id).length;
-    if (recurrence !== 'none' && activeRecurringCount >= 2) {
-      alert('Aviso: Limite de 2 tarefas recorrentes ativas atingido.');
+    // Validação global: até 5 recorrentes no sistema todo
+    const globalRecurringCount = [
+      ...tasks.filter(t => t.isRecurring && t.id !== id),
+      ...completedTasks.filter(t => t.isRecurring),
+    ].length;
+    if (recurrence !== 'none' && globalRecurringCount >= 5) {
+      alert('Limite máximo de 5 tarefas recorrentes atingido. Remova uma recorrente antes de configurar outra.');
       return;
     }
     setTasks(prev => prev.map(t => t.id === id ? { ...t, recurrence, recurrenceInterval: interval, isRecurring: recurrence !== 'none' } : t));
@@ -557,8 +643,11 @@ const App: React.FC = () => {
       ...taskToRescue,
       rescueCount: newRescueCount,
       createdAt: Date.now(),
+      completed: false,
+      completedAt: undefined,
       priority: 'none',
-      highlightColor: 'none'
+      highlightColor: 'none',
+      rescueSource: 'expiration',
     };
 
     setArchivedTasks(prev => prev.filter(t => t.id !== taskToRescue.id));
@@ -567,6 +656,30 @@ const App: React.FC = () => {
     if (archivedTasks.length <= 1) {
       setShowArchiveModal(false);
     }
+  };
+
+  // Resgatar tarefa da lista de concluídas (etiqueta "Fazer novamente!")
+  const handleRescueCompletedTask = (taskToRescue: Task) => {
+    const activeTasksCount = tasks.filter(t => !t.completed).length;
+    if (activeTasksCount >= 5) {
+      alert('Você só pode ter no máximo 5 tarefas ativas simultaneamente. Conclua alguma atividade para liberar espaço!');
+      return;
+    }
+
+    const rescuedTask: Task = {
+      ...taskToRescue,
+      id: crypto.randomUUID(),
+      completed: false,
+      completedAt: undefined,
+      createdAt: Date.now(),
+      priority: 'none',
+      highlightColor: 'none',
+      rescueSource: 'completed',
+      rescueCount: 0,
+    };
+
+    setCompletedTasks(prev => prev.filter(t => t.id !== taskToRescue.id));
+    setTasks(prev => [rescuedTask, ...prev]);
   };
 
   const currentLevelProgress = totalPoints % 100;
@@ -587,7 +700,7 @@ const App: React.FC = () => {
 
 
       {/* ===== MAIN DASHBOARD ===== */}
-      <main className="px-4 py-3 space-y-4 max-w-4xl mx-auto pb-32">
+      <main className="px-4 py-3 space-y-4 max-w-4xl mx-auto pb-24">
 
         {/* --- Hero Section: Avatar LEFT | Stats + Visão RIGHT --- */}
         <section className="flex gap-3 items-start">
@@ -604,6 +717,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.0</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -701,49 +815,242 @@ const App: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* Today Tasks */}
+              {/* ====== MINHAS TAREFAS — Tab Bar Section ====== */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-black flex items-center gap-2">
-                    Hoje <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isDarkMode ? 'bg-accent-cyan/15 text-accent-cyan' : 'bg-accent-cyan/10 text-teal-700'}`}>{tasks.filter(t => !t.completed).length}</span>
-                    {todayCompletedCount > 0 && (
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-auto ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
-                        ✨ Concluídas: {todayCompletedCount}
+                {/* Title */}
+                <h2 className={`text-lg font-black tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                  📋 Minhas Tarefas
+                  {todayCompletedCount > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-auto ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
+                      ✨ Hoje: {todayCompletedCount}
+                    </span>
+                  )}
+                </h2>
+
+                {/* Segmented Tab Bar */}
+                <div className={`flex rounded-2xl p-1 gap-1 ${isDarkMode ? 'bg-slate-900/80 border border-slate-700/50' : 'bg-slate-100 border border-slate-200'}`}>
+                  {[
+                    { key: 'completed' as ActiveTab, label: 'Concluídas', count: completedTasks.length, icon: '✅' },
+                    { key: 'today' as ActiveTab, label: 'Fazer Hoje', count: tasks.filter(t => !t.completed).length, icon: '🎯' },
+                    { key: 'recurring' as ActiveTab, label: 'Recorrentes', count: [...tasks.filter(t => t.isRecurring), ...completedTasks.filter(t => t.isRecurring)].length, icon: '🔄' },
+                  ].map(tab => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`flex-1 px-2 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1
+                        ${activeTab === tab.key
+                          ? (isDarkMode
+                            ? 'bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/30 shadow-[0_0_12px_rgba(0,242,255,0.15)]'
+                            : 'bg-accent-cyan/10 text-teal-700 border border-accent-cyan/30 shadow-sm')
+                          : (isDarkMode
+                            ? 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50')
+                        }
+                      `}
+                    >
+                      <span className="hidden sm:inline">{tab.icon}</span>
+                      {tab.label}
+                      <span className={`text-[9px] px-1 py-0 rounded-full font-bold ${activeTab === tab.key ? (isDarkMode ? 'bg-accent-cyan/25 text-accent-cyan' : 'bg-accent-cyan/15 text-teal-700') : (isDarkMode ? 'bg-slate-800 text-slate-600' : 'bg-slate-200 text-slate-500')}`}>
+                        {tab.count}
                       </span>
-                    )}
-                  </h3>
+                    </button>
+                  ))}
                 </div>
-                <div className="space-y-2.5 relative">
-                  <AnimatePresence>
-                    {tasks.filter(t => !t.completed).map((task, idx) => (
-                      <TaskItem
-                        key={task.id}
-                        task={task}
-                        index={idx}
-                        onComplete={toggleTask}
-                        onDelete={deleteTask}
-                        onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
-                        onUpdateProps={updateTaskProps}
-                        onUpdateRecurrence={updateTaskRecurrence}
-                        onOpenKanban={setActiveTaskId}
-                        onDragStart={handleDragStart}
-                        onDragEnter={handleDragEnter}
-                        onDragEnd={handleDragEnd}
-                        isDarkMode={isDarkMode}
-                      />
-                    ))}
-                    {tasks.filter(t => !t.completed).length === 0 && (
-                      <div
-                        onClick={() => {
-                          playPulseSound();
-                          setPulseButton(true);
-                          setTimeout(() => setPulseButton(false), 800);
-                        }}
-                        className={`p-8 rounded-xl text-center border-2 border-dashed transition-colors cursor-pointer active:scale-95 duration-200 ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800/50 hover:border-accent-cyan' : 'border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-accent-cyan'}`}
+
+                {/* ====== TAB CONTENT ====== */}
+                <div className="min-h-[200px]">
+                  <AnimatePresence mode="wait">
+
+                    {/* TAB: Fazer Hoje (default) */}
+                    {activeTab === 'today' && (
+                      <motion.div
+                        key="today"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        Nenhuma tarefa ativa. Clique aqui ou no <strong className="text-accent-cyan">+</strong> para criar.
-                      </div>
+                        <div className="space-y-2.5 relative">
+                          <AnimatePresence>
+                            {tasks.filter(t => !t.completed).map((task, idx) => (
+                              <TaskItem
+                                key={task.id}
+                                task={task}
+                                index={idx}
+                                onComplete={toggleTask}
+                                onDelete={deleteTask}
+                                onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
+                                onUpdateProps={updateTaskProps}
+                                onUpdateRecurrence={updateTaskRecurrence}
+                                onOpenKanban={setActiveTaskId}
+                                onDragStart={handleDragStart}
+                                onDragEnter={handleDragEnter}
+                                onDragEnd={handleDragEnd}
+                                isDarkMode={isDarkMode}
+                              />
+                            ))}
+                            {tasks.filter(t => !t.completed).length === 0 && (
+                              <div
+                                onClick={() => {
+                                  playPulseSound();
+                                  setPulseButton(true);
+                                  setTimeout(() => setPulseButton(false), 800);
+                                }}
+                                className={`p-8 rounded-xl text-center border-2 border-dashed transition-colors cursor-pointer active:scale-95 duration-200 ${isDarkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-800/50 hover:border-accent-cyan' : 'border-slate-200 text-slate-400 hover:bg-slate-50 hover:border-accent-cyan'}`}
+                              >
+                                Nenhuma tarefa ativa. Clique aqui ou no <strong className="text-accent-cyan">+</strong> para criar.
+                              </div>
+                            )}
+                          </AnimatePresence>
+
+                          {/* Botão "ver+ recorrentes" — aparece quando há recorrentes extras além das 2 da lista principal */}
+                          {(() => {
+                            const extraRecurring = completedTasks.filter(t => t.isRecurring && !t.completed).length;
+                            const activeRecurring = tasks.filter(t => !t.completed && t.isRecurring).length;
+                            const totalRecurring = activeRecurring + extraRecurring;
+                            if (totalRecurring > 2 && extraRecurring > 0) {
+                              return (
+                                <button
+                                  onClick={() => setActiveTab('recurring')}
+                                  className={`w-full mt-3 p-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 border-2 border-dashed ${
+                                    isDarkMode
+                                      ? 'border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400/50'
+                                      : 'border-cyan-300 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-500'
+                                  }`}
+                                >
+                                  <Repeat size={16} />
+                                  ver+ {extraRecurring} recorrente{extraRecurring > 1 ? 's' : ''}
+                                </button>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+                      </motion.div>
                     )}
+
+                    {/* TAB: Concluídas */}
+                    {activeTab === 'completed' && (
+                      <motion.div
+                        key="completed"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {completedTasks.length === 0 ? (
+                          <div className={`p-8 rounded-xl text-center border-2 border-dashed ${isDarkMode ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'}`}>
+                            <p className="text-sm">Nenhuma tarefa concluída ainda.</p>
+                            <p className="text-[11px] mt-1 opacity-60">As tarefas concluídas aparecem aqui (máximo 15).</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {completedTasks.map(task => (
+                              <div
+                                key={task.id}
+                                className={`p-3 rounded-xl flex items-center justify-between gap-3 border transition-all ${isDarkMode ? 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/50' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-wrap gap-1.5 mb-1">
+                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-black tracking-wider uppercase ${isDarkMode ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>✓ Concluída</span>
+                                    {task.isRecurring && task.recurrence !== 'none' && (
+                                      <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold tracking-wider uppercase flex items-center gap-0.5 ${isDarkMode ? 'bg-cyan-500/15 text-cyan-400' : 'bg-cyan-100 text-cyan-700'}`}>
+                                        🔄 Recorrente
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className={`text-sm font-medium line-through ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    {task.text}
+                                  </p>
+                                  {task.completedAt && (
+                                    <p className={`text-[10px] mt-0.5 ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+                                      {new Date(task.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                  )}
+                                </div>
+                                <button
+                                  onClick={() => handleRescueCompletedTask(task)}
+                                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-[11px] transition-all active:scale-95 ${isDarkMode ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white border border-emerald-200'}`}
+                                >
+                                  <RefreshCw size={12} />
+                                  Fazer novamente
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* TAB: Recorrentes */}
+                    {activeTab === 'recurring' && (
+                      <motion.div
+                        key="recurring"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {(() => {
+                          const allRecurring = [
+                            ...tasks.filter(t => t.isRecurring && t.recurrence !== 'none'),
+                            ...completedTasks.filter(t => t.isRecurring && t.recurrence !== 'none'),
+                          ];
+                          // Deduplica por texto
+                          const seen = new Set<string>();
+                          const uniqueRecurring = allRecurring.filter(t => {
+                            if (seen.has(t.text)) return false;
+                            seen.add(t.text);
+                            return true;
+                          });
+
+                          if (uniqueRecurring.length === 0) {
+                            return (
+                              <div className={`p-8 rounded-xl text-center border-2 border-dashed ${isDarkMode ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'}`}>
+                                <p className="text-sm">Nenhuma tarefa recorrente configurada.</p>
+                                <p className="text-[11px] mt-1 opacity-60">Crie uma tarefa e configure a recorrência no menu de edição.</p>
+                              </div>
+                            );
+                          }
+
+                          const getRecurrenceLabel = (r?: string) => {
+                            switch (r) {
+                              case 'daily': return 'Diária';
+                              case 'weekdays': return 'Dias Úteis';
+                              case 'weekly': return 'Semanal';
+                              case 'custom': return 'Personalizada';
+                              default: return r || '';
+                            }
+                          };
+
+                          return (
+                            <div className="space-y-2">
+                              {uniqueRecurring.map(task => (
+                                <div
+                                  key={task.id}
+                                  className={`p-3 rounded-xl flex items-center gap-3 border ${isDarkMode ? 'bg-slate-800/30 border-slate-700/40' : 'bg-slate-50 border-slate-200'}`}
+                                >
+                                  <div className={`p-2 rounded-lg shrink-0 ${isDarkMode ? 'bg-cyan-500/15' : 'bg-cyan-100'}`}>
+                                    <Repeat size={16} className={isDarkMode ? 'text-cyan-400' : 'text-cyan-700'} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={`text-sm font-semibold truncate ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>{task.text}</p>
+                                    <p className={`text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-cyan-400/70' : 'text-cyan-600'}`}>
+                                      {getRecurrenceLabel(task.recurrence)}
+                                      {task.recurrence === 'custom' && task.recurrenceInterval && ` (${task.recurrenceInterval} dias)`}
+                                    </p>
+                                  </div>
+                                  <span className={`text-[9px] px-2 py-1 rounded-full font-bold ${task.completed ? (isDarkMode ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (isDarkMode ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-700')}`}>
+                                    {task.completed ? 'Concluída' : 'Ativa'}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </motion.div>
+                    )}
+
                   </AnimatePresence>
                 </div>
               </div>
@@ -808,6 +1115,36 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* ===== RECURRING BANNER (auto-dismiss) ===== */}
+      <AnimatePresence>
+        {showRecurringBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 60 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className={`fixed bottom-24 inset-x-0 mx-auto w-[90%] max-w-md z-[60] px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 ${
+              isDarkMode
+                ? 'bg-slate-800/95 border border-cyan-500/40 backdrop-blur-xl'
+                : 'bg-white border-2 border-cyan-400 shadow-cyan-200/50'
+            }`}
+            onClick={() => setShowRecurringBanner(false)}
+          >
+            <div className={`p-2 rounded-lg shrink-0 ${isDarkMode ? 'bg-cyan-500/20' : 'bg-cyan-100'}`}>
+              <Repeat size={18} className={isDarkMode ? 'text-cyan-400' : 'text-cyan-700'} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`text-[12px] font-bold leading-snug ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                Tarefa recorrente salva! 🔄
+              </p>
+              <p className={`text-[11px] leading-snug ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                Veja suas recorrentes na aba <strong className="text-cyan-500">Recorrentes</strong>
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ===== SW UPDATE BANNER ===== */}
       <AnimatePresence>
         {swUpdateReady && (
@@ -838,46 +1175,29 @@ const App: React.FC = () => {
       </AnimatePresence>
 
       {/* ===== FIXED BOTTOM NAV BAR ===== */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col items-center pb-3 pointer-events-none">
-        <div className={`flex items-center justify-center gap-1 px-3 py-2 rounded-[28px] pointer-events-auto w-[95%] max-w-md ${isDarkMode ? 'glass-card border border-slate-700/50' : 'bg-white/95 shadow-2xl border border-slate-200'} backdrop-blur-xl`}>
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col items-center pointer-events-none">
+        <div className={`flex items-center justify-center gap-1 px-3 py-2.5 pointer-events-auto w-full max-w-full ${isDarkMode ? 'bg-slate-950/95 border-t border-slate-800/60' : 'bg-white/95 shadow-2xl border-t border-slate-200'} backdrop-blur-xl`} style={{ paddingBottom: 'max(0.625rem, env(safe-area-inset-bottom))' }}>
 
           {/* Visão */}
-          <div className="relative group">
-            <button
-              onClick={() => setShowVisionViewOnly(true)}
-              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-amber-400 hover:bg-amber-400/10' : 'text-amber-600 hover:bg-amber-50'
-                }`}
-            >
-              <Eye size={20} />
-              <span className="text-[9px] font-bold leading-none">Visão</span>
-            </button>
-            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
-              📋 Ver seu Quadro de Visão
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
-            </div>
-          </div>
+          <button
+            onClick={() => setShowVisionViewOnly(true)}
+            className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1 rounded-2xl transition-all active:scale-90 min-w-[52px] ${isDarkMode ? 'text-amber-400 hover:bg-amber-400/10' : 'text-amber-600 hover:bg-amber-50'}`}
+          >
+            <Eye size={20} />
+            <span className="text-[9px] font-bold leading-none">Visão</span>
+          </button>
 
-          {/* Docs */}
-          <div className="relative group">
-            <button
-              onClick={() => setShowUserGuide(true)}
-              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-blue-400 hover:bg-blue-400/10' : 'text-blue-600 hover:bg-blue-50'
-                }`}
-            >
-              <FileText size={20} />
-              <span className="text-[9px] font-bold leading-none">Guia</span>
-            </button>
-            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
-              📖 Guia de uso do 5Task
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700/60' : 'bg-slate-200'}`}></div>
+          {/* Guia */}
+          <button
+            onClick={() => setShowUserGuide(true)}
+            className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1 rounded-2xl transition-all active:scale-90 min-w-[52px] ${isDarkMode ? 'text-blue-400 hover:bg-blue-400/10' : 'text-blue-600 hover:bg-blue-50'}`}
+          >
+            <FileText size={20} />
+            <span className="text-[9px] font-bold leading-none">Guia</span>
+          </button>
 
           {/* FAB Add Button (Center) */}
-          <div className="relative group w-14 h-14 flex items-center justify-center -my-3 z-50">
+          <div className="relative w-14 h-14 flex items-center justify-center -my-4 z-50 mx-2">
             <button
               onClick={() => setIsAddingTask(!isAddingTask)}
               className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 z-50
@@ -890,51 +1210,25 @@ const App: React.FC = () => {
             >
               <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
             </button>
-            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-8 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
-              ✨ Criar nova tarefa
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
-            </div>
           </div>
-
-          {/* Divider */}
-          <div className={`h-8 w-[1px] mx-1 ${isDarkMode ? 'bg-slate-700/60' : 'bg-slate-200'}`}></div>
 
           {/* Arquivo */}
-          <div className="relative group">
-            <button
-              onClick={() => setShowArchiveModal(true)}
-              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-400/10' : 'text-emerald-600 hover:bg-emerald-50'
-                }`}
-            >
-              <Archive size={20} />
-              <span className="text-[9px] font-bold leading-none">Arquivo</span>
-            </button>
-            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
-              📂 Resgatar tarefas não concluídas
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
-            </div>
-          </div>
+          <button
+            onClick={() => setShowArchiveModal(true)}
+            className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1 rounded-2xl transition-all active:scale-90 min-w-[52px] ${isDarkMode ? 'text-emerald-400 hover:bg-emerald-400/10' : 'text-emerald-600 hover:bg-emerald-50'}`}
+          >
+            <Archive size={20} />
+            <span className="text-[9px] font-bold leading-none">Arquivo</span>
+          </button>
 
           {/* Tema */}
-          <div className="relative group">
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all active:scale-90 min-w-[56px] ${isDarkMode ? 'text-purple-400 hover:bg-purple-400/10' : 'text-purple-600 hover:bg-purple-50'
-                }`}
-            >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-              <span className="text-[9px] font-bold leading-none">Tema</span>
-            </button>
-            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none scale-90 group-hover:scale-100 shadow-xl ${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200 shadow-lg'}`}>
-              🎨 Alternar modo claro/escuro
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 -mt-1 ${isDarkMode ? 'bg-slate-800 border-r border-b border-slate-700' : 'bg-white border-r border-b border-slate-200'}`}></div>
-            </div>
-          </div>
-        </div>
-        {/* Copyright */}
-        <div className={`mt-1.5 text-[10px] text-center font-mono pointer-events-auto leading-relaxed ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
-          <p>5Task - Procrastinacao Zero - V 4.2.0</p>
-          <p>Copyright @gillemosai | Todos os direitos reservados</p>
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1 rounded-2xl transition-all active:scale-90 min-w-[52px] ${isDarkMode ? 'text-purple-400 hover:bg-purple-400/10' : 'text-purple-600 hover:bg-purple-50'}`}
+          >
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            <span className="text-[9px] font-bold leading-none">Tema</span>
+          </button>
         </div>
       </div>
 
@@ -1032,16 +1326,6 @@ const App: React.FC = () => {
       {showUserGuide && (
         <UserGuide isDarkMode={isDarkMode} onClose={() => setShowUserGuide(false)} />
       )}
-
-      {/* ===== UPDATE MODAL ===== */}
-      <UpdateModal 
-        isOpen={showUpdateModal}
-        onClose={() => {
-          localStorage.setItem('5task_version_4.2.0_notified', 'true');
-          setShowUpdateModal(false);
-        }}
-        isDarkMode={isDarkMode}
-      />
     </div>
   );
 };

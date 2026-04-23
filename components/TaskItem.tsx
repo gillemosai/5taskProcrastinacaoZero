@@ -193,12 +193,27 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                     {priority.label}
                   </span>
                 )}
-                {rescueLabel && (
+                {task.rescueSource === 'completed' && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase bg-emerald-500 text-white shadow-sm inline-block`}>
+                    FAZER NOVAMENTE!
+                  </span>
+                )}
+                {task.rescueSource === 'expiration' && rescueLabel && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase bg-amber-500 text-white shadow-sm inline-block`}>
                     {rescueLabel}
                   </span>
                 )}
-                {task.isRecurring && task.recurrence !== 'none' && (
+                {!task.rescueSource && rescueLabel && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase bg-amber-500 text-white shadow-sm inline-block`}>
+                    {rescueLabel}
+                  </span>
+                )}
+                {task.isRecreatedRecurring && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-cyan-600 text-white' : 'bg-cyan-500 text-white'}`}>
+                    <Repeat size={10} /> RECORRENTE
+                  </span>
+                )}
+                {task.isRecurring && task.recurrence !== 'none' && !task.isRecreatedRecurring && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
                     <Repeat size={10} /> 
                     {task.recurrence === 'daily' ? 'Diária' : task.recurrence === 'weekdays' ? 'Dias Úteis' : task.recurrence === 'weekly' ? 'Semanal' : 'Custom'}

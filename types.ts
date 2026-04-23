@@ -27,6 +27,8 @@ export interface Task {
   recurrenceInterval?: number; // Em dias, para 'custom'
   lastRecurredAt?: number;
   isRecurring?: boolean;
+  rescueSource?: 'expiration' | 'completed'; // Origem do resgate
+  isRecreatedRecurring?: boolean; // Tarefa recriada por recorrência
 }
 
 export enum Mood {

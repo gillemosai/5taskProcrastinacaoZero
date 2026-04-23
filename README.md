@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-4.2.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-4.2.1-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,9 +28,9 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **4.2.0**, nós polimos a experiência na Google Play Store resolvendo problemas de segurança TWA, inserimos o sistema de **Recorrência de Tarefas**, além de turbinar o UX garantindo limpeza automática em tela das atividades prontas sem ferir as interações originais.
+Na versão **4.2.1**, nós polimos a experiência na Google Play Store resolvendo problemas de segurança TWA, inserimos o sistema de **Recorrência de Tarefas**, além de turbinar o UX garantindo limpeza automática em tela das atividades prontas sem ferir as interações originais.
 
-## ✨ Funcionalidades Principais (Atualizado v4.2.0)
+## ✨ Funcionalidades Principais (Atualizado v4.2.1)
 
 - **🔄 Recorrência Automática (Novidade):** Programe e esqueça. Ative repetições em tarefas já existentes (ex: Diária, Dias Úteis) com um menu interno prático (Limite de 2 tarefas fixas por dia para evitar ruído mental).
 - **🌟 Expansão de Gamificação:** Receba badges visuais ao vivo na tela mostrando quantas missões de foco você aniquilou no dia, além de feedback instantâneo da sua pontuação após a linda animação de desaparecimento de tarefas cumpridas.
@@ -97,8 +97,8 @@ Na versão **4.2.0**, nós polimos a experiência na Google Play Store resolvend
 - [x] Correção de sobreposição de tags visuais em tarefas longas.
 - [x] Implementação do Banco de Pontos Offline / Gamification Local no IndexedDB.
 - [x] Nova Funcionalidade de Arquivos e Vidas de Resgate (v4.1.0).
-- [x] TWA Experience em Full Screen: Integração resolvida com Google Play Developer signatures (v4.2.0).
-- [x] Tarefas Recorrentes e Painel Analógico de Foco Diário (v4.2.0).
+- [x] TWA Experience em Full Screen: Integração resolvida com Google Play Developer signatures (v4.2.1).
+- [x] Tarefas Recorrentes e Painel Analógico de Foco Diário (v4.2.1).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
