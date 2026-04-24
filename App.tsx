@@ -445,13 +445,18 @@ const App: React.FC = () => {
 
         if (newRecurringTasks.length > 0) {
           setTasks(prevTasks => {
-            const activeCount = prevTasks.filter(t => !t.completed).length;
-            const activeRecurringCount = prevTasks.filter(t => !t.completed && t.isRecurring).length;
-            const availableSlots = 5 - activeCount;
+            const activeTasks = prevTasks.filter(t => !t.completed);
+            const activeRecurringCount = activeTasks.filter(t => t.isRecurring).length;
+            const availableSlots = 5 - activeTasks.length;
             const availableRecurringSlots = 2 - activeRecurringCount;
             // Respeitar ambos os limites: 5 tarefas ativas e 2 recorrentes na tela principal
             const maxToAdd = Math.min(Math.max(0, availableSlots), Math.max(0, availableRecurringSlots));
             const toAdd = newRecurringTasks.slice(0, maxToAdd);
+            // Recorrentes que não cabem na main vão para completedTasks (aba recorrentes)
+            const overflow = newRecurringTasks.slice(maxToAdd);
+            if (overflow.length > 0) {
+              setCompletedTasks(prev => [...overflow, ...prev]);
+            }
             if (toAdd.length > 0) return [...toAdd, ...prevTasks];
             return prevTasks;
           });
@@ -493,12 +498,13 @@ const App: React.FC = () => {
       return;
     }
 
-    // Conta recorrentes ativas na lista principal
-    const activeRecurringCount = tasks.filter(t => !t.completed && t.isRecurring).length;
+    const activeTasks = tasks.filter(t => !t.completed);
+    const activeNonRecurringCount = activeTasks.filter(t => !t.isRecurring).length;
+    const activeRecurringOnMain = activeTasks.filter(t => t.isRecurring);
 
-    // 3ª+ recorrente → vai para completedTasks como template
-    if (isRecurringNew && activeRecurringCount >= 2) {
-      const recurringTemplate: Task = {
+    // === CASO 1: Criando tarefa RECORRENTE ===
+    if (isRecurringNew) {
+      const newRecurringTask: Task = {
         id: crypto.randomUUID(),
         text: inputText.trim(),
         completed: false,
@@ -510,18 +516,27 @@ const App: React.FC = () => {
         recurrence: newTaskRecurrence,
         recurrenceInterval: newTaskRecurrence === 'custom' ? newTaskInterval : undefined,
       };
-      setCompletedTasks(prev => [recurringTemplate, ...prev]);
+
+      // Se a tela principal já tem 5 tarefas OU já tem 2+ recorrentes na main → vai direto para aba recorrentes
+      if (activeTasks.length >= 5 || activeRecurringOnMain.length >= 2) {
+        setCompletedTasks(prev => [newRecurringTask, ...prev]);
+        setShowRecurringBanner(true);
+      } else {
+        // Tem espaço na tela principal E menos de 2 recorrentes → adiciona na main
+        setTasks(prev => [newRecurringTask, ...prev]);
+      }
+
       setInputText('');
       setNewTaskRecurrence('none');
       setNewTaskInterval(2);
       setIsAddingTask(false);
-      setShowRecurringBanner(true);
       updateEinstein('add', Mood.EXCITED);
       return;
     }
 
-    // Verifica limite de 5 tarefas ativas na lista principal
-    if (tasks.filter(t => !t.completed).length >= 5) {
+    // === CASO 2: Criando tarefa NÃO-RECORRENTE (diária) ===
+    // Limite: 5 tarefas não-recorrentes no máximo
+    if (activeNonRecurringCount >= 5) {
       updateEinstein('full', Mood.SHOCKED);
       return;
     }
@@ -534,11 +549,21 @@ const App: React.FC = () => {
       subTasks: [],
       priority: 'none',
       highlightColor: 'none',
-      isRecurring: isRecurringNew,
-      recurrence: newTaskRecurrence,
-      recurrenceInterval: newTaskRecurrence === 'custom' ? newTaskInterval : undefined,
+      isRecurring: false,
+      recurrence: 'none',
     };
-    setTasks([newTask, ...tasks]);
+
+    // Se a tela principal está cheia (5 tarefas) mas tem recorrentes, empurra recorrentes para aba
+    if (activeTasks.length >= 5 && activeRecurringOnMain.length > 0) {
+      // Move a recorrente mais antiga da main para completedTasks (aba recorrentes)
+      const recurringToDisplace = activeRecurringOnMain[activeRecurringOnMain.length - 1]; // mais antiga
+      setTasks(prev => [newTask, ...prev.filter(t => t.id !== recurringToDisplace.id)]);
+      setCompletedTasks(prev => [recurringToDisplace, ...prev]);
+      setShowRecurringBanner(true);
+    } else {
+      setTasks(prev => [newTask, ...prev]);
+    }
+
     setInputText('');
     setNewTaskRecurrence('none');
     setNewTaskInterval(2);
@@ -717,7 +742,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.0</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.0.1</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -809,7 +834,18 @@ const App: React.FC = () => {
               <KanbanBoard
                 task={tasks.find(t => t.id === activeTaskId)!}
                 onClose={() => setActiveTaskId(null)}
-                onUpdateSubtasks={(subs) => setTasks(prev => prev.map(t => t.id === activeTaskId ? { ...t, subTasks: subs } : t))}
+                onUpdateSubtasks={(subs) => {
+                  setTasks(prev => prev.map(t => t.id === activeTaskId ? { ...t, subTasks: subs } : t));
+                  // Auto-complete: quando todas as etapas estão em 'done', completa a tarefa
+                  if (subs.length > 0 && subs.every(st => st.column === 'done')) {
+                    setTimeout(() => {
+                      setActiveTaskId(null); // Fecha o Kanban
+                      setTimeout(() => {
+                        if (activeTaskId) toggleTask(activeTaskId); // Completa a tarefa com animação suave
+                      }, 400);
+                    }, 1200);
+                  }
+                }}
                 isDarkMode={isDarkMode}
               />
             </div>
@@ -903,12 +939,15 @@ const App: React.FC = () => {
                             )}
                           </AnimatePresence>
 
-                          {/* Botão "ver+ recorrentes" — aparece quando há recorrentes extras além das 2 da lista principal */}
+                          {/* Botão "+ recorrentes" — aparece quando há recorrentes na aba */}
                           {(() => {
                             const extraRecurring = completedTasks.filter(t => t.isRecurring && !t.completed).length;
-                            const activeRecurring = tasks.filter(t => !t.completed && t.isRecurring).length;
-                            const totalRecurring = activeRecurring + extraRecurring;
-                            if (totalRecurring > 2 && extraRecurring > 0) {
+                            const allRecurringInSystem = [
+                              ...tasks.filter(t => t.isRecurring),
+                              ...completedTasks.filter(t => t.isRecurring),
+                            ];
+                            const totalRecurring = allRecurringInSystem.length;
+                            if (totalRecurring > 0 && extraRecurring > 0) {
                               return (
                                 <button
                                   onClick={() => setActiveTab('recurring')}
@@ -919,7 +958,7 @@ const App: React.FC = () => {
                                   }`}
                                 >
                                   <Repeat size={16} />
-                                  ver+ {extraRecurring} recorrente{extraRecurring > 1 ? 's' : ''}
+                                  + {extraRecurring} recorrente{extraRecurring > 1 ? 's' : ''}
                                 </button>
                               );
                             }

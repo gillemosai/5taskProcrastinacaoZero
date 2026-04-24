@@ -223,6 +223,28 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               <span className={`font-semibold leading-snug break-words text-sm md:text-base transition-colors ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100 group-hover:text-primary' : 'text-slate-900')}`}>
                 {task.text}
               </span>
+              {/* Kanban Subtask Progress */}
+              {task.subTasks && task.subTasks.length > 0 && (() => {
+                const total = task.subTasks!.length;
+                const done = task.subTasks!.filter(st => st.column === 'done').length;
+                const percent = Math.round((done / total) * 100);
+                const allDone = done === total;
+                return (
+                  <div className={`flex items-center gap-2 mt-1.5 ${allDone ? 'opacity-80' : ''}`}>
+                    <KanbanSquare size={12} className={allDone ? 'text-emerald-400' : (isDarkMode ? 'text-purple-400' : 'text-purple-500')} />
+                    <span className={`text-[11px] font-bold tabular-nums ${allDone ? 'text-emerald-400' : (isDarkMode ? 'text-slate-400' : 'text-slate-500')}`}>
+                      {done}/{total} etapas
+                    </span>
+                    <div className={`flex-1 h-1.5 rounded-full overflow-hidden max-w-[80px] ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ease-out ${allDone ? 'bg-emerald-400' : 'bg-purple-500'}`}
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                    {allDone && <span className="text-[10px] text-emerald-400 font-bold">✓</span>}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

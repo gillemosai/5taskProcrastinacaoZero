@@ -1,7 +1,7 @@
 
-// 5Task Service Worker - v5.0.0
+// 5Task Service Worker - v5.0.1
 // Mudar o nome do CACHE força o navegador a instalar o novo SW e limpar o cache antigo.
-const CACHE = "5task-quantum-v5-0-0-offline";
+const CACHE = "5task-quantum-v5-0-1-offline";
 const offlineFallbackPage = "index.html";
 
 const ASSETS_TO_CACHE = [
@@ -26,6 +26,7 @@ self.addEventListener("message", (event) => {
 });
 
 self.addEventListener('install', (event) => {
+  // Pré-cacheia os assets e ativa imediatamente (sem esperar o SW anterior fechar)
   event.waitUntil(
     caches.open(CACHE).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
@@ -33,6 +34,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  // Remove todos os caches antigos
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -43,6 +45,7 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  // Assume controle de todas as abas imediatamente
   self.clients.claim();
 });
 
@@ -66,17 +69,20 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
+    // Para navegação: sempre tenta a rede primeiro (garante página atualizada)
     event.respondWith((async () => {
       try {
         const networkResp = await fetch(event.request);
         return networkResp;
       } catch (error) {
+        // Offline: usa fallback do cache
         const cache = await caches.open(CACHE);
         const cachedResp = await cache.match(offlineFallbackPage);
         return cachedResp;
       }
     })());
   } else {
+    // Para assets: Stale-While-Revalidate (retorna cache mas atualiza em background)
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
@@ -85,7 +91,9 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE).then((cache) => cache.put(event.request, cacheCopy));
           }
           return networkResponse;
-        }).catch(() => {});
+        }).catch(() => {
+          // Ignora erros de rede na revalidação
+        });
 
         return cachedResponse || fetchPromise;
       })
