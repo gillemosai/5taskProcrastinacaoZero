@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun, ArrowLeft } from 'lucide-react';
+import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun, ArrowLeft, Repeat } from 'lucide-react';
 
 const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero#readme';
 
@@ -27,7 +27,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                 <div className={`flex items-center justify-between px-5 py-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                     <div>
                         <h2 className="text-lg font-black">📘 Como Usar o 5Task</h2>
-                        <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido das funcionalidades</p>
+                        <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido v5.0</p>
                     </div>
                     <button onClick={onClose} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}>
                         <ArrowLeft size={18} /> <span className="text-sm font-bold">Voltar</span>
@@ -41,7 +41,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                     <div className={`rounded-2xl p-4 ${card}`}>
                         <h3 className={`font-bold text-sm mb-2 ${accent}`}>🎯 O Conceito</h3>
                         <p className={`text-[12px] leading-relaxed ${muted}`}>
-                            O <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>5Task</strong> é um sistema anti-procrastinação que limita você a <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>no máximo 5 tarefas por vez</strong>. Menos tarefas significa mais foco e mais resultados.
+                            O <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>5Task</strong> é um sistema anti-procrastinação que limita você a <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>no máximo 5 tarefas por vez</strong>, com suporte a até <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>5 tarefas recorrentes</strong>. Menos tarefas significa mais foco e mais resultados.
                         </p>
                     </div>
 
@@ -65,6 +65,31 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                                 <GripVertical size={15} className="text-slate-500 shrink-0 mt-0.5" />
                                 <p className={`text-[12px] leading-relaxed ${muted}`}>
                                     <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Reordenar:</strong> Arraste as tarefas para mudar a prioridade
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tarefas Recorrentes */}
+                    <div className={`rounded-2xl p-4 border-l-4 border-cyan-500 ${card}`}>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🔄 Tarefas Recorrentes</h3>
+                        <div className="space-y-2.5">
+                            <div className="flex items-start gap-2.5">
+                                <Repeat size={15} className="text-cyan-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    Você pode ter até <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>5 tarefas recorrentes</strong> no total (Diária, Dias Úteis, Semanal ou Personalizada)
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-2.5">
+                                <Repeat size={15} className="text-cyan-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>2 na tela principal:</strong> As 2 primeiras recorrentes aparecem em "Fazer Hoje". As demais ficam na aba <strong className="text-cyan-500">Recorrentes</strong>
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-2.5">
+                                <Repeat size={15} className="text-cyan-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>ver+ recorrentes:</strong> Quando há recorrentes extras, um botão aparece abaixo da lista para levá-lo à aba dedicada
                                 </p>
                             </div>
                         </div>

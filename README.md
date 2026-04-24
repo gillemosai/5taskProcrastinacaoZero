@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-4.2.1-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-5.0.0-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -28,11 +28,12 @@
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
 
-Na versão **4.2.1**, nós polimos a experiência na Google Play Store resolvendo problemas de segurança TWA, inserimos o sistema de **Recorrência de Tarefas**, além de turbinar o UX garantindo limpeza automática em tela das atividades prontas sem ferir as interações originais.
+Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **5 recorrentes no total**, com gerenciamento inteligente que mantém **2 recorrentes visíveis na tela principal** e disponibiliza as demais na aba dedicada **Recorrentes**, além de guiar o usuário com banners informativos automáticos.
 
-## ✨ Funcionalidades Principais (Atualizado v4.2.1)
+## ✨ Funcionalidades Principais (Atualizado v5.0)
 
-- **🔄 Recorrência Automática (Novidade):** Programe e esqueça. Ative repetições em tarefas já existentes (ex: Diária, Dias Úteis) com um menu interno prático (Limite de 2 tarefas fixas por dia para evitar ruído mental).
+- **🔄 Recorrência Expandida (v5.0):** Configure até **5 tarefas recorrentes** no total (Diária, Dias Úteis, Semanal, Personalizada). As 2 primeiras aparecem na tela principal "Fazer Hoje"; a 3ª em diante é salva automaticamente na aba **Recorrentes** com um banner informativo. Um botão **"ver+ recorrentes"** aparece abaixo da lista quando há extras disponíveis.
+- **📋 Abas Inteligentes (v5.0):** Navegue entre **Concluídas**, **Fazer Hoje** e **Recorrentes** para ter visão completa de todas as suas tarefas ativas, concluídas e recorrentes.
 - **🌟 Expansão de Gamificação:** Receba badges visuais ao vivo na tela mostrando quantas missões de foco você aniquilou no dia, além de feedback instantâneo da sua pontuação após a linda animação de desaparecimento de tarefas cumpridas.
 - **🛡️ Limite Quântico Inteligente:** O limite de criar até 5 tarefas só leva em consideração as que estão em andamento. Tarefas finalizadas contam na sua pontuação e desaparecem imediatamente da contagem de carga ativa.
 - **⏱️ Motor Procrastinação Zero:**
@@ -99,6 +100,8 @@ Na versão **4.2.1**, nós polimos a experiência na Google Play Store resolvend
 - [x] Nova Funcionalidade de Arquivos e Vidas de Resgate (v4.1.0).
 - [x] TWA Experience em Full Screen: Integração resolvida com Google Play Developer signatures (v4.2.1).
 - [x] Tarefas Recorrentes e Painel Analógico de Foco Diário (v4.2.1).
+- [x] Expansão de Recorrentes para 5 tarefas, gerenciamento inteligente com aba dedicada (v5.0).
+- [x] Banners informativos auto-dismiss e botão "ver+ recorrentes" (v5.0).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
