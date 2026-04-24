@@ -60,7 +60,7 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
 - **🔝 Fluxo de Inserção Inteligente:** Novas tarefas são automaticamente adicionadas ao topo.
 - **🚥 Matriz de Prioridade:** Classificação visual `(Urgente, Atenção e Crítico)`.
 - **✨ Smooth Motion (Drag & Drop):** Reordenação intuitiva com animações fluidas físicas (impulsionado por Framer Motion).
-- **📋 Micro-Kanban Integrado:** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído).
+- **📋 Micro-Kanban Integrado e Auto-Complete (v5.0.1):** Cada tarefa principal possui seu próprio quadro de planejamento (A Fazer, Fazendo, Concluído). O progresso das etapas é exibido ao vivo no próprio card da tarefa e, ao mover todas as etapas para "Concluído", a tarefa é finalizada automaticamente com uma animação suave.
 - **💾 Offline-First Total:** Suas tarefas, sua Visão Pessoal e até seus Pontos de Conclusão sobrevivem sem internet permanentemente no "Armazenamento Procrastinação Zero".
 - **📱 PWA Nativo:** Instalável em Android e iOS, totalmente pronto e testado para ser convertido num App da Google Play Store!
 

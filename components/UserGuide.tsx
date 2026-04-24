@@ -67,6 +67,12 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                                     <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Reordenar:</strong> Arraste as tarefas para mudar a prioridade
                                 </p>
                             </div>
+                            <div className="flex items-start gap-2.5">
+                                <LayoutGrid size={15} className="text-purple-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Etapas Kanban:</strong> O progresso das subtarefas (ex: 2/4 etapas) aparece no card. Ao concluir 100%, a tarefa é finalizada automaticamente!
+                                </p>
+                            </div>
                         </div>
                     </div>
 
