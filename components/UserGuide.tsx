@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun, ArrowLeft, Repeat } from 'lucide-react';
+import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun, ArrowLeft, Repeat, RefreshCw, Trophy, Sparkles, LayoutGrid } from 'lucide-react';
 
 const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero#readme';
 
@@ -95,6 +95,31 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                         </div>
                     </div>
 
+                    {/* Abas Inteligentes (v5.0) */}
+                    <div className={`rounded-2xl p-4 border-l-4 border-purple-500 ${card}`}>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>📋 Abas Inteligentes <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>v5.0</span></h3>
+                        <div className="space-y-2.5">
+                            <div className="flex items-start gap-2.5">
+                                <LayoutGrid size={15} className="text-purple-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    Navegue entre 3 abas: <strong className={isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}>Concluídas</strong>, <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>Fazer Hoje</strong> e <strong className="text-cyan-500">Recorrentes</strong>
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-2.5">
+                                <RefreshCw size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Fazer novamente:</strong> Na aba Concluídas, toque no botão para recriar qualquer tarefa já finalizada
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-2.5">
+                                <Sparkles size={15} className="text-amber-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Contador diário:</strong> O badge <strong className={isDarkMode ? 'text-purple-400' : 'text-purple-600'}>"✨ Hoje: X"</strong> mostra quantas tarefas você concluiu no dia
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Regras Anti-Procrastinação */}
                     <div className={`rounded-2xl p-4 border-l-4 border-amber-500 ${card}`}>
                         <h3 className={`font-bold text-sm mb-3 ${accent}`}>⏰ Regras Anti-Procrastinação</h3>
@@ -115,6 +140,25 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                                 <Zap size={15} className="text-purple-400 shrink-0 mt-0.5" />
                                 <p className={`text-[12px] leading-relaxed ${muted}`}>
                                     O Einstein muda de humor conforme o tempo vai acabando!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Dia Produtivo (v5.0) */}
+                    <div className={`rounded-2xl p-4 border-l-4 border-emerald-500 ${card}`}>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎉 Dia Produtivo <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>v5.0</span></h3>
+                        <div className="space-y-2.5">
+                            <div className="flex items-start gap-2.5">
+                                <Trophy size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    Ao concluir <strong className={isDarkMode ? 'text-emerald-300' : 'text-emerald-600'}>3 tarefas no dia</strong>, o Einstein comemora com uma animação especial de parabéns!
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-2.5">
+                                <Zap size={15} className="text-amber-400 shrink-0 mt-0.5" />
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    Seu dia é contabilizado na <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>sequência de dias produtivos</strong> — mantenha o ritmo para aumentar seu streak!
                                 </p>
                             </div>
                         </div>
@@ -151,7 +195,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                     <div className={`rounded-2xl p-4 ${card}`}>
                         <h3 className={`font-bold text-sm mb-2 ${accent}`}>🏆 Progresso & XP</h3>
                         <p className={`text-[12px] leading-relaxed ${muted}`}>
-                            Cada tarefa concluída gera <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>pontos de experiência (XP)</strong>. Acompanhe seu progresso e mantenha sua sequência de dias produtivos!
+                            Cada tarefa concluída gera <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>pontos de experiência (XP)</strong>. Acompanhe seu progresso, mantenha sua sequência de dias produtivos e desbloqueie o modal de celebração ao atingir 3 tarefas no dia!
                         </p>
                     </div>
 

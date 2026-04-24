@@ -33,7 +33,9 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
 ## ✨ Funcionalidades Principais (Atualizado v5.0)
 
 - **🔄 Recorrência Expandida (v5.0):** Configure até **5 tarefas recorrentes** no total (Diária, Dias Úteis, Semanal, Personalizada). As 2 primeiras aparecem na tela principal "Fazer Hoje"; a 3ª em diante é salva automaticamente na aba **Recorrentes** com um banner informativo. Um botão **"ver+ recorrentes"** aparece abaixo da lista quando há extras disponíveis.
-- **📋 Abas Inteligentes (v5.0):** Navegue entre **Concluídas**, **Fazer Hoje** e **Recorrentes** para ter visão completa de todas as suas tarefas ativas, concluídas e recorrentes.
+- **📋 Abas Inteligentes (v5.0):** Navegue entre **Concluídas**, **Fazer Hoje** e **Recorrentes** para ter visão completa de todas as suas tarefas ativas, concluídas e recorrentes. Na aba Concluídas, o botão **"Fazer novamente"** permite recriar qualquer tarefa já finalizada.
+- **🎉 Dia Produtivo (v5.0):** Ao concluir **3 tarefas no mesmo dia**, o Einstein celebra com uma animação especial de parabéns. Seu dia é contabilizado na **sequência de dias produtivos** (streak), incentivando a consistência.
+- **✨ Contador Diário (v5.0):** O badge **"✨ Hoje: X"** no topo da lista de tarefas mostra em tempo real quantas tarefas você já concluiu no dia.
 - **🌟 Expansão de Gamificação:** Receba badges visuais ao vivo na tela mostrando quantas missões de foco você aniquilou no dia, além de feedback instantâneo da sua pontuação após a linda animação de desaparecimento de tarefas cumpridas.
 - **🛡️ Limite Quântico Inteligente:** O limite de criar até 5 tarefas só leva em consideração as que estão em andamento. Tarefas finalizadas contam na sua pontuação e desaparecem imediatamente da contagem de carga ativa.
 - **⏱️ Motor Procrastinação Zero:**
@@ -102,6 +104,7 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
 - [x] Tarefas Recorrentes e Painel Analógico de Foco Diário (v4.2.1).
 - [x] Expansão de Recorrentes para 5 tarefas, gerenciamento inteligente com aba dedicada (v5.0).
 - [x] Banners informativos auto-dismiss e botão "ver+ recorrentes" (v5.0).
+- [x] Modal "Dia Produtivo" ao completar 3 tarefas, contador diário e botão "Fazer novamente" (v5.0).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
