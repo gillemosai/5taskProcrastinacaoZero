@@ -610,6 +610,14 @@ const App: React.FC = () => {
     }
   };
 
+  const deleteRecurringTask = (text: string) => {
+    if (window.confirm(`Deseja excluir permanentemente a recorrência de "${text}"?`)) {
+      setTasks(prev => prev.filter(t => !(t.isRecurring && t.text === text)));
+      setCompletedTasks(prev => prev.filter(t => !(t.isRecurring && t.text === text)));
+      updateEinstein('delete', Mood.SHOCKED);
+    }
+  };
+
   const updateTaskProps = (id: string, priority: Priority, color: HighlightColor) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, priority, highlightColor: color } : t));
   };
@@ -1082,6 +1090,13 @@ const App: React.FC = () => {
                                   <span className={`text-[9px] px-2 py-1 rounded-full font-bold ${task.completed ? (isDarkMode ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (isDarkMode ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-700')}`}>
                                     {task.completed ? 'Concluída' : 'Ativa'}
                                   </span>
+                                  <button
+                                    onClick={() => deleteRecurringTask(task.text)}
+                                    className={`p-2 rounded-lg transition-colors shrink-0 ${isDarkMode ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50'}`}
+                                    title="Excluir recorrência"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
                                 </div>
                               ))}
                             </div>
