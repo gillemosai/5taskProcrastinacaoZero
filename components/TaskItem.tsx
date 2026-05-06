@@ -178,7 +178,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       {/* Barra de Prioridade Lateral Substituída pela Borda Esquerda do Container */}
 
       <div className="p-4 md:p-5 flex flex-col gap-3">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <div className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-white transition-colors">
             <GripVertical size={20} />
           </div>
@@ -323,7 +323,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             </div>
           )}
 
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="hidden md:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {rescueCount === 0 && (
               <>
                 <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
