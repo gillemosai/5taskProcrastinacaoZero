@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-5.1.1-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-5.2.4-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -30,11 +30,11 @@ O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob
 
 Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **5 recorrentes no total**, com gerenciamento inteligente que mantém **2 recorrentes visíveis na tela principal** e disponibiliza as demais na aba dedicada **Recorrentes**, além de guiar o usuário com banners informativos automáticos.
 
-## ✨ Funcionalidades Principais (Atualizado v5.1)
+## ✨ Funcionalidades Principais (Atualizado v5.2.4)
 
-- **🎯 Menu em Leque (v5.1):** Ao clicar no botão "+", um menu animado exibe 3 tipos de tarefa: **Lista** (purple), **Tarefa** (cyan) e **Recorrente** (amber). Cada opção tem glow neon próprio e animação spring suave.
-- **📝 Tarefas Tipo Lista (v5.1):** Novo tipo de tarefa com checklist interativo estilo Microsoft To-Do. Crie listas de compras, checklists de projeto, etc. Cada item pode ser marcado/desmarcado com animação. Barra de progresso mostra "X/Y itens" e a tarefa é auto-completada quando todos os itens forem marcados.
-- **🔄 Criação de Recorrentes Otimizada (v5.1):** Ao selecionar "Recorrente" no menu em leque, o seletor de recorrência já vem pré-aberto com a opção "Diária" selecionada, agilizando a criação.
+- **🎯 Menu em Leque Avançado (v5.2.4):** Ao clicar no botão "+", um menu radial é revelado. O Nível 1 expande como **"Teclas de Piano"**, com os botões girando dinamicamente em direção à origem, como as lâminas de um leque real. 
+- **🔄 Segundo Nível em Arco (v5.2.4):** Ao selecionar "Recorrente", o menu se adapta formando um belo arco-íris perfeito ao redor de um botão "VOLTAR" centralizado, oferecendo 4 opções (Diária, Semanal, Dias Úteis, Custom) espalhadas uniformemente pela tela.
+- **📝 Tarefas Tipo Lista:** Novo tipo de tarefa com checklist interativo estilo Microsoft To-Do. Crie listas de compras, checklists de projeto, etc. Cada item pode ser marcado/desmarcado com animação. Barra de progresso mostra "X/Y itens" e a tarefa é auto-completada quando todos os itens forem marcados.
 
 - **🔄 Recorrência Expandida (v5.0):** Configure até **5 tarefas recorrentes** no total (Diária, Dias Úteis, Semanal, Personalizada). As 2 primeiras aparecem na tela principal "Fazer Hoje"; a 3ª em diante é salva automaticamente na aba **Recorrentes** com um banner informativo. Um botão **"ver+ recorrentes"** aparece abaixo da lista quando há extras disponíveis.
 - **📋 Abas Inteligentes (v5.0):** Navegue entre **Concluídas**, **Fazer Hoje** e **Recorrentes** para ter visão completa de todas as suas tarefas ativas, concluídas e recorrentes. Na aba Concluídas, o botão **"Fazer novamente"** permite recriar qualquer tarefa já finalizada.

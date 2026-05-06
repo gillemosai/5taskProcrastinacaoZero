@@ -11,7 +11,6 @@ import { WelcomeCarousel } from './components/WelcomeCarousel';
 import { ArchiveModal } from './components/ArchiveModal';
 import { VisionBoard } from './components/VisionBoard';
 import { UserGuide } from './components/UserGuide';
-import { RecurrenceSelector } from './components/RecurrenceSelector';
 import { RecurrenceType } from './types';
 import { FanMenu } from './components/FanMenu';
 import { ListTaskModal } from './components/ListTaskModal';
@@ -775,7 +774,7 @@ const App: React.FC = () => {
   };
 
   // === NEW: Fan Menu handler ===
-  const handleFanMenuSelect = (type: TaskType) => {
+  const handleFanMenuSelect = (type: TaskType, recurrence?: RecurrenceType) => {
     setShowFanMenu(false);
     if (type === 'list') {
       setShowListModal(true);
@@ -783,7 +782,7 @@ const App: React.FC = () => {
       setNewTaskRecurrence('none');
       setIsAddingTask(true);
     } else if (type === 'recurring') {
-      setNewTaskRecurrence('daily'); // Pre-select daily as default
+      setNewTaskRecurrence(recurrence || 'daily');
       setIsAddingTask(true);
     }
   };
@@ -823,7 +822,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.1.1</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.2.4</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -1228,13 +1227,19 @@ const App: React.FC = () => {
                 placeholder="O que vamos resolver hoje?"
                 className={`w-full rounded-2xl p-4 outline-none font-medium ${isDarkMode ? 'bg-background-dark text-white border border-slate-700 focus:border-accent-cyan' : 'bg-slate-50 border-2 border-slate-200 focus:border-accent-cyan'}`}
               />
-              <RecurrenceSelector 
-                isDarkMode={isDarkMode} 
-                value={newTaskRecurrence} 
-                onChange={setNewTaskRecurrence}
-                intervalValue={newTaskInterval}
-                onIntervalChange={setNewTaskInterval}
-              />
+              {newTaskRecurrence === 'custom' && (
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-slate-700/50">
+                  <label className="text-sm font-bold opacity-90 flex-1">A cada quantos dias?</label>
+                  <input
+                    type="number"
+                    min="2"
+                    max="365"
+                    value={newTaskInterval}
+                    onChange={e => setNewTaskInterval(parseInt(e.target.value) || 2)}
+                    className={`w-20 rounded-xl p-2 outline-none text-center font-bold text-lg ${isDarkMode ? 'bg-slate-900 text-white border border-slate-700' : 'bg-slate-100 text-slate-900 border border-slate-300'}`}
+                  />
+                </div>
+              )}
               <button type="submit" className="w-full bg-accent-cyan text-background-dark font-bold p-4 rounded-xl shadow-lg active:scale-95 disabled:opacity-50 mt-1">
                 Criar Tarefa
               </button>
