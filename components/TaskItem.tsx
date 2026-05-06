@@ -40,7 +40,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(task.text);
   const [showConfig, setShowConfig] = useState(false);
-  const [showChecklist, setShowChecklist] = useState(task.taskType === 'list');
+  const [showChecklist, setShowChecklist] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
   const isListTask = task.taskType === 'list';
 
