@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle, Repeat } from 'lucide-react';
+import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle, Repeat, ListChecks } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Task, Priority, HighlightColor, RecurrenceType } from '../types';
 import { RecurrenceSelector } from './RecurrenceSelector';
+import { ChecklistDisplay } from './ChecklistDisplay';
 
 interface TaskItemProps {
   task: Task;
@@ -13,6 +14,7 @@ interface TaskItemProps {
   onEdit: (id: string, newText: string) => void;
   onUpdateProps: (id: string, priority: Priority, color: HighlightColor) => void;
   onUpdateRecurrence: (id: string, recurrence: RecurrenceType, interval?: number) => void;
+  onToggleChecklistItem?: (taskId: string, itemId: string) => void;
   onOpenKanban: (id: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, position: number) => void;
   onDragEnter: (e: React.DragEvent<HTMLDivElement>, position: number) => void;
@@ -28,6 +30,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onEdit,
   onUpdateProps,
   onUpdateRecurrence,
+  onToggleChecklistItem,
   onOpenKanban,
   onDragStart,
   onDragEnter,
@@ -37,7 +40,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(task.text);
   const [showConfig, setShowConfig] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(task.taskType === 'list');
   const itemRef = useRef<HTMLDivElement>(null);
+  const isListTask = task.taskType === 'list';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -186,7 +191,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
           ) : (
-            <div className="flex-1 min-w-0 flex flex-col items-start gap-1" onClick={() => onOpenKanban(task.id)}>
+            <div className="flex-1 min-w-0 flex flex-col items-start gap-1" onClick={() => isListTask ? setShowChecklist(!showChecklist) : onOpenKanban(task.id)}>
               <div className="flex flex-wrap gap-2 mb-1">
                 {priority && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${priority.color} text-white shadow-sm inline-block`}>
@@ -219,12 +224,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                     {task.recurrence === 'daily' ? 'Diária' : task.recurrence === 'weekdays' ? 'Dias Úteis' : task.recurrence === 'weekly' ? 'Semanal' : 'Custom'}
                   </span>
                 )}
+                {isListTask && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white'}`}>
+                    <ListChecks size={10} /> LISTA
+                  </span>
+                )}
               </div>
               <span className={`font-semibold leading-snug break-words text-sm md:text-base transition-colors ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100 group-hover:text-primary' : 'text-slate-900')}`}>
                 {task.text}
               </span>
               {/* Kanban Subtask Progress */}
-              {task.subTasks && task.subTasks.length > 0 && (() => {
+              {!isListTask && task.subTasks && task.subTasks.length > 0 && (() => {
                 const total = task.subTasks!.length;
                 const done = task.subTasks!.filter(st => st.column === 'done').length;
                 const percent = Math.round((done / total) * 100);
@@ -242,6 +252,20 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                       />
                     </div>
                     {allDone && <span className="text-[10px] text-emerald-400 font-bold">✓</span>}
+                  </div>
+                );
+              })()}
+              {/* List task mini progress */}
+              {isListTask && task.checklistItems && task.checklistItems.length > 0 && (() => {
+                const total = task.checklistItems!.length;
+                const done = task.checklistItems!.filter(i => i.completed).length;
+                const allDone = done === total;
+                return (
+                  <div className={`flex items-center gap-2 mt-1.5 ${allDone ? 'opacity-80' : ''}`}>
+                    <ListChecks size={12} className={allDone ? 'text-emerald-400' : (isDarkMode ? 'text-purple-400' : 'text-purple-500')} />
+                    <span className={`text-[11px] font-bold tabular-nums ${allDone ? 'text-emerald-400' : (isDarkMode ? 'text-slate-400' : 'text-slate-500')}`}>
+                      {done}/{total} itens
+                    </span>
                   </div>
                 );
               })()}
@@ -264,6 +288,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Inline Checklist for List tasks */}
+        {isListTask && showChecklist && task.checklistItems && task.checklistItems.length > 0 && (
+          <div className={`px-1 pb-1 ${isDarkMode ? '' : ''}`} onClick={(e) => e.stopPropagation()}>
+            <ChecklistDisplay
+              items={task.checklistItems}
+              onToggleItem={(itemId) => onToggleChecklistItem?.(task.id, itemId)}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
 
         {isAlertTime && !task.completed && (
           <div className={`flex items-center justify-center gap-2 p-3 rounded-xl transition-all ${isBlinking ? 'bg-red-600 text-white shadow-lg animate-pulse' : 'bg-red-500/10 text-red-500 border border-red-500/30'}`}>

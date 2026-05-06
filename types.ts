@@ -13,6 +13,14 @@ export interface SubTask {
 
 export type RecurrenceType = 'none' | 'daily' | 'weekdays' | 'weekly' | 'custom';
 
+export type TaskType = 'task' | 'list' | 'recurring';
+
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface Task {
   id: string;
   text: string;
@@ -29,6 +37,8 @@ export interface Task {
   isRecurring?: boolean;
   rescueSource?: 'expiration' | 'completed'; // Origem do resgate
   isRecreatedRecurring?: boolean; // Tarefa recriada por recorrência
+  taskType?: TaskType; // Tipo da tarefa: task, list, recurring
+  checklistItems?: ChecklistItem[]; // Itens do checklist (para taskType === 'list')
 }
 
 export enum Mood {

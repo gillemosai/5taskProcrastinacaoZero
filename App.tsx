@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Trash2, Undo2, X, Archive, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText, Repeat } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor } from './types';
+import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor, TaskType, ChecklistItem } from './types';
 import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
 import { EinsteinAvatar } from './components/EinsteinAvatar';
 import { TaskItem } from './components/TaskItem';
@@ -13,6 +13,8 @@ import { VisionBoard } from './components/VisionBoard';
 import { UserGuide } from './components/UserGuide';
 import { RecurrenceSelector } from './components/RecurrenceSelector';
 import { RecurrenceType } from './types';
+import { FanMenu } from './components/FanMenu';
+import { ListTaskModal } from './components/ListTaskModal';
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -248,6 +250,8 @@ const App: React.FC = () => {
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>('today');
   const [showRecurringBanner, setShowRecurringBanner] = useState(false);
+  const [showFanMenu, setShowFanMenu] = useState(false);
+  const [showListModal, setShowListModal] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -567,6 +571,7 @@ const App: React.FC = () => {
     setInputText('');
     setNewTaskRecurrence('none');
     setNewTaskInterval(2);
+    setShowFanMenu(false);
     setIsAddingTask(false);
     updateEinstein('add', Mood.EXCITED);
   };
@@ -715,6 +720,74 @@ const App: React.FC = () => {
     setTasks(prev => [rescuedTask, ...prev]);
   };
 
+  // === NEW: Add List Task ===
+  const addListTask = (title: string, items: ChecklistItem[]) => {
+    const activeTasks = tasks.filter(t => !t.completed);
+    const activeNonRecurringCount = activeTasks.filter(t => !t.isRecurring).length;
+    if (activeNonRecurringCount >= 5) {
+      updateEinstein('full', Mood.SHOCKED);
+      return;
+    }
+
+    const newTask: Task = {
+      id: crypto.randomUUID(),
+      text: title,
+      completed: false,
+      createdAt: Date.now(),
+      subTasks: [],
+      priority: 'none',
+      highlightColor: 'none',
+      isRecurring: false,
+      recurrence: 'none',
+      taskType: 'list',
+      checklistItems: items,
+    };
+
+    const activeRecurringOnMain = activeTasks.filter(t => t.isRecurring);
+    if (activeTasks.length >= 5 && activeRecurringOnMain.length > 0) {
+      const recurringToDisplace = activeRecurringOnMain[activeRecurringOnMain.length - 1];
+      setTasks(prev => [newTask, ...prev.filter(t => t.id !== recurringToDisplace.id)]);
+      setCompletedTasks(prev => [recurringToDisplace, ...prev]);
+      setShowRecurringBanner(true);
+    } else {
+      setTasks(prev => [newTask, ...prev]);
+    }
+
+    setShowListModal(false);
+    setShowFanMenu(false);
+    updateEinstein('add', Mood.EXCITED);
+  };
+
+  // === NEW: Toggle Checklist Item ===
+  const toggleChecklistItem = (taskId: string, itemId: string) => {
+    setTasks(prev => prev.map(task => {
+      if (task.id !== taskId || !task.checklistItems) return task;
+      const updatedItems = task.checklistItems.map(item =>
+        item.id === itemId ? { ...item, completed: !item.completed } : item
+      );
+      const allDone = updatedItems.every(item => item.completed);
+      if (allDone && updatedItems.length > 0) {
+        // Auto-complete: all items checked → complete the task after a brief delay
+        setTimeout(() => toggleTask(taskId), 800);
+      }
+      return { ...task, checklistItems: updatedItems };
+    }));
+  };
+
+  // === NEW: Fan Menu handler ===
+  const handleFanMenuSelect = (type: TaskType) => {
+    setShowFanMenu(false);
+    if (type === 'list') {
+      setShowListModal(true);
+    } else if (type === 'task') {
+      setNewTaskRecurrence('none');
+      setIsAddingTask(true);
+    } else if (type === 'recurring') {
+      setNewTaskRecurrence('daily'); // Pre-select daily as default
+      setIsAddingTask(true);
+    }
+  };
+
   const currentLevelProgress = totalPoints % 100;
   const progressPercent = totalPoints === 0 ? 0 : (currentLevelProgress === 0 ? 100 : currentLevelProgress);
 
@@ -750,7 +823,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.0.1</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.1.0</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -926,6 +999,7 @@ const App: React.FC = () => {
                                 onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
                                 onUpdateProps={updateTaskProps}
                                 onUpdateRecurrence={updateTaskRecurrence}
+                                onToggleChecklistItem={toggleChecklistItem}
                                 onOpenKanban={setActiveTaskId}
                                 onDragStart={handleDragStart}
                                 onDragEnter={handleDragEnter}
@@ -1169,6 +1243,25 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* ===== FAN MENU ===== */}
+      <FanMenu
+        isOpen={showFanMenu}
+        onClose={() => setShowFanMenu(false)}
+        onSelectType={handleFanMenuSelect}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* ===== LIST TASK MODAL ===== */}
+      <AnimatePresence>
+        {showListModal && (
+          <ListTaskModal
+            isDarkMode={isDarkMode}
+            onClose={() => { setShowListModal(false); setShowFanMenu(false); }}
+            onCreate={addListTask}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ===== RECURRING BANNER (auto-dismiss) ===== */}
       <AnimatePresence>
         {showRecurringBanner && (
@@ -1253,7 +1346,15 @@ const App: React.FC = () => {
           {/* FAB Add Button (Center) */}
           <div className="relative w-14 h-14 flex items-center justify-center -my-4 z-50 mx-2">
             <button
-              onClick={() => setIsAddingTask(!isAddingTask)}
+              onClick={() => {
+                if (isAddingTask || showListModal) {
+                  setIsAddingTask(false);
+                  setShowListModal(false);
+                  setShowFanMenu(false);
+                } else {
+                  setShowFanMenu(!showFanMenu);
+                }
+              }}
               className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 z-50
                 ${isDarkMode ? 'text-background-dark' : 'text-slate-900'}
                 ${pulseButton
@@ -1262,7 +1363,7 @@ const App: React.FC = () => {
                 }
               `}
             >
-              <Plus size={30} strokeWidth={3} className={`transition-transform ${isAddingTask ? 'rotate-45' : ''}`} />
+              <Plus size={30} strokeWidth={3} className={`transition-transform duration-300 ${(showFanMenu || isAddingTask || showListModal) ? 'rotate-45' : ''}`} />
             </button>
           </div>
 
