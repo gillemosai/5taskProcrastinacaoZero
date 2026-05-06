@@ -202,13 +202,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             />
           ) : (
             <div className="flex-1 min-w-0 flex flex-col items-start gap-1" onClick={() => {
-              if (isClamped) {
-                // Toggle expand/collapse for long text
-                setIsExpanded(!isExpanded);
+              const next = !isExpanded;
+              setIsExpanded(next);
+              if (next) {
+                if (rescueCount === 0) setShowConfig(true);
+                if (isListTask) setShowChecklist(true);
               } else {
-                // Short text — go straight to kanban/checklist
-                if (isListTask) setShowChecklist(!showChecklist);
-                else onOpenKanban(task.id);
+                setShowConfig(false);
+                if (isListTask) setShowChecklist(false);
               }
             }}>
               <div className="flex flex-wrap gap-2 mb-1">
@@ -262,7 +263,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                   ver mais...
                 </span>
               )}
-              {isExpanded && isClamped && (
+              {isExpanded && (
                 <span className={`text-[11px] font-semibold cursor-pointer transition-colors mt-0.5 ${isDarkMode ? 'text-slate-500 hover:text-slate-400' : 'text-slate-400 hover:text-slate-500'}`}>
                   ver menos
                 </span>
@@ -323,7 +324,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             </div>
           )}
 
-          <div className="hidden md:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className={`gap-1 transition-all ${isExpanded ? 'flex flex-wrap mt-1' : 'hidden md:flex opacity-0 group-hover:opacity-100'}`}>
             {rescueCount === 0 && (
               <>
                 <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
