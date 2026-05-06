@@ -41,8 +41,18 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const [editedText, setEditedText] = useState(task.text);
   const [showConfig, setShowConfig] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [isClamped, setIsClamped] = useState(false);
   const isListTask = task.taskType === 'list';
+
+  useEffect(() => {
+    if (!isExpanded && textRef.current) {
+      const el = textRef.current;
+      setIsClamped(el.scrollHeight > el.clientHeight + 1);
+    }
+  }, [task.text, isExpanded]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -191,7 +201,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
           ) : (
-            <div className="flex-1 min-w-0 flex flex-col items-start gap-1" onClick={() => isListTask ? setShowChecklist(!showChecklist) : onOpenKanban(task.id)}>
+            <div className="flex-1 min-w-0 flex flex-col items-start gap-1" onClick={() => {
+              if (isClamped) {
+                // Toggle expand/collapse for long text
+                setIsExpanded(!isExpanded);
+              } else {
+                // Short text — go straight to kanban/checklist
+                if (isListTask) setShowChecklist(!showChecklist);
+                else onOpenKanban(task.id);
+              }
+            }}>
               <div className="flex flex-wrap gap-2 mb-1">
                 {priority && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${priority.color} text-white shadow-sm inline-block`}>
@@ -230,31 +249,63 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                   </span>
                 )}
               </div>
-              <span className={`font-semibold leading-snug break-words text-sm md:text-base transition-colors ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100 group-hover:text-primary' : 'text-slate-900')}`}>
+              <span
+                ref={textRef}
+                className={`font-semibold leading-snug break-words text-sm md:text-base transition-colors cursor-pointer
+                  ${task.completed ? 'line-through text-slate-500' : (isDarkMode ? 'text-slate-100 group-hover:text-primary' : 'text-slate-900')}
+                  ${!isExpanded ? 'line-clamp-2' : ''}`}
+              >
                 {task.text}
               </span>
-              {/* Kanban Subtask Progress */}
-              {!isListTask && task.subTasks && task.subTasks.length > 0 && (() => {
-                const total = task.subTasks!.length;
-                const done = task.subTasks!.filter(st => st.column === 'done').length;
-                const percent = Math.round((done / total) * 100);
-                const allDone = done === total;
-                return (
-                  <div className={`flex items-center gap-2 mt-1.5 ${allDone ? 'opacity-80' : ''}`}>
-                    <KanbanSquare size={12} className={allDone ? 'text-emerald-400' : (isDarkMode ? 'text-purple-400' : 'text-purple-500')} />
-                    <span className={`text-[11px] font-bold tabular-nums ${allDone ? 'text-emerald-400' : (isDarkMode ? 'text-slate-400' : 'text-slate-500')}`}>
-                      {done}/{total} etapas
+              {!isExpanded && isClamped && (
+                <span className={`text-[11px] font-semibold cursor-pointer transition-colors mt-0.5 ${isDarkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-blue-500 hover:text-blue-600'}`}>
+                  ver mais...
+                </span>
+              )}
+              {isExpanded && isClamped && (
+                <span className={`text-[11px] font-semibold cursor-pointer transition-colors mt-0.5 ${isDarkMode ? 'text-slate-500 hover:text-slate-400' : 'text-slate-400 hover:text-slate-500'}`}>
+                  ver menos
+                </span>
+              )}
+              {/* Kanban Entry Point for non-list tasks */}
+              {!isListTask && !task.completed && (
+                <div
+                  className={`flex items-center gap-2 mt-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-all duration-200 w-fit
+                    ${isDarkMode
+                      ? 'bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40'
+                      : 'bg-purple-50 hover:bg-purple-100 border border-purple-200 hover:border-purple-300'}`}
+                  onClick={(e) => { e.stopPropagation(); onOpenKanban(task.id); }}
+                >
+                  <KanbanSquare size={13} className={isDarkMode ? 'text-purple-400' : 'text-purple-500'} />
+                  {task.subTasks && task.subTasks.length > 0 ? (() => {
+                    const total = task.subTasks!.length;
+                    const done = task.subTasks!.filter(st => st.column === 'done').length;
+                    const percent = Math.round((done / total) * 100);
+                    const allDone = done === total;
+                    return (
+                      <>
+                        <span className={`text-[11px] font-bold ${allDone ? 'text-emerald-400' : (isDarkMode ? 'text-purple-300' : 'text-purple-600')}`}>
+                          Kanban
+                        </span>
+                        <span className={`text-[10px] font-bold tabular-nums ${allDone ? 'text-emerald-400' : (isDarkMode ? 'text-slate-400' : 'text-slate-500')}`}>
+                          {done}/{total}
+                        </span>
+                        <div className={`h-1.5 w-12 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ease-out ${allDone ? 'bg-emerald-400' : 'bg-purple-500'}`}
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                        {allDone && <span className="text-[10px] text-emerald-400 font-bold">✓</span>}
+                      </>
+                    );
+                  })() : (
+                    <span className={`text-[11px] font-semibold ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`}>
+                      Quebrar em etapas
                     </span>
-                    <div className={`flex-1 h-1.5 rounded-full overflow-hidden max-w-[80px] ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ease-out ${allDone ? 'bg-emerald-400' : 'bg-purple-500'}`}
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                    {allDone && <span className="text-[10px] text-emerald-400 font-bold">✓</span>}
-                  </div>
-                );
-              })()}
+                  )}
+                </div>
+              )}
               {/* List task mini progress */}
               {isListTask && task.checklistItems && task.checklistItems.length > 0 && (() => {
                 const total = task.checklistItems!.length;
