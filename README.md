@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-5.3.0-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-5.3.3-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -30,12 +30,13 @@ O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob
 
 Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **5 recorrentes no total**, com gerenciamento inteligente que mantém **2 recorrentes visíveis na tela principal** e disponibiliza as demais na aba dedicada **Recorrentes**, além de guiar o usuário com banners informativos automáticos.
 
-## ✨ Funcionalidades Principais (Atualizado v5.3.0)
+## ✨ Funcionalidades Principais (Atualizado v5.3.3)
 
 - **📐 Descrição Compacta de Tarefas (v5.3.0):** Textos longos são automaticamente limitados a **2 linhas** com indicador **"ver mais..."** em cyan. Ao clicar, o texto expande mostrando **"ver menos"** para recolher. O card mantém tamanho compacto por padrão, evitando que descrições longas quebrem o layout.
 - **📋 Botão Kanban Visível (v5.3.0):** Cada tarefa ativa agora exibe um botão **"Quebrar em etapas"** sempre visível. Tarefas que já possuem etapas no Kanban mostram o label **"Kanban"** junto com a barra de progresso (X/Y). Tarefas tipo Lista mantêm seu próprio sistema de checklist.
-- **🎯 Menu em Leque Avançado (v5.2.4):** Ao clicar no botão "+", um menu radial é revelado. O Nível 1 expande como **"Teclas de Piano"**, com os botões girando dinamicamente em direção à origem, como as lâminas de um leque real. 
-- **🔄 Segundo Nível em Arco (v5.2.4):** Ao selecionar "Recorrente", o menu se adapta formando um belo arco-íris perfeito ao redor de um botão "VOLTAR" centralizado, oferecendo 4 opções (Diária, Semanal, Dias Úteis, Custom) espalhadas uniformemente pela tela.
+- **🎯 Menu em Leque Avançado (v5.3.3):** Ao clicar no botão "+", um menu radial baseado em **SVG Path** é revelado com precisão absoluta de renderização, com opções de: Lista, Simples e Recorrente.
+- **🔄 Segundo Nível em Arco (v5.3.3):** O menu se adapta formando fatias de anel ao redor de um botão persistente, oferecendo 4 opções (Diária, Semanal, Dias Úteis, Custom) para recorrências.
+- **🎶 Feedback Sonoro Responsivo (v5.3.3):** Cada clique do usuário na interface reproduz um pequeno tick de resposta via `AudioContext` de baixo nível, dando uma sensação tátil impressionante.
 - **📝 Tarefas Tipo Lista:** Novo tipo de tarefa com checklist interativo estilo Microsoft To-Do. Crie listas de compras, checklists de projeto, etc. Cada item pode ser marcado/desmarcado com animação. Barra de progresso mostra "X/Y itens" e a tarefa é auto-completada quando todos os itens forem marcados.
 
 - **🔄 Recorrência Expandida (v5.0):** Configure até **5 tarefas recorrentes** no total (Diária, Dias Úteis, Semanal, Personalizada). As 2 primeiras aparecem na tela principal "Fazer Hoje"; a 3ª em diante é salva automaticamente na aba **Recorrentes** com um banner informativo. Um botão **"ver+ recorrentes"** aparece abaixo da lista quando há extras disponíveis.

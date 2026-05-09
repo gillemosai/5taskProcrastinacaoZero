@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ListChecks, Target, Repeat } from 'lucide-react';
+import { ListChecks, Target, Repeat, Clock, CalendarDays, Briefcase, Settings, Undo2, X } from 'lucide-react';
 import { TaskType, RecurrenceType } from '../types';
 
 interface FanMenuProps {
@@ -10,7 +10,38 @@ interface FanMenuProps {
   isDarkMode?: boolean;
 }
 
-import { Clock, Calendar, CalendarDays, Settings } from 'lucide-react';
+const playMenuClickSound = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    
+    if (!(window as any).sharedAudioCtx) {
+      (window as any).sharedAudioCtx = new AudioContext();
+    }
+    const ctx = (window as any).sharedAudioCtx;
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.05);
+
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.05);
+  } catch (e) {
+    console.warn('Audio feedback failed', e);
+  }
+};
 
 const level1Items = [
   {
@@ -18,27 +49,24 @@ const level1Items = [
     label: 'LISTA',
     icon: ListChecks,
     color: '#bc13fe',       // purple
-    bgGlow: 'rgba(188, 19, 254, 0.20)',
-    shadowGlow: '0 0 20px rgba(188, 19, 254, 0.35), 0 0 40px rgba(188, 19, 254, 0.10)',
-    borderColor: 'rgba(188, 19, 254, 0.55)',
+    start: -80,
+    end: -30,
   },
   {
     type: 'task' as TaskType,
-    label: 'TAREFA',
+    label: 'SIMPLES',
     icon: Target,
     color: '#00f2ff',       // cyan
-    bgGlow: 'rgba(0, 242, 255, 0.20)',
-    shadowGlow: '0 0 20px rgba(0, 242, 255, 0.35), 0 0 40px rgba(0, 242, 255, 0.10)',
-    borderColor: 'rgba(0, 242, 255, 0.55)',
+    start: -25,
+    end: 25,
   },
   {
     type: 'recurring' as TaskType,
     label: 'RECORRENTE',
     icon: Repeat,
     color: '#fbbf24',       // amber-400
-    bgGlow: 'rgba(251, 191, 36, 0.20)',
-    shadowGlow: '0 0 20px rgba(251, 191, 36, 0.35), 0 0 40px rgba(251, 191, 36, 0.10)',
-    borderColor: 'rgba(251, 191, 36, 0.55)',
+    start: 30,
+    end: 80,
   },
 ];
 
@@ -48,34 +76,59 @@ const level2Items = [
     label: 'DIÁRIA',
     icon: Clock,
     color: '#34d399',       // emerald-400
-    shadowGlow: '0 0 20px rgba(52, 211, 153, 0.35)',
-    borderColor: 'rgba(52, 211, 153, 0.55)',
+    start: -80,
+    end: -42,
   },
   {
     recurrence: 'weekly' as RecurrenceType,
     label: 'SEMANAL',
     icon: CalendarDays,
     color: '#f472b6',       // pink-400
-    shadowGlow: '0 0 20px rgba(244, 114, 182, 0.35)',
-    borderColor: 'rgba(244, 114, 182, 0.55)',
+    start: -38,
+    end: -2,
   },
   {
     recurrence: 'weekdays' as RecurrenceType,
     label: 'DIAS ÚTEIS',
-    icon: Calendar,
-    color: '#60a5fa',       // blue-400
-    shadowGlow: '0 0 20px rgba(96, 165, 250, 0.35)',
-    borderColor: 'rgba(96, 165, 250, 0.55)',
+    icon: Briefcase,
+    color: '#00f2ff',       // cyan-400
+    start: 2,
+    end: 38,
   },
   {
     recurrence: 'custom' as RecurrenceType,
     label: 'CUSTOM',
     icon: Settings,
-    color: '#94a3b8',       // slate-400
-    shadowGlow: '0 0 20px rgba(148, 163, 184, 0.35)',
-    borderColor: 'rgba(148, 163, 184, 0.55)',
+    color: '#a855f7',       // purple-500
+    start: 42,
+    end: 80,
   },
 ];
+
+const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
+  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+  return {
+    x: centerX + (radius * Math.cos(angleInRadians)),
+    y: centerY + (radius * Math.sin(angleInRadians))
+  };
+};
+
+const describeAnnularSector = (x: number, y: number, innerRadius: number, outerRadius: number, startAngle: number, endAngle: number) => {
+  const p1 = polarToCartesian(x, y, outerRadius, endAngle);
+  const p2 = polarToCartesian(x, y, outerRadius, startAngle);
+  const p3 = polarToCartesian(x, y, innerRadius, startAngle);
+  const p4 = polarToCartesian(x, y, innerRadius, endAngle);
+  
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+  
+  return [
+    "M", p1.x, p1.y,
+    "A", outerRadius, outerRadius, 0, largeArcFlag, 0, p2.x, p2.y,
+    "L", p3.x, p3.y,
+    "A", innerRadius, innerRadius, 0, largeArcFlag, 1, p4.x, p4.y,
+    "Z"
+  ].join(" ");
+};
 
 export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType, isDarkMode = true }) => {
   const [level, setLevel] = React.useState<1 | 2>(1);
@@ -89,6 +142,7 @@ export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType,
 
   const handleLevel1Click = (e: React.MouseEvent, type: TaskType) => {
     e.stopPropagation();
+    playMenuClickSound();
     if (type === 'recurring') {
       setLevel(2);
     } else {
@@ -98,29 +152,22 @@ export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType,
 
   const handleLevel2Click = (e: React.MouseEvent, recurrence: RecurrenceType) => {
     e.stopPropagation();
+    playMenuClickSound();
     onSelectType('recurring', recurrence);
   };
 
-  const getCoordinates = (angleDegrees: number, radius: number) => {
-    const angleRadians = (angleDegrees * Math.PI) / 180;
-    return {
-      x: radius * Math.cos(angleRadians),
-      y: radius * Math.sin(angleRadians)
-    };
-  };
+  const cx = 180;
+  const cy = 180;
+  const innerRadiusLevel1 = 60;
+  const outerRadiusLevel1 = 160;
+  const innerRadiusLevel2 = 55;
+  const outerRadiusLevel2 = 165;
 
-  const anglesLevel1 = [
-    { angle: -165, radius: 100 }, // LISTA
-    { angle: -90, radius: 115 },  // TAREFA
-    { angle: -15, radius: 100 },  // RECORRENTE
-  ];
-  
-  const anglesLevel2 = [
-    { angle: -160, radius: 115 }, // DIÁRIA
-    { angle: -115, radius: 115 }, // SEMANAL
-    { angle: -65, radius: 115 },  // DIAS ÚTEIS
-    { angle: -20, radius: 115 },  // CUSTOM
-  ];
+  // Extrair cores únicas para os filtros SVG
+  const allColors = [...level1Items, ...level2Items].map(i => i.color);
+  allColors.push('#fbbf24'); // para o botão voltar
+  const uniqueColors = Array.from(new Set(allColors));
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -134,10 +181,10 @@ export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType,
             className="fixed inset-0 z-[45]"
             style={{
               background: isDarkMode
-                ? 'rgba(5, 5, 20, 0.80)'
-                : 'rgba(0, 0, 0, 0.45)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
+                ? 'rgba(5, 5, 20, 0.85)'
+                : 'rgba(0, 0, 0, 0.55)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
             }}
             onClick={onClose}
           />
@@ -145,111 +192,149 @@ export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType,
           <div
             className="fixed z-[55] pointer-events-none"
             style={{
-              bottom: 'calc(max(0.625rem, env(safe-area-inset-bottom)) + 24px)', // Aligned to the center of the FAB in the bottom nav
+              bottom: 'calc(max(0.625rem, env(safe-area-inset-bottom)) + 24px)', // Alinhado com o FAB
               left: '50%',
             }}
           >
-            <AnimatePresence>
-              {level === 1 && level1Items.map((item, index) => {
-                const itemAngle = anglesLevel1[index].angle;
-                const { x, y } = getCoordinates(itemAngle, anglesLevel1[index].radius);
-                let rotateAngle = itemAngle < -90 ? itemAngle + 180 : itemAngle;
-                
-                // Force TAREFA to be horizontal as requested
-                if (item.type === 'task') {
-                  rotateAngle = 0;
-                }
+            <svg 
+              width="360" height="220" viewBox="0 0 360 220" 
+              className="absolute overflow-visible pointer-events-none"
+              style={{ bottom: -40, left: -180 }}
+            >
+              <defs>
+                {uniqueColors.map(color => (
+                  <filter key={color} id={`glow-${color.replace('#', '')}`} x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={color} floodOpacity="0.7" />
+                  </filter>
+                ))}
+              </defs>
 
-                return (
-                  <motion.button
-                    key={item.type}
-                    initial={{ opacity: 0, x: '-50%', y: '10px', scale: 0.3, rotate: rotateAngle }}
-                    animate={{
-                      opacity: 1,
-                      x: `calc(-50% + ${x}px)`,
-                      y: `calc(-50% + ${y}px)`,
-                      scale: 1,
-                      rotate: rotateAngle,
-                    }}
-                    exit={{ opacity: 0, x: '-50%', y: '10px', scale: 0.3, rotate: rotateAngle }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 450,
-                      damping: 22,
-                      delay: index * 0.05,
-                    }}
-                    onClick={(e) => handleLevel1Click(e, item.type)}
-                    className="absolute pointer-events-auto flex items-center justify-center gap-2 px-5 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.15em] cursor-pointer active:scale-90 transition-transform whitespace-nowrap min-w-[130px]"
-                    style={{
-                      background: isDarkMode
-                        ? `linear-gradient(135deg, rgba(12, 12, 28, 0.92), rgba(20, 20, 45, 0.92))`
-                        : `rgba(255, 255, 255, 0.95)`,
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      border: `2px solid ${item.borderColor}`,
-                      boxShadow: item.shadowGlow,
-                      color: item.color,
-                    }}
-                  >
-                    <item.icon size={18} strokeWidth={2.5} />
-                    {item.label}
-                  </motion.button>
-                );
-              })}
-            </AnimatePresence>
+              {/* Botão Central Permanente (FECHAR / VOLTAR) */}
+              <motion.g
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                style={{ transformOrigin: `${cx}px ${cy}px` }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  playMenuClickSound();
+                  if (level === 2) setLevel(1); 
+                  else onClose(); 
+                }}
+                className="cursor-pointer group pointer-events-auto"
+              >
+                <circle 
+                  cx={cx} cy={cy} r="32" 
+                  fill={isDarkMode ? `rgba(20, 20, 45, 0.7)` : `rgba(255, 255, 255, 0.9)`}
+                  stroke="#fbbf24" 
+                  strokeWidth="3" 
+                  filter="url(#glow-fbbf24)"
+                  className="transition-all duration-300"
+                  style={{ fillOpacity: 0.8 }}
+                />
+                <foreignObject x={cx - 30} y={cy - 30} width={60} height={60}>
+                  <div className="w-full h-full flex flex-col items-center justify-center pointer-events-none">
+                    {level === 2 ? (
+                      <>
+                        <Undo2 size={20} color="#fbbf24" className="mb-0.5" />
+                        <span className="text-[8px] font-black tracking-widest text-amber-400">VOLTAR</span>
+                      </>
+                    ) : (
+                      <>
+                        <X size={22} color="#fbbf24" className="mb-0.5" />
+                        <span className="text-[8px] font-black tracking-widest text-amber-400">FECHAR</span>
+                      </>
+                    )}
+                  </div>
+                </foreignObject>
+              </motion.g>
 
-            <AnimatePresence>
-              {level === 2 && (
-                <motion.div
-                  initial={{ opacity: 0, x: '-50%', y: '10px', scale: 0.3 }}
-                  animate={{ opacity: 1, x: '-50%', y: `calc(-50% - 70px)`, scale: 1 }}
-                  exit={{ opacity: 0, x: '-50%', y: '10px', scale: 0.3 }}
-                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                  className="absolute pointer-events-auto flex items-center justify-center gap-2 px-5 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.15em] cursor-pointer active:scale-90 transition-transform whitespace-nowrap min-w-[130px]"
-                  style={{
-                    background: isDarkMode ? `linear-gradient(135deg, rgba(12, 12, 28, 0.92), rgba(20, 20, 45, 0.92))` : `rgba(255, 255, 255, 0.95)`,
-                    border: `2px solid rgba(251, 191, 36, 0.55)`,
-                    boxShadow: '0 0 20px rgba(251, 191, 36, 0.35)',
-                    color: '#fbbf24',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                  }}
-                  onClick={(e) => { e.stopPropagation(); setLevel(1); }}
-                >
-                  <Repeat size={18} strokeWidth={2.5} />
-                  VOLTAR
-                </motion.div>
-              )}
-            </AnimatePresence>
+              <AnimatePresence mode="wait">
+                {level === 1 && (
+                  <motion.g key="level1" className="pointer-events-auto">
+                    {level1Items.map((item, index) => {
+                      const midAngle = (item.start + item.end) / 2;
+                      const midRadius = (innerRadiusLevel1 + outerRadiusLevel1) / 2;
+                      const { x, y } = polarToCartesian(cx, cy, midRadius, midAngle);
+                      const size = 70;
 
-            <AnimatePresence>
-              {level === 2 && level2Items.map((item, index) => {
-                const itemAngle = anglesLevel2[index].angle;
-                const { x, y } = getCoordinates(itemAngle, anglesLevel2[index].radius);
-                return (
-                  <motion.button
-                    key={item.recurrence}
-                    initial={{ opacity: 0, x: '-50%', y: '10px', scale: 0.3 }} 
-                    animate={{ opacity: 1, x: `calc(-50% + ${x}px)`, y: `calc(-50% - 70px + ${y}px)`, scale: 1 }}
-                    exit={{ opacity: 0, x: '-50%', y: '10px', scale: 0.3 }}
-                    transition={{ type: 'spring', stiffness: 350, damping: 25, delay: index * 0.05 }}
-                    onClick={(e) => handleLevel2Click(e, item.recurrence)}
-                    className="absolute pointer-events-auto flex flex-col items-center justify-center gap-1.5 w-[85px] h-[85px] rounded-full font-black text-[9px] uppercase tracking-wider cursor-pointer active:scale-90 transition-transform text-center leading-tight"
-                    style={{
-                      background: isDarkMode ? `linear-gradient(135deg, rgba(12, 12, 28, 0.92), rgba(20, 20, 45, 0.92))` : `rgba(255, 255, 255, 0.95)`,
-                      border: `2px solid ${item.borderColor}`,
-                      boxShadow: item.shadowGlow,
-                      color: item.color,
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                    }}
-                  >
-                    <item.icon size={22} strokeWidth={2.5} />
-                    {item.label}
-                  </motion.button>
-                );
-              })}
-            </AnimatePresence>
+                      return (
+                        <motion.g
+                          key={item.type}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 25, delay: index * 0.05 }}
+                          style={{ transformOrigin: `${cx}px ${cy}px` }}
+                          onClick={(e) => handleLevel1Click(e as any, item.type)}
+                          className="cursor-pointer group"
+                        >
+                          <path 
+                            d={describeAnnularSector(cx, cy, innerRadiusLevel1, outerRadiusLevel1, item.start, item.end)}
+                            fill={isDarkMode ? `rgba(20, 20, 45, 0.7)` : `rgba(255, 255, 255, 0.9)`}
+                            stroke={item.color}
+                            strokeWidth="3"
+                            strokeLinejoin="round"
+                            filter={`url(#glow-${item.color.replace('#', '')})`}
+                            className="transition-all duration-300"
+                            style={{ fillOpacity: 0.8 }}
+                          />
+                          <foreignObject x={x - size/2} y={y - size/2} width={size} height={size}>
+                            <div className="w-full h-full flex flex-col items-center justify-center pointer-events-none">
+                              <item.icon size={26} color={item.color} className="mb-1.5 drop-shadow-md" />
+                              <span style={{ color: item.color }} className="text-[10px] font-black tracking-widest drop-shadow-md">{item.label}</span>
+                            </div>
+                          </foreignObject>
+                        </motion.g>
+                      );
+                    })}
+                  </motion.g>
+                )}
+
+                {level === 2 && (
+                  <motion.g key="level2" className="pointer-events-auto">
+                    {/* As Fatias do Level 2 */}
+                    {level2Items.map((item, index) => {
+                      const midAngle = (item.start + item.end) / 2;
+                      const midRadius = (innerRadiusLevel2 + outerRadiusLevel2) / 2;
+                      const { x, y } = polarToCartesian(cx, cy, midRadius, midAngle);
+                      const size = 60;
+
+                      return (
+                        <motion.g
+                          key={item.recurrence}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 25, delay: index * 0.05 }}
+                          style={{ transformOrigin: `${cx}px ${cy}px` }}
+                          onClick={(e) => handleLevel2Click(e as any, item.recurrence)}
+                          className="cursor-pointer group"
+                        >
+                          <path 
+                            d={describeAnnularSector(cx, cy, innerRadiusLevel2, outerRadiusLevel2, item.start, item.end)}
+                            fill={isDarkMode ? `rgba(20, 20, 45, 0.7)` : `rgba(255, 255, 255, 0.9)`}
+                            stroke={item.color}
+                            strokeWidth="2.5"
+                            strokeLinejoin="round"
+                            filter={`url(#glow-${item.color.replace('#', '')})`}
+                            className="transition-all duration-300"
+                            style={{ fillOpacity: 0.8 }}
+                          />
+                          <foreignObject x={x - size/2} y={y - size/2} width={size} height={size}>
+                            <div className="w-full h-full flex flex-col items-center justify-center pointer-events-none px-1">
+                              <item.icon size={22} color={item.color} className="mb-1 drop-shadow-md" />
+                              <span style={{ color: item.color }} className="text-[8px] font-black tracking-wider drop-shadow-md leading-tight text-center">{item.label}</span>
+                            </div>
+                          </foreignObject>
+                        </motion.g>
+                      );
+                    })}
+                  </motion.g>
+                )}
+              </AnimatePresence>
+            </svg>
           </div>
         </>
       )}
