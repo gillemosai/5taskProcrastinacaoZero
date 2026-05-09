@@ -19,25 +19,30 @@ const playMenuClickSound = () => {
       (window as any).sharedAudioCtx = new AudioContext();
     }
     const ctx = (window as any).sharedAudioCtx;
+
+    const play = () => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.05);
+
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.05);
+    };
+
     if (ctx.state === 'suspended') {
-      ctx.resume();
+      ctx.resume().then(play);
+    } else {
+      play();
     }
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.05);
-
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
-
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.05);
   } catch (e) {
     console.warn('Audio feedback failed', e);
   }
@@ -181,8 +186,8 @@ export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType,
             className="fixed inset-0 z-[45]"
             style={{
               background: isDarkMode
-                ? 'rgba(5, 5, 20, 0.85)'
-                : 'rgba(0, 0, 0, 0.55)',
+                ? 'rgba(5, 5, 20, 0.45)'
+                : 'rgba(0, 0, 0, 0.25)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
             }}
@@ -283,7 +288,7 @@ export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType,
                           <foreignObject x={x - size/2} y={y - size/2} width={size} height={size}>
                             <div className="w-full h-full flex flex-col items-center justify-center pointer-events-none">
                               <item.icon size={26} color={item.color} className="mb-1.5 drop-shadow-md" />
-                              <span style={{ color: item.color }} className="text-[10px] font-black tracking-widest drop-shadow-md">{item.label}</span>
+                              <span style={{ color: item.color }} className="text-[9px] font-black tracking-wider drop-shadow-md text-center">{item.label}</span>
                             </div>
                           </foreignObject>
                         </motion.g>

@@ -227,25 +227,30 @@ const playGlobalClickSound = () => {
       (window as any).sharedAudioCtx = new AudioContext();
     }
     const ctx = (window as any).sharedAudioCtx;
+
+    const play = () => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.04);
+
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.04);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.04);
+    };
+
     if (ctx.state === 'suspended') {
-      ctx.resume();
+      ctx.resume().then(play);
+    } else {
+      play();
     }
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.03);
-
-    gain.gain.setValueAtTime(0.03, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.03);
-
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.03);
   } catch (e) {
     // ignorar silenciosamente
   }
@@ -291,12 +296,12 @@ const App: React.FC = () => {
     window.addEventListener('offline', handleStatusChange);
     
     // Som responsivo a cada clique
-    document.addEventListener('click', playGlobalClickSound);
+    document.addEventListener('pointerdown', playGlobalClickSound);
     
     return () => {
       window.removeEventListener('online', handleStatusChange);
       window.removeEventListener('offline', handleStatusChange);
-      document.removeEventListener('click', playGlobalClickSound);
+      document.removeEventListener('pointerdown', playGlobalClickSound);
     };
   }, []);
 
@@ -860,7 +865,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.3.2</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.3.3</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
