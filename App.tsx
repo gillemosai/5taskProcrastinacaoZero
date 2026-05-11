@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Undo2, X, Archive, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText, Repeat } from 'lucide-react';
+import { Plus, Trash2, Undo2, X, Archive, StickyNote, ArrowRight, RefreshCw, Database, AlertCircle, Upload, ShieldCheck, Wifi, WifiOff, Sun, Moon, Target, Eye, FileText, Repeat, Volume2, VolumeX } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Task, Mood, QuoteType, SubTask, Priority, HighlightColor, TaskType, ChecklistItem } from './types';
 import { QUOTES, AVATAR_IMAGES, LOGO_URL } from './constants';
@@ -193,6 +193,7 @@ export const getGamificationStats = async (): Promise<{ totalXP: number, streak:
 };
 
 const playPulseSound = () => {
+  if (localStorage.getItem('5task_sound') === 'false') return;
   try {
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContext) return;
@@ -218,7 +219,8 @@ const playPulseSound = () => {
   }
 };
 
-const playGlobalClickSound = () => {
+const playActionSound = () => {
+  if (localStorage.getItem('5task_sound') === 'false') return;
   try {
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContext) return;
@@ -289,19 +291,20 @@ const App: React.FC = () => {
   const [showRecurringBanner, setShowRecurringBanner] = useState(false);
   const [showFanMenu, setShowFanMenu] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(() => localStorage.getItem('5task_sound') !== 'false');
+
+  useEffect(() => {
+    localStorage.setItem('5task_sound', isSoundEnabled ? 'true' : 'false');
+  }, [isSoundEnabled]);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', handleStatusChange);
     window.addEventListener('offline', handleStatusChange);
     
-    // Som responsivo a cada clique
-    document.addEventListener('pointerdown', playGlobalClickSound);
-    
     return () => {
       window.removeEventListener('online', handleStatusChange);
       window.removeEventListener('offline', handleStatusChange);
-      document.removeEventListener('pointerdown', playGlobalClickSound);
     };
   }, []);
 
@@ -577,6 +580,7 @@ const App: React.FC = () => {
       setNewTaskInterval(2);
       setIsAddingTask(false);
       updateEinstein('add', Mood.EXCITED);
+      playActionSound();
       return;
     }
 
@@ -616,6 +620,7 @@ const App: React.FC = () => {
     setShowFanMenu(false);
     setIsAddingTask(false);
     updateEinstein('add', Mood.EXCITED);
+    playActionSound();
   };
 
   const toggleTask = (id: string) => {
@@ -633,6 +638,7 @@ const App: React.FC = () => {
       setCompletedTasks(prev => [completedTask, ...prev].slice(0, 15));
 
       updateEinstein('complete', Mood.HAPPY);
+      playActionSound();
       saveCompletedTaskToDB(taskToComplete.text).then(() => {
         getGamificationStats().then(stats => {
           const previousCount = todayCompletedCount;
@@ -654,6 +660,7 @@ const App: React.FC = () => {
       setLastDeletedTask(taskToDelete);
       setTasks(prev => prev.filter(t => t.id !== id));
       updateEinstein('delete', Mood.SHOCKED);
+      playActionSound();
     }
   };
 
@@ -662,6 +669,7 @@ const App: React.FC = () => {
       setTasks(prev => prev.filter(t => !(t.isRecurring && t.text === text)));
       setCompletedTasks(prev => prev.filter(t => !(t.isRecurring && t.text === text)));
       updateEinstein('delete', Mood.SHOCKED);
+      playActionSound();
     }
   };
 
@@ -736,6 +744,7 @@ const App: React.FC = () => {
     if (archivedTasks.length <= 1) {
       setShowArchiveModal(false);
     }
+    playActionSound();
   };
 
   // Resgatar tarefa da lista de concluídas (etiqueta "Fazer novamente!")
@@ -760,6 +769,7 @@ const App: React.FC = () => {
 
     setCompletedTasks(prev => prev.filter(t => t.id !== taskToRescue.id));
     setTasks(prev => [rescuedTask, ...prev]);
+    playActionSound();
   };
 
   // === NEW: Add List Task ===
@@ -798,6 +808,7 @@ const App: React.FC = () => {
     setShowListModal(false);
     setShowFanMenu(false);
     updateEinstein('add', Mood.EXCITED);
+    playActionSound();
   };
 
   // === NEW: Toggle Checklist Item ===
@@ -812,6 +823,7 @@ const App: React.FC = () => {
         // Auto-complete: all items checked → complete the task after a brief delay
         setTimeout(() => toggleTask(taskId), 800);
       }
+      playActionSound();
       return { ...task, checklistItems: updatedItems };
     }));
   };
@@ -979,6 +991,15 @@ const App: React.FC = () => {
                 {/* Title */}
                 <h2 className={`text-lg font-black tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                   📋 Minhas Tarefas
+                  
+                  <button
+                    onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+                    className={`p-1.5 rounded-full transition-all active:scale-95 ${isDarkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-rose-400' : 'text-slate-500 hover:bg-slate-100 hover:text-rose-600'}`}
+                    title={isSoundEnabled ? "Desativar Som" : "Ativar Som"}
+                  >
+                    {isSoundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                  </button>
+
                   {todayCompletedCount > 0 && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-auto ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
                       ✨ Hoje: {todayCompletedCount}
