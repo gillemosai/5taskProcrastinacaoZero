@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-5.3.3-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-5.3.7-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -30,13 +30,15 @@ O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob
 
 Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **5 recorrentes no total**, com gerenciamento inteligente que mantém **2 recorrentes visíveis na tela principal** e disponibiliza as demais na aba dedicada **Recorrentes**, além de guiar o usuário com banners informativos automáticos.
 
-## ✨ Funcionalidades Principais (Atualizado v5.3.3)
+## ✨ Funcionalidades Principais (Atualizado v5.3.7)
 
 - **📐 Descrição Compacta de Tarefas (v5.3.0):** Textos longos são automaticamente limitados a **2 linhas** com indicador **"ver mais..."** em cyan. Ao clicar, o texto expande mostrando **"ver menos"** para recolher. O card mantém tamanho compacto por padrão, evitando que descrições longas quebrem o layout.
 - **📋 Botão Kanban Visível (v5.3.0):** Cada tarefa ativa agora exibe um botão **"Quebrar em etapas"** sempre visível. Tarefas que já possuem etapas no Kanban mostram o label **"Kanban"** junto com a barra de progresso (X/Y). Tarefas tipo Lista mantêm seu próprio sistema de checklist.
 - **🎯 Menu em Leque Avançado (v5.3.3):** Ao clicar no botão "+", um menu radial baseado em **SVG Path** é revelado com precisão absoluta de renderização, com opções de: Lista, Simples e Recorrente.
 - **🔄 Segundo Nível em Arco (v5.3.3):** O menu se adapta formando fatias de anel ao redor de um botão persistente, oferecendo 4 opções (Diária, Semanal, Dias Úteis, Custom) para recorrências.
 - **🎶 Feedback Sonoro Responsivo (v5.3.3):** Cada clique do usuário na interface reproduz um pequeno tick de resposta via `AudioContext` de baixo nível, dando uma sensação tátil impressionante.
+- **🗨️ Balão de Fala Profissional (v5.3.5):** O bico do balão de fala do Einstein foi refinado com um **SVG Path** elegante e afilado, substituindo o visual antigo por um acabamento muito mais profissional e fluido.
+- **🧠 Repertório Dinâmico e Memória (v5.3.7):** As falas do avatar são agora carregadas externamente via `QUOTES.md`. O Einstein também ganhou uma "memória de curto prazo" que **impede a repetição das últimas 3 frases**, tornando as interações muito mais naturais e variadas.
 - **📝 Tarefas Tipo Lista:** Novo tipo de tarefa com checklist interativo estilo Microsoft To-Do. Crie listas de compras, checklists de projeto, etc. Cada item pode ser marcado/desmarcado com animação. Barra de progresso mostra "X/Y itens" e a tarefa é auto-completada quando todos os itens forem marcados.
 
 - **🔄 Recorrência Expandida (v5.0):** Configure até **5 tarefas recorrentes** no total (Diária, Dias Úteis, Semanal, Personalizada). As 2 primeiras aparecem na tela principal "Fazer Hoje"; a 3ª em diante é salva automaticamente na aba **Recorrentes** com um banner informativo. Um botão **"ver+ recorrentes"** aparece abaixo da lista quando há extras disponíveis.
@@ -117,6 +119,8 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
 - [x] Correções de layout mobile no menu em leque e checklist colapsado por padrão (v5.1.1).
 - [x] Descrição de tarefas compacta com clamp de 2 linhas e "ver mais/ver menos" (v5.3.0).
 - [x] Botão Kanban "Quebrar em etapas" sempre visível em tarefas ativas (v5.3.0).
+- [x] Refinamento estético do balão de fala com SVG Path (v5.3.5).
+- [x] Externalização de frases para `QUOTES.md` e sistema de memória anti-repetição (v5.3.7).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
