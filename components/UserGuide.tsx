@@ -27,7 +27,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                 <div className={`flex items-center justify-between px-5 py-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                     <div>
                         <h2 className="text-lg font-black">📘 Como Usar o 5Task</h2>
-                        <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido v5.3.7</p>
+                        <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido v5.3.8</p>
                     </div>
                     <button onClick={onClose} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}>
                         <ArrowLeft size={18} /> <span className="text-sm font-bold">Voltar</span>
@@ -103,7 +103,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
 
                     {/* Abas Inteligentes (v5.3.3) */}
                     <div className={`rounded-2xl p-4 border-l-4 border-purple-500 ${card}`}>
-                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>📋 Abas Inteligentes <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>v5.3.7</span></h3>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>📋 Abas Inteligentes <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>v5.3.8</span></h3>
                         <div className="space-y-2.5">
                             <div className="flex items-start gap-2.5">
                                 <LayoutGrid size={15} className="text-purple-400 shrink-0 mt-0.5" />
@@ -153,7 +153,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
 
                     {/* Dia Produtivo (v5.3.3) */}
                     <div className={`rounded-2xl p-4 border-l-4 border-emerald-500 ${card}`}>
-                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎉 Dia Produtivo <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>v5.3.7</span></h3>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎉 Dia Produtivo <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>v5.3.8</span></h3>
                         <div className="space-y-2.5">
                             <div className="flex items-start gap-2.5">
                                 <Trophy size={15} className="text-emerald-400 shrink-0 mt-0.5" />
@@ -180,7 +180,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
 
                     {/* Experiência Tátil (v5.3.3) */}
                     <div className={`rounded-2xl p-4 border-l-4 border-accent-cyan ${card}`}>
-                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>✨ Experiência Tátil <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-600'}`}>v5.3.7</span></h3>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>✨ Experiência Tátil <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-600'}`}>v5.3.8</span></h3>
                         <div className="space-y-2.5">
                             <div className="flex items-start gap-2.5">
                                 <Target size={15} className="text-cyan-400 shrink-0 mt-0.5" />
