@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle, Repeat, ListChecks } from 'lucide-react';
+import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle, Repeat, ListChecks, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Task, Priority, HighlightColor, RecurrenceType } from '../types';
 import { RecurrenceSelector } from './RecurrenceSelector';
@@ -15,6 +15,7 @@ interface TaskItemProps {
   onUpdateProps: (id: string, priority: Priority, color: HighlightColor) => void;
   onUpdateRecurrence: (id: string, recurrence: RecurrenceType, interval?: number) => void;
   onToggleChecklistItem?: (taskId: string, itemId: string) => void;
+  onAddChecklistItem?: (taskId: string, text: string) => void;
   onOpenKanban: (id: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, position: number) => void;
   onDragEnter: (e: React.DragEvent<HTMLDivElement>, position: number) => void;
@@ -31,6 +32,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onUpdateProps,
   onUpdateRecurrence,
   onToggleChecklistItem,
+  onAddChecklistItem,
   onOpenKanban,
   onDragStart,
   onDragEnter,
@@ -42,8 +44,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const [showConfig, setShowConfig] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [newItemText, setNewItemText] = useState('');
+  const [showAddItem, setShowAddItem] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const newItemRef = useRef<HTMLInputElement>(null);
   const [isClamped, setIsClamped] = useState(false);
   const isListTask = task.taskType === 'list';
 
@@ -68,10 +73,24 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     };
   }, [showConfig]);
 
+  useEffect(() => {
+    if (showAddItem && newItemRef.current) {
+      newItemRef.current.focus();
+    }
+  }, [showAddItem]);
+
   const handleSave = () => {
     if (editedText.trim()) {
       onEdit(task.id, editedText);
       setIsEditing(false);
+    }
+  };
+
+  const handleAddItem = () => {
+    if (newItemText.trim() && onAddChecklistItem) {
+      onAddChecklistItem(task.id, newItemText.trim());
+      setNewItemText('');
+      // keep the input open for adding more items
     }
   };
 
@@ -175,8 +194,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         ${task.completed ? 'grayscale opacity-70 border-l-slate-600' : (isDarkMode ? 'glass-card' : 'bg-white shadow-xl shadow-slate-200/60')}
       `}
     >
-      {/* Barra de Prioridade Lateral Substituída pela Borda Esquerda do Container */}
-
       <div className="p-4 md:p-5 flex flex-col gap-3">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-white transition-colors">
@@ -205,10 +222,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               const next = !isExpanded;
               setIsExpanded(next);
               if (next) {
-                if (rescueCount === 0) setShowConfig(true);
+                setShowConfig(true);
                 if (isListTask) setShowChecklist(true);
               } else {
                 setShowConfig(false);
+                setShowAddItem(false);
                 if (isListTask) setShowChecklist(false);
               }
             }}>
@@ -325,16 +343,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           )}
 
           <div className={`gap-1 transition-all ${isExpanded ? 'flex flex-wrap mt-1' : 'hidden md:flex opacity-0 group-hover:opacity-100'}`}>
-            {rescueCount === 0 && (
-              <>
-                <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
-                  <Palette size={16} />
-                </button>
-                <button onClick={() => setIsEditing(true)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
-                  <Edit2 size={16} />
-                </button>
-              </>
-            )}
+            <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
+              <Palette size={16} />
+            </button>
+            <button onClick={() => setIsEditing(true)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
+              <Edit2 size={16} />
+            </button>
             <button onClick={() => onDelete(task.id)} className={`p-2 rounded-lg text-red-400 ${isDarkMode ? 'hover:bg-red-500/20' : 'hover:bg-red-50'}`}>
               <Trash2 size={16} />
             </button>
@@ -342,13 +356,59 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </div>
 
         {/* Inline Checklist for List tasks */}
-        {isListTask && showChecklist && task.checklistItems && task.checklistItems.length > 0 && (
-          <div className={`px-1 pb-1 ${isDarkMode ? '' : ''}`} onClick={(e) => e.stopPropagation()}>
-            <ChecklistDisplay
-              items={task.checklistItems}
-              onToggleItem={(itemId) => onToggleChecklistItem?.(task.id, itemId)}
-              isDarkMode={isDarkMode}
-            />
+        {isListTask && showChecklist && (
+          <div className={`px-1 pb-1`} onClick={(e) => e.stopPropagation()}>
+            {task.checklistItems && task.checklistItems.length > 0 && (
+              <ChecklistDisplay
+                items={task.checklistItems}
+                onToggleItem={(itemId) => onToggleChecklistItem?.(task.id, itemId)}
+                isDarkMode={isDarkMode}
+              />
+            )}
+
+            {/* Add item section */}
+            {!task.completed && (
+              <div className="mt-2">
+                {showAddItem ? (
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      ref={newItemRef}
+                      type="text"
+                      value={newItemText}
+                      onChange={(e) => setNewItemText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleAddItem();
+                        if (e.key === 'Escape') { setShowAddItem(false); setNewItemText(''); }
+                      }}
+                      placeholder="Novo item..."
+                      className={`flex-1 text-sm rounded-lg px-3 py-1.5 outline-none border ${isDarkMode ? 'bg-slate-900 text-white border-slate-700 focus:border-purple-500' : 'bg-slate-50 text-slate-900 border-slate-200 focus:border-purple-400'}`}
+                    />
+                    <button
+                      onClick={handleAddItem}
+                      disabled={!newItemText.trim()}
+                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${isDarkMode ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-purple-500 hover:bg-purple-600 text-white'}`}
+                    >
+                      <Check size={14} />
+                    </button>
+                    <button
+                      onClick={() => { setShowAddItem(false); setNewItemText(''); }}
+                      className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-100'}`}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowAddItem(true); }}
+                    className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors w-fit mt-1 border border-dashed
+                      ${isDarkMode ? 'text-purple-400 border-purple-500/40 hover:bg-purple-500/10' : 'text-purple-600 border-purple-300 hover:bg-purple-50'}`}
+                  >
+                    <Plus size={12} />
+                    + item
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 

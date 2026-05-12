@@ -715,8 +715,7 @@ const App: React.FC = () => {
   const handleRescueTask = (taskToRescue: Task) => {
     const activeTasksCount = tasks.filter(t => !t.completed).length;
     if (activeTasksCount >= 5) {
-      const freeSlots = 5 - activeTasksCount;
-      alert(`Você só pode ter no máximo 5 tarefas ativas simultaneamente. ${freeSlots === 0 ? 'Conclua alguma atividade para liberar espaço!' : `Você tem espaço para resgatar apenas ${freeSlots} tarefa(s).`}`);
+      alert('Você só pode ter no máximo 5 tarefas ativas simultaneamente. Conclua alguma atividade para liberar espaço!');
       return;
     }
 
@@ -724,17 +723,17 @@ const App: React.FC = () => {
     const newRescueCount = currentRescue + 1;
 
     if (newRescueCount === 3) {
-      alert("ATENÇÃO: Este é o seu ÚLTIMO RESGATE para esta tarefa. Se não for concluída dentro do prazo, ela será excluída permanentemente do sistema pois está atrapalhando a produtividade.");
+      alert("ATENÇÃO: Este é o seu ÚLTIMO RESGATE para esta tarefa. Se não for concluída dentro do prazo, ela será excluída permanentemente do sistema.");
     }
 
+    // Tarefa resgatada recebe novo timer de 24h (createdAt = now)
+    // Mantém prioridade e cor originais para referência visual
     const rescuedTask: Task = {
       ...taskToRescue,
       rescueCount: newRescueCount,
-      createdAt: Date.now(),
+      createdAt: Date.now(), // Timer reiniciado: 24h para concluir
       completed: false,
       completedAt: undefined,
-      priority: 'none',
-      highlightColor: 'none',
       rescueSource: 'expiration',
     };
 
@@ -755,16 +754,20 @@ const App: React.FC = () => {
       return;
     }
 
+    // Tarefa resgatada de concluídas recebe novo timer de 24h
+    // Mantém prioridade, cor e checklistItems originais
     const rescuedTask: Task = {
       ...taskToRescue,
       id: crypto.randomUUID(),
       completed: false,
       completedAt: undefined,
-      createdAt: Date.now(),
-      priority: 'none',
-      highlightColor: 'none',
+      createdAt: Date.now(), // Timer reiniciado: 24h para concluir
       rescueSource: 'completed',
       rescueCount: 0,
+      // Reseta checklistItems para unchecked se for lista
+      checklistItems: taskToRescue.checklistItems
+        ? taskToRescue.checklistItems.map(item => ({ ...item, completed: false }))
+        : undefined,
     };
 
     setCompletedTasks(prev => prev.filter(t => t.id !== taskToRescue.id));
@@ -825,6 +828,15 @@ const App: React.FC = () => {
       }
       playActionSound();
       return { ...task, checklistItems: updatedItems };
+    }));
+  };
+
+  // === NEW: Add Checklist Item to existing list task ===
+  const addChecklistItem = (taskId: string, text: string) => {
+    setTasks(prev => prev.map(task => {
+      if (task.id !== taskId) return task;
+      const newItem = { id: crypto.randomUUID(), text, completed: false };
+      return { ...task, checklistItems: [...(task.checklistItems || []), newItem] };
     }));
   };
 
@@ -1063,6 +1075,7 @@ const App: React.FC = () => {
                                 onUpdateProps={updateTaskProps}
                                 onUpdateRecurrence={updateTaskRecurrence}
                                 onToggleChecklistItem={toggleChecklistItem}
+                                onAddChecklistItem={addChecklistItem}
                                 onOpenKanban={setActiveTaskId}
                                 onDragStart={handleDragStart}
                                 onDragEnter={handleDragEnter}
