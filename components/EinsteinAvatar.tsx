@@ -50,7 +50,9 @@ export const EinsteinAvatar: React.FC<EinsteinAvatarProps> = ({ mood, quote, isD
         <p className="font-black text-sm md:text-base font-mono leading-tight tracking-tight">
           "{quote}"
         </p>
-        <div className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 border-r-2 border-b-2 rotate-45 ${isDarkMode ? 'bg-white border-neon-blue' : 'bg-slate-900 border-slate-700'}`}></div>
+        <svg className={`absolute -bottom-[14px] left-1/2 transform -translate-x-1/2 w-5 h-5 ${isDarkMode ? 'text-white' : 'text-slate-900'}`} viewBox="0 0 40 40">
+          <path d="M 10 0 C 10 5 15 25 20 40 C 25 25 30 5 30 0 Z" fill="currentColor" />
+        </svg>
       </div>
 
       <div className="relative w-32 h-32 md:w-40 md:h-40">

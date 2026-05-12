@@ -332,6 +332,48 @@ const App: React.FC = () => {
   const [showFanMenu, setShowFanMenu] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(() => localStorage.getItem('5task_sound') !== 'false');
+  const [dynamicQuotes, setDynamicQuotes] = useState(QUOTES);
+  const [quoteHistory, setQuoteHistory] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      try {
+        const response = await fetch('/QUOTES.md');
+        if (!response.ok) return;
+        const text = await response.text();
+        
+        const sections = text.split(/^##\s+/m).slice(1);
+        const newQuotes: any = { ...QUOTES };
+        
+        sections.forEach(section => {
+          const lines = section.split('\n');
+          const headerLine = lines[0].trim();
+          // Extrair apenas o QuoteType (ex: "welcome" de "welcome (Boas-vindas)")
+          const category = headerLine.split(' ')[0] as QuoteType;
+          
+          const quotes = lines
+            .slice(1)
+            .map(line => line.trim())
+            .filter(line => line.startsWith('-'))
+            .map(line => line.substring(1).trim());
+          
+          if (quotes.length > 0 && (newQuotes as any)[category]) {
+            newQuotes[category] = quotes;
+          }
+        });
+        
+        setDynamicQuotes(newQuotes);
+        // Atualizar frase inicial se for a de boas-vindas
+        if (newQuotes.welcome && newQuotes.welcome.length > 0) {
+          setQuote(newQuotes.welcome[Math.floor(Math.random() * newQuotes.welcome.length)]);
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar frases externas:', err);
+      }
+    };
+    
+    fetchQuotes();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('5task_sound', isSoundEnabled ? 'true' : 'false');
@@ -562,9 +604,26 @@ const App: React.FC = () => {
 
   const updateEinstein = (type: QuoteType, customMood?: Mood) => {
     if (mood === Mood.PANIC_1H || mood === Mood.PANIC_2H || mood === Mood.PANIC_3H) return;
-    const quotes = QUOTES[type];
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    
+    const availableQuotes = dynamicQuotes[type];
+    
+    // Filtrar frases que já foram ditas recentemente (evita repetição das últimas 3)
+    const filteredQuotes = availableQuotes.filter(q => !quoteHistory.includes(q));
+    
+    // Se todas as frases da categoria já estiverem no histórico (categorias pequenas), 
+    // usa a lista completa mas evita a última dita.
+    let quotesToUse = filteredQuotes;
+    if (filteredQuotes.length === 0) {
+      quotesToUse = availableQuotes.filter(q => q !== quote);
+    }
+    // Se ainda assim estiver vazio (categoria de 1 frase), usa a única disponível
+    if (quotesToUse.length === 0) quotesToUse = availableQuotes;
+
+    const randomQuote = quotesToUse[Math.floor(Math.random() * quotesToUse.length)];
+    
     setQuote(randomQuote);
+    setQuoteHistory(prev => [randomQuote, ...prev].slice(0, 3));
+    
     setShowQuoteBubble(true);
     if (customMood) setMood(customMood);
     
@@ -952,7 +1011,9 @@ const App: React.FC = () => {
                     onClick={(e) => { e.stopPropagation(); setShowQuoteBubble(false); }}
                   >
                     "{quote}"
-                    <div className={`absolute -left-3 top-8 w-8 h-8 rotate-45 ${isDarkMode ? 'bg-[#f3eff7]' : 'bg-[#f3eff7] border-l border-b border-purple-100'}`}></div>
+                    <svg className="absolute -left-[14px] top-8 w-5 h-5 text-[#f3eff7] drop-shadow-[-2px_2px_2px_rgba(0,0,0,0.1)]" viewBox="0 0 40 40">
+                      <path d="M 40 10 C 35 10 15 15 0 20 C 15 25 35 30 40 30 Z" fill="currentColor" />
+                    </svg>
                   </div>
                 </motion.div>
               )}
