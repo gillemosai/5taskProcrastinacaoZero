@@ -11,7 +11,7 @@
   <meta name="description" content="5task - Gerenciador de tarefas minimalista e focado.">
   <title>5task</title>
 
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <link rel="apple-touch-icon"
     href="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo-192x192.png" />
   <link rel="icon" type="image/png"
@@ -144,7 +144,7 @@
     });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=5.3.3').then(reg => {
+        navigator.serviceWorker.register('./sw.js?v=5.3.4').then(reg => {
           console.log('[SW] Registrado com sucesso.');
 
           // Detecta quando um novo SW está esperando para ser ativado
