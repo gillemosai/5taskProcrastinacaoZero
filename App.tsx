@@ -258,6 +258,46 @@ const playActionSound = () => {
   }
 };
 
+const playAvatarSound = () => {
+  if (localStorage.getItem('5task_sound') === 'false') return;
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    
+    if (!(window as any).sharedAudioCtx) {
+      (window as any).sharedAudioCtx = new AudioContext();
+    }
+    const ctx = (window as any).sharedAudioCtx;
+
+    const play = () => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+    };
+
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(play);
+    } else {
+      play();
+    }
+  } catch (e) {
+    console.warn('Audio feedback failed', e);
+  }
+};
+
 const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inputText, setInputText] = useState('');
@@ -527,6 +567,8 @@ const App: React.FC = () => {
     setQuote(randomQuote);
     setShowQuoteBubble(true);
     if (customMood) setMood(customMood);
+    
+    playAvatarSound();
   };
 
   const addTask = (e: React.FormEvent) => {
@@ -875,7 +917,7 @@ const App: React.FC = () => {
       <main className="px-4 py-3 space-y-4 max-w-4xl mx-auto pb-24">
 
         {/* --- Hero Section: Avatar LEFT | Stats + Visão RIGHT --- */}
-        <section className="flex gap-3 items-start">
+        <section className="flex gap-3 items-start relative">
           {/* Avatar Large (Left) */}
           <div className="shrink-0 flex flex-col items-center" onClick={() => setShowQuoteBubble(!showQuoteBubble)}>
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 cursor-pointer">
@@ -889,7 +931,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.3.3</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.3.4</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -898,18 +940,19 @@ const App: React.FC = () => {
             <AnimatePresence>
               {showQuoteBubble && (
                 <motion.div
-                  initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: -20 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="absolute z-[100] left-[115px] sm:left-[135px] top-2 md:top-4 w-[calc(100%-120px)] sm:w-[calc(100%-140px)] max-w-sm drop-shadow-2xl"
                 >
                   <div
-                    className={`rounded-xl px-3 py-2 text-[11px] font-bold font-mono shadow-lg relative cursor-pointer leading-snug
-                    ${isDarkMode ? 'bg-white/95 text-slate-900 border border-neon-blue/30' : 'bg-slate-900/95 text-white border border-slate-600'}`}
-                    onClick={() => setShowQuoteBubble(false)}
+                    className={`rounded-[2rem] px-5 py-4 text-[14px] md:text-[15px] font-bold relative cursor-pointer leading-relaxed text-center
+                    ${isDarkMode ? 'bg-[#f3eff7] text-[#8e24aa] border-none' : 'bg-[#f3eff7] text-[#8e24aa] border border-purple-100'}`}
+                    onClick={(e) => { e.stopPropagation(); setShowQuoteBubble(false); }}
                   >
                     "{quote}"
-                    <div className={`absolute -left-1.5 top-4 w-2.5 h-2.5 rotate-45 ${isDarkMode ? 'bg-white border-l border-b border-neon-blue/30' : 'bg-slate-900 border-l border-b border-slate-600'}`}></div>
+                    <div className={`absolute -left-3 top-8 w-8 h-8 rotate-45 ${isDarkMode ? 'bg-[#f3eff7]' : 'bg-[#f3eff7] border-l border-b border-purple-100'}`}></div>
                   </div>
                 </motion.div>
               )}
