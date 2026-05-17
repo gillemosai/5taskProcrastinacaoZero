@@ -14,6 +14,7 @@ import { UserGuide } from './components/UserGuide';
 import { RecurrenceType } from './types';
 import { FanMenu } from './components/FanMenu';
 import { ListTaskModal } from './components/ListTaskModal';
+import { ContextualTip, ContextualTipData } from './components/ContextualTip';
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -334,6 +335,7 @@ const App: React.FC = () => {
   const [isSoundEnabled, setIsSoundEnabled] = useState(() => localStorage.getItem('5task_sound') !== 'false');
   const [dynamicQuotes, setDynamicQuotes] = useState(QUOTES);
   const [quoteHistory, setQuoteHistory] = useState<string[]>([]);
+  const [activeTip, setActiveTip] = useState<ContextualTipData | null>(null);
 
   useEffect(() => {
     const fetchQuotes = async () => {
@@ -481,6 +483,17 @@ const App: React.FC = () => {
               const rCount = t.rescueCount || 0;
               if (rCount < 3) {
                 setArchivedTasks(oldArchive => [{ ...t, rescueSource: 'expiration' as const }, ...oldArchive].slice(0, 10));
+                if (!localStorage.getItem('5task_tip_archive')) {
+                  localStorage.setItem('5task_tip_archive', 'seen');
+                  setTimeout(() => setActiveTip({
+                    key: 'archive',
+                    emoji: '🗂️',
+                    title: 'Tarefa foi para o Arquivo!',
+                    message: 'Não se preocupe — acesse o Arquivo na barra de navegação e resgate-a. Você tem até 3 chances!',
+                    actionLabel: 'Ver Arquivo',
+                    onAction: () => setShowArchiveModal(true),
+                  }), 2000);
+                }
               }
               changed = true;
               return false;
@@ -630,6 +643,11 @@ const App: React.FC = () => {
     playAvatarSound();
   };
 
+  const showContextualTip = useCallback((tip: ContextualTipData) => {
+    if (localStorage.getItem(`5task_tip_${tip.key}`)) return;
+    setTimeout(() => setActiveTip(tip), 1500);
+  }, []);
+
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
@@ -740,6 +758,14 @@ const App: React.FC = () => {
 
       updateEinstein('complete', Mood.HAPPY);
       playActionSound();
+      showContextualTip({
+        key: 'first_complete',
+        emoji: '✅',
+        title: 'Tarefa salva nos Concluídos!',
+        message: 'Suas tarefas concluídas ficam guardadas aqui. Você pode relançá-las com 1 toque quando precisar!',
+        actionLabel: 'Ver aba Concluídas',
+        onAction: () => setActiveTab('completed'),
+      });
       saveCompletedTaskToDB(taskToComplete.text).then(() => {
         getGamificationStats().then(stats => {
           const previousCount = todayCompletedCount;
@@ -990,7 +1016,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.3.8</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.4.0</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -1010,7 +1036,7 @@ const App: React.FC = () => {
                     ${isDarkMode ? 'bg-[#f3eff7] text-[#8e24aa] border-none' : 'bg-[#f3eff7] text-[#8e24aa] border border-purple-100'}`}
                     onClick={(e) => { e.stopPropagation(); setShowQuoteBubble(false); }}
                   >
-                    "{quote}"
+                    {quote}
                     <svg className="absolute -left-[14px] top-8 w-5 h-5 text-[#f3eff7] drop-shadow-[-2px_2px_2px_rgba(0,0,0,0.1)]" viewBox="0 0 40 40">
                       <path d="M 40 10 C 35 10 15 15 0 20 C 15 25 35 30 40 30 Z" fill="currentColor" />
                     </svg>
@@ -1132,7 +1158,17 @@ const App: React.FC = () => {
                   ].map(tab => (
                     <button
                       key={tab.key}
-                      onClick={() => setActiveTab(tab.key)}
+                      onClick={() => {
+                        setActiveTab(tab.key);
+                        if (tab.key === 'completed') {
+                          showContextualTip({
+                            key: 'completed_tab',
+                            emoji: '🔄',
+                            title: 'Reuse suas tarefas!',
+                            message: 'Aqui ficam suas tarefas concluídas. Toque em “Fazer novamente” para relançar qualquer uma com 1 clique!',
+                          });
+                        }
+                      }}
                       className={`flex-1 px-2 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1
                         ${activeTab === tab.key
                           ? (isDarkMode
@@ -1660,6 +1696,17 @@ const App: React.FC = () => {
               </button>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== CONTEXTUAL TIPS ===== */}
+      <AnimatePresence>
+        {activeTip && (
+          <ContextualTip
+            tip={activeTip}
+            isDarkMode={isDarkMode}
+            onClose={() => setActiveTip(null)}
+          />
         )}
       </AnimatePresence>
 

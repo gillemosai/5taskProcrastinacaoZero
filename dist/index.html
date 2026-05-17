@@ -60,6 +60,10 @@
     body {
       margin: 0;
       padding: 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
       overflow-y: auto;
       overscroll-behavior-y: none;
       font-family: 'Inter', sans-serif;
@@ -123,7 +127,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/assets/index-Xno49GMw.js"></script>
+  <script type="module" crossorigin src="/assets/index-DyhNhnjS.js"></script>
 </head>
 
 <body class="text-slate-100 antialiased">
@@ -145,7 +149,7 @@
     });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=5.3.4').then(reg => {
+        navigator.serviceWorker.register('./sw.js?v=5.3.8').then(reg => {
           console.log('[SW] Registrado com sucesso.');
 
           // Detecta quando um novo SW está esperando para ser ativado

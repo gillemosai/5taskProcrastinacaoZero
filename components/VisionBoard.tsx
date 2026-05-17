@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Target, Save, Heart, Eye, Rocket, ChevronLeft, ChevronRight, BookOpen, Check, Pencil, ArrowLeft } from 'lucide-react';
 import { loadVisionFromDB, saveVisionToDB } from '../App';
+import { AVATAR_IMAGES } from '../constants';
+import { Mood } from '../types';
 
 interface VisionBoardProps {
     onClose: () => void;
@@ -57,6 +59,7 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode, v
     const [direction, setDirection] = useState<'next' | 'prev'>('next');
     const [isAnimating, setIsAnimating] = useState(false);
     const [isEditMode, setIsEditMode] = useState(!viewOnly);
+    const [showMethodInfo, setShowMethodInfo] = useState(false);
 
     const fieldValues: Record<string, string> = { valores, visao, metas };
     const setters: Record<string, (v: string) => void> = {
@@ -127,6 +130,12 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode, v
                             <h2 className="text-lg font-black font-mono tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-400">Minha Visão</h2>
                         </div>
                         <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowMethodInfo(true)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 border border-amber-500/20' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'}`}
+                            >
+                                💡 O que é isso?
+                            </button>
                             <button
                                 onClick={() => setIsEditMode(true)}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
@@ -210,6 +219,77 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode, v
                         </a>
                     </div>
                 </div>
+
+                {/* ===== METHOD INFO MODAL ===== */}
+                {showMethodInfo && (
+                    <div
+                        className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+                        onClick={() => setShowMethodInfo(false)}
+                    >
+                        <div
+                            className={`w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border animate-[slideUp_0.3s_ease-out] ${isDarkMode ? 'bg-slate-900 border-slate-700/60' : 'bg-white border-slate-200'}`}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Gradient accent top */}
+                            <div className="h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400" />
+
+                            <div className="p-5">
+                                {/* Einstein + Título */}
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className={`shrink-0 w-14 h-14 rounded-full border-2 overflow-hidden shadow-lg ${isDarkMode ? 'border-amber-500/60' : 'border-amber-400'}`}>
+                                        <img src={AVATAR_IMAGES[Mood.HAPPY]} alt="Einstein" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div>
+                                        <p className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>📘 O Fim da Procrastinação</p>
+                                        <h3 className={`text-[16px] font-black leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Por que um Quadro de Visão?</h3>
+                                    </div>
+                                </div>
+
+                                {/* Explicação do método */}
+                                <p className={`text-[12px] leading-relaxed mb-4 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                                    Segundo <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>Petr Ludwig</strong>, procrastinamos quando as tarefas parecem sem sentido. O Quadro de Visão cria a <strong className={isDarkMode ? 'text-amber-300' : 'text-amber-600'}>motivação intrínseca</strong> — aquela que vem de dentro, sem precisar de pressão externa.
+                                </p>
+
+                                {/* 3 pilares */}
+                                <div className="space-y-2.5 mb-4">
+                                    <div className={`flex items-start gap-3 p-3 rounded-xl ${isDarkMode ? 'bg-pink-500/8 border border-pink-500/15' : 'bg-pink-50 border border-pink-100'}`}>
+                                        <span className="text-lg shrink-0">❤️</span>
+                                        <div>
+                                            <p className={`text-[12px] font-black mb-0.5 ${isDarkMode ? 'text-pink-300' : 'text-pink-700'}`}>Valores</p>
+                                            <p className={`text-[11px] leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Seu "porquê" mais profundo. Quando suas ações refletem seus valores, você age com propósito — não por obrigação.</p>
+                                        </div>
+                                    </div>
+                                    <div className={`flex items-start gap-3 p-3 rounded-xl ${isDarkMode ? 'bg-blue-500/8 border border-blue-500/15' : 'bg-blue-50 border border-blue-100'}`}>
+                                        <span className="text-lg shrink-0">👁️</span>
+                                        <div>
+                                            <p className={`text-[12px] font-black mb-0.5 ${isDarkMode ? 'text-blue-300' : 'text-blue-700'}`}>Visão</p>
+                                            <p className={`text-[11px] leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>A imagem clara de como você quer viver. Serve como bússola quando surgem distrações e desânimo.</p>
+                                        </div>
+                                    </div>
+                                    <div className={`flex items-start gap-3 p-3 rounded-xl ${isDarkMode ? 'bg-amber-500/8 border border-amber-500/15' : 'bg-amber-50 border border-amber-100'}`}>
+                                        <span className="text-lg shrink-0">🚀</span>
+                                        <div>
+                                            <p className={`text-[12px] font-black mb-0.5 ${isDarkMode ? 'text-amber-300' : 'text-amber-700'}`}>Metas</p>
+                                            <p className={`text-[11px] leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Passos concretos que conectam seus valores à sua visão. Sem metas claras, boas intenções ficam no papel.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Fala do Einstein */}
+                                <div className={`p-3 rounded-2xl text-center text-[12px] italic leading-relaxed font-medium ${isDarkMode ? 'bg-slate-800/60 text-slate-300 border border-slate-700/40' : 'bg-slate-50 text-slate-600 border border-slate-200'}`}>
+                                    "Quando seu dia a dia reflete quem você é e aonde quer chegar, a procrastinação perde seu poder."
+                                </div>
+
+                                <button
+                                    onClick={() => setShowMethodInfo(false)}
+                                    className="mt-4 w-full py-3 rounded-2xl font-black text-sm transition-all active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30"
+                                >
+                                    Entendido! 🎯
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }

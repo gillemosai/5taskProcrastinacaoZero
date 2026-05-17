@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertTriangle, Trash2, Rocket, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Rocket, Target, Zap, Archive, Star, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface WelcomeCarouselProps {
     onComplete: () => void;
@@ -9,34 +9,54 @@ interface WelcomeCarouselProps {
 
 const slides = [
     {
-        icon: AlertTriangle,
-        iconColor: 'text-amber-400',
-        glowColor: 'shadow-amber-500/30',
-        bgGradient: 'from-amber-500/20 to-orange-500/10',
-        borderColor: 'border-amber-500/30',
-        title: 'Atenção',
-        message: 'As tarefas devem ser concluídas em 24 horas',
-        emoji: '⚠️',
-    },
-    {
-        icon: Trash2,
-        iconColor: 'text-red-400',
-        glowColor: 'shadow-red-500/30',
-        bgGradient: 'from-red-500/20 to-pink-500/10',
-        borderColor: 'border-red-500/30',
-        title: 'Após 27 horas',
-        message: 'Tarefas não concluídas\nserão excluídas sumariamente',
-        emoji: '🗑️',
-    },
-    {
         icon: Rocket,
         iconColor: 'text-neon-blue',
         glowColor: 'shadow-neon-blue/30',
         bgGradient: 'from-neon-blue/20 to-neon-purple/10',
         borderColor: 'border-neon-blue/30',
-        title: 'Não Procrastine',
-        message: 'Seu Sucesso depende de você!',
-        emoji: '🚀',
+        title: 'Bem-vindo ao 5Task!',
+        message: 'Seu parceiro pessoal contra a procrastinação. Não é mais uma lista de tarefas — é um método comprovado de foco e ação.',
+        emoji: '👋',
+    },
+    {
+        icon: Target,
+        iconColor: 'text-accent-cyan',
+        glowColor: 'shadow-accent-cyan/30',
+        bgGradient: 'from-accent-cyan/20 to-neon-blue/10',
+        borderColor: 'border-accent-cyan/30',
+        title: 'O Método dos 5 Focos',
+        message: 'Máximo de 5 tarefas ativas por vez. Não para limitar você — mas para eliminar as listas infinitas que nunca terminam e drenam sua energia.',
+        emoji: '🎯',
+    },
+    {
+        icon: Zap,
+        iconColor: 'text-amber-400',
+        glowColor: 'shadow-amber-500/30',
+        bgGradient: 'from-amber-500/20 to-orange-500/10',
+        borderColor: 'border-amber-500/30',
+        title: 'Urgência que Liberta',
+        message: 'Cada tarefa tem 24h para ser concluída. Esse prazo não é punição — é a dose certa de urgência para vencer a procrastinação de vez.',
+        emoji: '⚡',
+    },
+    {
+        icon: Archive,
+        iconColor: 'text-emerald-400',
+        glowColor: 'shadow-emerald-500/30',
+        bgGradient: 'from-emerald-500/20 to-teal-500/10',
+        borderColor: 'border-emerald-500/30',
+        title: 'Sempre Há Segunda Chance',
+        message: 'Não concluiu a tempo? A tarefa vai para o Arquivo — e você pode resgatá-la. Sem perda definitiva, sem culpa. O foco continua!',
+        emoji: '🛡️',
+    },
+    {
+        icon: Star,
+        iconColor: 'text-neon-purple',
+        glowColor: 'shadow-neon-purple/30',
+        bgGradient: 'from-neon-purple/20 to-pink-500/10',
+        borderColor: 'border-neon-purple/30',
+        title: 'Muito Mais que um To-Do',
+        message: 'Tarefas recorrentes, checklists, Kanban, XP, sequência de dias produtivos e Quadro de Visão. Tudo para você agir — não apenas planejar.',
+        emoji: '🌟',
     },
 ];
 
@@ -82,6 +102,11 @@ export const WelcomeCarousel: React.FC<WelcomeCarouselProps> = ({ onComplete, is
                 className={`relative w-full max-w-md mx-4 rounded-3xl overflow-hidden border shadow-2xl transition-transform duration-500 ${isVisible ? 'scale-100' : 'scale-90'
                     } ${isDarkMode ? 'bg-slate-900 border-slate-700/50' : 'bg-white border-slate-200'}`}
             >
+                {/* Slide counter */}
+                <div className={`absolute top-4 right-5 z-10 text-[11px] font-bold tabular-nums ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                    {currentSlide + 1}/{slides.length}
+                </div>
+
                 {/* Scroll area */}
                 <div
                     ref={scrollRef}
@@ -98,19 +123,19 @@ export const WelcomeCarousel: React.FC<WelcomeCarouselProps> = ({ onComplete, is
                         return (
                             <div
                                 key={index}
-                                className="flex-shrink-0 w-full snap-center flex flex-col items-center justify-center px-8 py-12"
+                                className="flex-shrink-0 w-full snap-center flex flex-col items-center justify-center px-8 py-10"
                                 style={{ minWidth: '100%' }}
                             >
                                 {/* Icon circle with glow */}
                                 <div
-                                    className={`relative w-28 h-28 rounded-full flex items-center justify-center mb-8 bg-gradient-to-br ${slide.bgGradient} border ${slide.borderColor} shadow-lg ${slide.glowColor}`}
+                                    className={`relative w-28 h-28 rounded-full flex items-center justify-center mb-6 bg-gradient-to-br ${slide.bgGradient} border ${slide.borderColor} shadow-lg ${slide.glowColor}`}
                                 >
-                                    <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-current" style={{ animationDuration: '2s' }} />
+                                    <div className="absolute inset-0 rounded-full animate-ping opacity-15 bg-current" style={{ animationDuration: '2.5s' }} />
                                     <IconComponent size={48} className={slide.iconColor} strokeWidth={1.5} />
                                 </div>
 
                                 {/* Emoji */}
-                                <div className="text-4xl mb-4">{slide.emoji}</div>
+                                <div className="text-4xl mb-3">{slide.emoji}</div>
 
                                 {/* Title */}
                                 <h2
@@ -122,7 +147,7 @@ export const WelcomeCarousel: React.FC<WelcomeCarouselProps> = ({ onComplete, is
 
                                 {/* Message */}
                                 <p
-                                    className={`text-base text-center leading-relaxed max-w-xs whitespace-pre-line ${isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                                    className={`text-[14px] text-center leading-relaxed max-w-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'
                                         }`}
                                 >
                                     {slide.message}
@@ -176,12 +201,22 @@ export const WelcomeCarousel: React.FC<WelcomeCarouselProps> = ({ onComplete, is
                                 }`}
                         >
                             {currentSlide === slides.length - 1 ? (
-                                <>COMEÇAR <Rocket size={18} /></>
+                                <>COMEÇAR! <Rocket size={18} /></>
                             ) : (
                                 <>Próximo <ChevronRight size={18} /></>
                             )}
                         </button>
                     </div>
+
+                    {/* Skip link */}
+                    {currentSlide < slides.length - 1 && (
+                        <button
+                            onClick={handleClose}
+                            className={`text-[11px] font-medium transition-colors ${isDarkMode ? 'text-slate-600 hover:text-slate-400' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            Pular introdução
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
