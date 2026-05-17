@@ -1,0 +1,73 @@
+{
+  "packageId": "com.fivetask.quantum.app",
+  "host": "5taskprocrastinacaozero.vercel.app",
+  "name": "5task - Foco Quântico",
+  "launcherName": "5task",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#020617",
+  "navigationColor": "#020617",
+  "navigationColorDark": "#020617",
+  "navigationDividerColor": "#020617",
+  "navigationDividerColorDark": "#020617",
+  "backgroundColor": "#020617",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://5taskprocrastinacaozero.vercel.app/assets/5task-logo.png",
+  "maskableIconUrl": "https://5taskprocrastinacaozero.vercel.app/assets/5task-logo.png",
+  "monochromeIconUrl": "https://5taskprocrastinacaozero.vercel.app/assets/5task-logo.png",
+  "appVersion": "5.4.0",
+  "appVersionCode": 540,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "5task"
+  },
+  "splashScreenFadeOutDuration": 300,
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://5taskprocrastinacaozero.vercel.app/",
+  "minSdkVersion": 19,
+  "targetSdkVersion": 34,
+  "shareTarget": {
+    "action": "/share",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Nova Tarefa",
+      "short_name": "Add",
+      "url": "/?action=new",
+      "icons": [
+        {
+          "src": "https://5taskprocrastinacaozero.vercel.app/assets/5task-logo-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://5taskprocrastinacaozero.vercel.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableCrashReporting": false,
+  "isTrustedWebActivity": true,
+  "serviceAccountJsonFile": "",
+  "useBrowserOnChromeOS": false
+}

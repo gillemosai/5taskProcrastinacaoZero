@@ -1,0 +1,71 @@
+{
+  "packageId": "com.fivetask.quantum.app",
+  "host": "5task-seven.vercel.app",
+  "name": "5task - Foco Quântico",
+  "launcherName": "5task",
+  "display": "standalone",
+  "themeColor": "#020617",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#020617",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://5task-seven.vercel.app/assets/5task-logo.png",
+  "maskableIconUrl": "https://5task-seven.vercel.app/assets/5task-logo.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "D:\\_Meus_APPS\\5task\\play-console\\android.keystore",
+    "alias": "5task-key"
+  },
+  "appVersionName": "540",
+  "appVersionCode": 540,
+  "shortcuts": [
+    {
+      "name": "Nova Tarefa",
+      "shortName": "Add",
+      "url": "https://5task-seven.vercel.app/?action=new",
+      "chosenIconUrl": "https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo-192x192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://5task-seven.vercel.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://5task-seven.vercel.app/",
+  "minSdkVersion": 21,
+  "shareTarget": {
+    "action": "https://5task-seven.vercel.app/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [
+    {
+      "actionUrl": "https://5task-seven.vercel.app/open-file",
+      "mimeTypes": [
+        "text/plain",
+        "application/json"
+      ]
+    }
+  ],
+  "launchHandlerClientMode": "focus-existing",
+  "displayOverride": [],
+  "appVersion": "540"
+}

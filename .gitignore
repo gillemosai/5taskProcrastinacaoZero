@@ -4,3 +4,11 @@ node_modules
 .agent/
 _agents/
 _agent/
+
+# Android build — não versionar
+play-console/app/build/
+play-console/build/
+play-console/.gradle/
+play-console/local.properties
+
+# O signing.keystore e signing-key-info.txt SÃO versionados intencionalmente (repo privado)
