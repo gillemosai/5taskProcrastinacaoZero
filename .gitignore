@@ -11,4 +11,9 @@ play-console/build/
 play-console/.gradle/
 play-console/local.properties
 
-# O signing.keystore e signing-key-info.txt SÃO versionados intencionalmente (repo privado)
+# Chaves de assinatura — NUNCA versionar (manter apenas localmente)
+play-console/*.keystore
+play-console/*.jks
+play-console/android.keystore
+play-console/signing.keystore
+play-console/signing-key-info.txt
