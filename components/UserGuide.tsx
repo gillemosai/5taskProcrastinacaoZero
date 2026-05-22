@@ -249,6 +249,58 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                         </p>
                     </div>
 
+                    {/* Orientações de Build (Git/Android) */}
+                    <div className={`rounded-2xl p-4 border-l-4 border-amber-500 ${card}`}>
+                        <h3 className={`font-bold text-sm mb-3 flex items-center gap-1.5 ${accent}`}>
+                            💻 Orientações de Build (Git/Android)
+                        </h3>
+                        <div className="space-y-3">
+                            <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                Toda vez que fizer alterações no código do seu PWA (<strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>App.tsx</strong>, componentes, etc.), execute os comandos abaixo para sincronizar e gerar o app:
+                            </p>
+                            <div className="space-y-2">
+                                <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-[11px] font-black text-amber-500">Passo 1</span>
+                                        <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-600'}`}>Web Build</span>
+                                    </div>
+                                    <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                        Faça o build da nova versão Web:
+                                    </p>
+                                    <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
+                                        npm run build
+                                    </code>
+                                </div>
+
+                                <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-[11px] font-black text-amber-500">Passo 2</span>
+                                        <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>Sync Capacitor</span>
+                                    </div>
+                                    <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                        Sincronize as novidades com a pasta do Android:
+                                    </p>
+                                    <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
+                                        npx cap sync android
+                                    </code>
+                                </div>
+
+                                <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-[11px] font-black text-amber-500">Passo 3</span>
+                                        <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>Android Studio</span>
+                                    </div>
+                                    <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                        Gere o novo .aab: Abra o projeto no Android Studio:
+                                    </p>
+                                    <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
+                                        npx cap open android
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Link para docs completa */}
                     <div className="pt-2 pb-2">
                         <a

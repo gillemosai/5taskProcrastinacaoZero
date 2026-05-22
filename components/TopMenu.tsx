@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, FileText, Target, Download, ExternalLink } from 'lucide-react';
+import { Menu, FileText, Target, Download, ExternalLink, Calendar, ToggleLeft, RefreshCw } from 'lucide-react';
 import { Task } from '../types';
 import { exportUncompletedTasks } from '../utils/exportTasks';
 import { VisionBoard } from './VisionBoard';
@@ -10,9 +10,13 @@ interface TopMenuProps {
     tasks: Task[];
     isDarkMode: boolean;
     onOpenVisionBoard: () => void;
+    isPro?: boolean;
+    onOpenCalendar?: () => void;
+    onDisablePro?: () => void;
+    onOpenSyncModal?: () => void;
 }
 
-export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisionBoard }) => {
+export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisionBoard, isPro, onOpenCalendar, onDisablePro, onOpenSyncModal }) => {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +75,8 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisio
                                 <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500"><Target size={18} /></div>
                                 <span>Quadro Visão</span>
                             </button>
+
+
 
                             <div className={`h-px w-full my-1 ${isDarkMode ? 'bg-slate-800/60' : 'bg-slate-100'}`}></div>
 

@@ -15,6 +15,11 @@ import { RecurrenceType } from './types';
 import { FanMenu } from './components/FanMenu';
 import { ListTaskModal } from './components/ListTaskModal';
 import { ContextualTip, ContextualTipData } from './components/ContextualTip';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { UpdateModal } from './components/UpdateModal';
+import { TopMenu } from './components/TopMenu';
+
 
 /**
  * ⚠️ INSTRUÇÃO AO SISTEMA: PROIBIDO MEXER NA PASTA "assets".
@@ -321,10 +326,12 @@ const App: React.FC = () => {
   const [todayCompletedCount, setTodayCompletedCount] = useState(0);
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showQuoteBubble, setShowQuoteBubble] = useState(true);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [visionText, setVisionText] = useState('');
   const [pulseButton, setPulseButton] = useState(false);
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
   const [swUpdateReady, setSwUpdateReady] = useState(false);
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
@@ -336,6 +343,84 @@ const App: React.FC = () => {
   const [dynamicQuotes, setDynamicQuotes] = useState(QUOTES);
   const [quoteHistory, setQuoteHistory] = useState<string[]>([]);
   const [activeTip, setActiveTip] = useState<ContextualTipData | null>(null);
+
+  // --- Estados do Modo PRO Secreto ---
+  const [isPro, setIsPro] = useState(() => localStorage.getItem('5task_pro_mode') === 'true');
+  const [showProCalendar, setShowProCalendar] = useState(false);
+  const [proToast, setProToast] = useState<string | null>(null);
+  const avatarClicksRef = useRef<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 });
+
+  useEffect(() => {
+    if (proToast) {
+      const timer = setTimeout(() => setProToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [proToast]);
+
+  const handleAvatarClick = () => {
+    const now = Date.now();
+    const clicks = avatarClicksRef.current;
+    
+    if (now - clicks.lastTime > 3000) {
+      clicks.count = 1;
+    } else {
+      clicks.count += 1;
+    }
+    clicks.lastTime = now;
+
+    if (clicks.count === 7) {
+      const nextPro = !isPro;
+      setIsPro(nextPro);
+      localStorage.setItem('5task_pro_mode', nextPro ? 'true' : 'false');
+      
+      setProToast(nextPro ? 'Modo PRO Ativado! 🌟' : 'Modo PRO Desativado! 🕊️');
+      
+      if (isSoundEnabled) {
+        try {
+          playActionSound();
+        } catch (e) {}
+      }
+      
+      setShowQuoteModal(false);
+      clicks.count = 0;
+    } else {
+      if (clicks.count === 1) {
+        // Enhance avatar click to update quote based on list status
+        const activeNonRecurringCount = tasks.filter(t => !t.completed && !t.isRecurring).length;
+        if (activeNonRecurringCount === 0) {
+          updateEinstein('zen', Mood.ZEN);
+        } else if (activeNonRecurringCount >= 5) {
+          updateEinstein('challenge', Mood.CHALLENGE);
+        } else if (activeTaskId) {
+          updateEinstein('focus', Mood.FOCUS);
+        } else {
+          updateEinstein('idle', Mood.THINKING);
+        }
+        setShowQuoteModal(true);
+      }
+    }
+  };
+
+  const handleDisablePro = () => {
+    setIsPro(false);
+    localStorage.setItem('5task_pro_mode', 'false');
+    setProToast('Modo PRO Desativado! 🕊️');
+    if (isSoundEnabled) {
+      try {
+        playActionSound();
+      } catch (e) {}
+    }
+  };
+
+  // Estados para atualização nativa (Google Play)
+  const [showStoreUpdateModal, setShowStoreUpdateModal] = useState(false);
+  const [isStoreForceUpdate, setIsStoreForceUpdate] = useState(false);
+  const [storeUpdateInfo, setStoreUpdateInfo] = useState<{
+    latestVersion: string;
+    releaseNotes: string;
+    playStoreUrl: string;
+  } | null>(null);
+
 
   useEffect(() => {
     const fetchQuotes = async () => {
@@ -380,6 +465,25 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('5task_sound', isSoundEnabled ? 'true' : 'false');
   }, [isSoundEnabled]);
+
+  // Triggers de Estado Emocional do Einstein
+  useEffect(() => {
+    if (activeTaskId) {
+      updateEinstein('focus', Mood.FOCUS);
+    }
+  }, [activeTaskId]);
+
+  useEffect(() => {
+    if (isLoaded && tasks.filter(t => !t.completed).length === 0) {
+      updateEinstein('zen', Mood.ZEN);
+    }
+  }, [tasks, isLoaded]);
+
+  useEffect(() => {
+    if (showVisionBoard || showUserGuide) {
+      updateEinstein('mentor', Mood.MENTOR);
+    }
+  }, [showVisionBoard, showUserGuide]);
 
   useEffect(() => {
     const handleStatusChange = () => setIsOnline(navigator.onLine);
@@ -431,7 +535,65 @@ const App: React.FC = () => {
     });
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') setIsDarkMode(false);
+
+    // Solicitar permissão de notificação ao carregar
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
+
+  // Verificação de nova versão do App Nativo (Play Store)
+  useEffect(() => {
+    const checkAppVersion = async () => {
+      try {
+        let currentVersion = '6.0.0.0'; // Fallback padrão / Versão web atual
+
+        // Se estiver rodando nativo no celular (Capacitor)
+        if (Capacitor.isNativePlatform()) {
+          const info = await CapApp.getInfo();
+          currentVersion = info.version;
+        }
+
+        // Busca o arquivo de versão no mesmo servidor onde o app está hospedado
+        const response = await fetch('/app-version.json');
+        if (!response.ok) return;
+        const data = await response.json();
+
+        // Comparador semântico de versões
+        const isVersionOlder = (current: string, latest: string): boolean => {
+          const cParts = current.split('.').map(Number);
+          const lParts = latest.split('.').map(Number);
+          for (let i = 0; i < Math.max(cParts.length, lParts.length); i++) {
+            const cPart = cParts[i] || 0;
+            const lPart = lParts[i] || 0;
+            if (cPart < lPart) return true;
+            if (cPart > lPart) return false;
+          }
+          return false;
+        };
+
+        if (isVersionOlder(currentVersion, data.latestVersion)) {
+          setStoreUpdateInfo({
+            latestVersion: data.latestVersion,
+            releaseNotes: data.releaseNotes,
+            playStoreUrl: data.playStoreUrl || 'market://details?id=com.gillemosai.cincotask',
+          });
+          setShowStoreUpdateModal(true);
+
+          if (isVersionOlder(currentVersion, data.minRequiredVersion)) {
+            setIsStoreForceUpdate(true);
+          }
+        }
+      } catch (err) {
+        console.warn('Erro ao verificar atualização nativa:', err);
+      }
+    };
+
+    // Atraso sutil para não competir com a animação de carregamento inicial
+    const timer = setTimeout(checkAppVersion, 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
 
   useEffect(() => {
     if (isLoaded) {
@@ -466,6 +628,7 @@ const App: React.FC = () => {
     const checkUrgencyAndExpiration = () => {
       setTasks(prev => {
         const now = Date.now();
+        const HOURS_23_MS = 23 * 60 * 60 * 1000; // 1h antes do fim do ciclo de 24h
         const HOURS_24_MS = 24 * 60 * 60 * 1000;
         const HOURS_27_MS = 27 * 60 * 60 * 1000;
 
@@ -479,6 +642,24 @@ const App: React.FC = () => {
             return true; // Manter — toggleTask cuida de mover para completedTasks
           } else {
             const age = now - t.createdAt;
+
+            // 🔔 Notificação: 1h antes do fim do ciclo de 24h
+            if (age >= HOURS_23_MS && age < HOURS_24_MS) {
+              const notifKey = `5task_notif_1h_${t.id}`;
+              if (!localStorage.getItem(notifKey)) {
+                localStorage.setItem(notifKey, '1');
+                if ('Notification' in window && Notification.permission === 'granted') {
+                  const taskLabel = t.text.length > 40 ? t.text.substring(0, 40) + '…' : t.text;
+                  new Notification('⏰ 5Task — 1 hora restante!', {
+                    body: `"${taskLabel}" expira em 1 hora. Conclua agora antes que vá para o arquivo!`,
+                    icon: '/icons/icon-192x192.png',
+                    badge: '/icons/icon-72x72.png',
+                    tag: `5task-1h-${t.id}`,
+                  });
+                }
+              }
+            }
+
             if (age > HOURS_27_MS) {
               const rCount = t.rescueCount || 0;
               if (rCount < 3) {
@@ -495,6 +676,8 @@ const App: React.FC = () => {
                   }), 2000);
                 }
               }
+              // Limpar chave de notificação da tarefa expirada
+              localStorage.removeItem(`5task_notif_1h_${t.id}`);
               changed = true;
               return false;
             }
@@ -706,7 +889,7 @@ const App: React.FC = () => {
     // === CASO 2: Criando tarefa NÃO-RECORRENTE (diária) ===
     // Limite: 5 tarefas não-recorrentes no máximo
     if (activeNonRecurringCount >= 5) {
-      updateEinstein('full', Mood.SHOCKED);
+      updateEinstein('challenge', Mood.CHALLENGE);
       return;
     }
 
@@ -775,6 +958,7 @@ const App: React.FC = () => {
           // Só mostra o modal ao cruzar a marca de 3 tarefas (transição de <3 para >=3)
           if (previousCount < 3 && stats.todayCount >= 3) {
             setShowProductiveModal(true);
+            updateEinstein('victory', Mood.VICTORY);
           }
         });
       }).catch(e => console.error("Error saving gamification:", e));
@@ -907,7 +1091,7 @@ const App: React.FC = () => {
     const activeTasks = tasks.filter(t => !t.completed);
     const activeNonRecurringCount = activeTasks.filter(t => !t.isRecurring).length;
     if (activeNonRecurringCount >= 5) {
-      updateEinstein('full', Mood.SHOCKED);
+      updateEinstein('challenge', Mood.CHALLENGE);
       return;
     }
 
@@ -1001,10 +1185,29 @@ const App: React.FC = () => {
       {/* ===== MAIN DASHBOARD ===== */}
       <main className="px-4 py-3 space-y-4 max-w-4xl mx-auto pb-24">
 
+        {/* --- Top Bar: Logo + TopMenu --- */}
+        <header className="flex justify-between items-center py-2 px-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">⚡</span>
+            <h1 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+              5task{isPro && <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 ml-1">Pro</span>}
+            </h1>
+          </div>
+          <TopMenu
+            tasks={tasks}
+            isDarkMode={isDarkMode}
+            onOpenVisionBoard={() => setShowVisionBoard(true)}
+            isPro={isPro}
+            onOpenCalendar={() => setShowProCalendar(true)}
+            onDisablePro={handleDisablePro}
+            onOpenSyncModal={() => setShowSyncModal(true)}
+          />
+        </header>
+
         {/* --- Hero Section: Avatar LEFT | Stats + Visão RIGHT --- */}
         <section className="flex gap-3 items-start relative">
           {/* Avatar Large (Left) */}
-          <div className="shrink-0 flex flex-col items-center" onClick={() => setShowQuoteBubble(!showQuoteBubble)}>
+          <div className="shrink-0 flex flex-col items-center" onClick={handleAvatarClick}>
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 cursor-pointer">
               <div className="absolute inset-0 bg-neon-purple rounded-full blur-2xl opacity-15 animate-pulse"></div>
               <div className={`relative w-full h-full rounded-full border-[3px] shadow-lg z-10 flex items-center justify-center overflow-hidden transition-colors ${isDarkMode ? 'border-neon-blue bg-slate-900' : 'border-slate-300 bg-white'}`}>
@@ -1016,7 +1219,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 5.4.1</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 6.0.0.0</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -1675,8 +1878,8 @@ const App: React.FC = () => {
 
               <div className="w-40 h-40 mb-6 rounded-full border-4 border-accent-cyan shadow-[0_0_30px_rgba(0,242,255,0.4)] overflow-hidden shrink-0">
                 <img
-                  src={AVATAR_IMAGES[Mood.HAPPY]}
-                  alt="Einstein Feliz"
+                  src={AVATAR_IMAGES[Mood.VICTORY]}
+                  alt="Einstein Vitória"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -1690,6 +1893,57 @@ const App: React.FC = () => {
 
               <button
                 onClick={() => setShowProductiveModal(false)}
+                className="w-full bg-accent-cyan text-background-dark font-black text-lg p-4 rounded-xl shadow-[0_4px_14px_0_rgba(0,242,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,242,255,0.23)] hover:scale-105 transition-all active:scale-95"
+              >
+                Continuar Vencendo! 🚀
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== QUOTE MODAL ===== */}
+      <AnimatePresence>
+        {showQuoteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setShowQuoteModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 50 }}
+              className={`relative max-w-sm w-full p-8 rounded-3xl shadow-2xl flex flex-col items-center text-center ${isDarkMode ? 'glass-card-vivid border-2 border-accent-cyan/50' : 'bg-white border-2 border-accent-cyan/50'}`}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowQuoteModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+                title="Fechar"
+              >
+                <X size={24} />
+              </button>
+
+              <div className="w-40 h-40 mb-6 rounded-full border-4 border-accent-cyan shadow-[0_0_30px_rgba(0,242,255,0.4)] overflow-hidden shrink-0">
+                <img
+                  src={AVATAR_IMAGES[mood]}
+                  alt="Einstein"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <h2 className={`text-2xl font-black mb-3 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                Sábias Palavras ⚛️
+              </h2>
+              <p className={`text-lg font-medium mb-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                {quote}
+              </p>
+
+              <button
+                onClick={() => setShowQuoteModal(false)}
                 className="w-full bg-accent-cyan text-background-dark font-black text-lg p-4 rounded-xl shadow-[0_4px_14px_0_rgba(0,242,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,242,255,0.23)] hover:scale-105 transition-all active:scale-95"
               >
                 Continuar Vencendo! 🚀
@@ -1714,8 +1968,36 @@ const App: React.FC = () => {
       {showUserGuide && (
         <UserGuide isDarkMode={isDarkMode} onClose={() => setShowUserGuide(false)} />
       )}
+
+      {/* ===== PLAY STORE UPDATE MODAL ===== */}
+      <UpdateModal
+        isOpen={showStoreUpdateModal}
+        onClose={() => setShowStoreUpdateModal(false)}
+        isForceUpdate={isStoreForceUpdate}
+        latestVersion={storeUpdateInfo?.latestVersion || ''}
+        releaseNotes={storeUpdateInfo?.releaseNotes || ''}
+        playStoreUrl={storeUpdateInfo?.playStoreUrl || ''}
+        isDarkMode={isDarkMode}
+      />
+
+
+
+      {/* ===== PRO TOAST NOTIFICATION ===== */}
+      <AnimatePresence>
+        {proToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-full bg-slate-900/90 text-white font-black text-xs border border-purple-500 shadow-lg shadow-purple-500/20 backdrop-blur-md"
+          >
+            {proToast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
+
 };
 
 export default App;
