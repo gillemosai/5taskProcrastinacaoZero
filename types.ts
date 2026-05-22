@@ -49,6 +49,11 @@ export enum Mood {
   PANIC_3H = 'PANIC_3H',
   PANIC_2H = 'PANIC_2H',
   PANIC_1H = 'PANIC_1H',
+  FOCUS = 'FOCUS',
+  VICTORY = 'VICTORY',
+  ZEN = 'ZEN',
+  MENTOR = 'MENTOR',
+  CHALLENGE = 'CHALLENGE',
 }
 
-export type QuoteType = 'welcome' | 'add' | 'complete' | 'delete' | 'full' | 'idle';
+export type QuoteType = 'welcome' | 'add' | 'complete' | 'delete' | 'full' | 'idle' | 'focus' | 'victory' | 'zen' | 'mentor' | 'challenge';

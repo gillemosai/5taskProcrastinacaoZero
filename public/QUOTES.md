@@ -73,3 +73,38 @@ Este arquivo contém as falas do avatar Einstein. O tom é científico, motivado
 - "Uma pessoa que nunca errou nunca tentou nada novo. Não tenha medo de começar essa tarefa!"
 - "O silêncio do laboratório é bom, mas o som de tarefas sendo riscadas é música para meus ouvidos!"
 - "O valor de hoje está na sua disciplina. Não deixe a procrastinação ser a única constante do seu universo!"
+
+## focus
+- "Foco absoluto ativado! O espaço-tempo ao redor se contrai quando concentramos nossa energia em um único ponto."
+- "Sem distrações! Quando focamos 100% de nossa atenção, o ruído cósmico desaparece e a lógica prevalece."
+- "Modo laser quântico! Estamos alinhando todos os átomos em direção a este objetivo específico. Sem desvios!"
+- "Concentração é a arte de ignorar o universo inteiro para resolver uma única equação. Você está no caminho certo!"
+- "Mantenha o foco. O progresso é a soma de pequenos saltos quânticos de esforço contínuo."
+
+## victory
+- "VITÓRIA! Rompemos a barreira da procrastinação e alcançamos a velocidade de escape rumo ao sucesso!"
+- "Fabuloso! Essa meta concluída brilha mais do que uma estrela recém-nascida no firmamento."
+- "Mais um marco conquistado! A sua consistência é a força gravitacional que atrai o sucesso diário."
+- "Sensacional! Você acaba de provar que a persistência é mais forte do que a inércia da procrastinação!"
+- "Você venceu o dia! Seus feitos de hoje seriam dignos de um Nobel da Produtividade!"
+
+## zen
+- "Paz absoluta. A mente livre de pendências é o estado de menor energia e maior estabilidade universal."
+- "Zero pendências! Um laboratório limpo é o solo mais fértil para as grandes descobertas científicas."
+- "Silêncio cósmico... Sem tarefas abertas, você atingiu o equilíbrio perfeito no espaço-tempo de hoje."
+- "Sinta o Zen. Suas ideias agora podem flutuar livremente sem a resistência gravitacional das pendências."
+- "O vazio perfeito. Aproveite este momento de calmaria para recarregar suas energias quânticas."
+
+## mentor
+- "Como seu mentor científico, lembro: o conhecimento real vem de experimentar, errar e documentar o processo."
+- "O seu Quadro dos Sonhos é a planta baixa do seu universo pessoal. Deixe-me guiar seus próximos passos!"
+- "Planejar é antecipar a entropia. Estudar o guia nos dá as ferramentas para domar o tempo e o foco."
+- "Cada grande descoberta começou com uma hipótese clara. O que estamos aprendendo com o dia de hoje?"
+- "O sucesso não é um acidente, é um design inteligente. Vamos ajustar seus planos de longo prazo!"
+
+## challenge
+- "Alerta de desafio! As maiores pressões produzem os diamantes mais brilhantes. Vamos encarar essa barreira!"
+- "Dificuldades são apenas variáveis ocultas que ainda não deciframos. Respire fundo e encare o desafio!"
+- "Rompendo os limites da nossa zona de conforto! É no limite da nossa capacidade que a física do aprendizado acontece."
+- "Desafio aceito! Não evite o complexo; a resolução de grandes problemas é o que define as grandes mentes."
+- "A resistência que você sente agora é a gravidade da sua antiga inércia sendo superada por sua nova força!"

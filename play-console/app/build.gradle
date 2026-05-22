@@ -21,7 +21,7 @@ plugins {
 }
 
 def twaManifest = [
-    applicationId: 'com.fivetask.quantum.app',
+    applicationId: 'com.gillemosai.cincotask',
     hostName: '5task-seven.vercel.app', // The domain being opened in the TWA.
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: '5task - Foco Quântico', // The application name.
@@ -52,13 +52,13 @@ def twaManifest = [
 
 android {
     compileSdkVersion 36
-    namespace "com.fivetask.quantum.app"
+    namespace "com.gillemosai.cincotask"
     defaultConfig {
-        applicationId "com.fivetask.quantum.app"
+        applicationId "com.gillemosai.cincotask"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 540
-        versionName "540"
+        versionCode 541
+        versionName "5.4.1"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

@@ -27,7 +27,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                 <div className={`flex items-center justify-between px-5 py-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                     <div>
                         <h2 className="text-lg font-black">📘 Como Usar o 5Task</h2>
-                        <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido v5.4.1</p>
+                        <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido v6.0.0.0</p>
                     </div>
                     <button onClick={onClose} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}>
                         <ArrowLeft size={18} /> <span className="text-sm font-bold">Voltar</span>
@@ -103,24 +103,24 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
 
                     {/* Novidades v5.4.1 */}
                     <div className={`rounded-2xl p-4 border-l-4 border-neon-blue ${card}`}>
-                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎓 Novidades <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-neon-blue/20 text-neon-blue' : 'bg-blue-100 text-blue-600'}`}>v5.4.1</span></h3>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎓 Novidades <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-neon-blue/20 text-neon-blue' : 'bg-blue-100 text-blue-600'}`}>v6.0.0.0</span></h3>
                         <div className="space-y-2.5">
                             <div className="flex items-start gap-2.5">
-                                <span className="text-base shrink-0">🎠</span>
+                                <span className="text-base shrink-0">✨</span>
                                 <p className={`text-[12px] leading-relaxed ${muted}`}>
-                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Boas-vindas renovadas:</strong> O carousel inicial agora tem 5 slides motivadores que explicam o método anti-procrastinação — sem textos ameaçadores!
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Avatares 3D do Einstein:</strong> 5 novos moods tridimensionais neon (Foco, Vitória, Zen, Mentor e Desafio) que reagem dinamicamente à sua lista de tarefas e ações!
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-2.5">
+                                <span className="text-base shrink-0">⚡</span>
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Nova Logo Harmonizada:</strong> Design moderno e minimalista integrando a letra "T" (Task) e o número "5" perfeitamente dentro do raio de foco em ciano/magenta.
                                 </p>
                             </div>
                             <div className="flex items-start gap-2.5">
                                 <span className="text-base shrink-0">💡</span>
                                 <p className={`text-[12px] leading-relaxed ${muted}`}>
-                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Dicas do Einstein:</strong> Ao concluir sua 1ª tarefa, visitar a aba Concluídas e quando uma tarefa vai ao Arquivo, o Einstein aparece com uma dica útil. Cada uma só aparece 1 vez.
-                                </p>
-                            </div>
-                            <div className="flex items-start gap-2.5">
-                                <span className="text-base shrink-0">📖</span>
-                                <p className={`text-[12px] leading-relaxed ${muted}`}>
-                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Visão explicada:</strong> Na tela <em>Minha Visão</em>, clique em <strong className={isDarkMode ? 'text-amber-400' : 'text-amber-600'}>💡 O que é isso?</strong> para entender o método dos 3 pilares de Petr Ludwig (O Fim da Procrastinação).
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Frases Científicas Inéditas:</strong> Novas frases de efeito do Einstein personalizadas para cada estado de ânimo e conquistas diárias.
                                 </p>
                             </div>
                         </div>

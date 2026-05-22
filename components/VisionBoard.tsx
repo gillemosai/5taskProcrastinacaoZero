@@ -129,24 +129,27 @@ export const VisionBoard: React.FC<VisionBoardProps> = ({ onClose, isDarkMode, v
                             </div>
                             <h2 className="text-lg font-black font-mono tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-400">Minha Visão</h2>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                             <button
                                 onClick={() => setShowMethodInfo(true)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 border border-amber-500/20' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'}`}
+                                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 border border-amber-500/20' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'}`}
+                                title="O que é isso?"
                             >
-                                💡 O que é isso?
+                                💡 <span className="hidden sm:inline">O que é isso?</span>
                             </button>
                             <button
                                 onClick={() => setIsEditMode(true)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                                title="Editar"
                             >
-                                <Pencil size={12} /> Editar
+                                <Pencil size={12} /> <span className="hidden sm:inline">Editar</span>
                             </button>
                             <button
                                 onClick={onClose}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}
+                                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg transition-all active:scale-90 ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}
+                                title="Voltar"
                             >
-                                <ArrowLeft size={16} /> <span className="text-xs font-bold">Voltar</span>
+                                <ArrowLeft size={16} /> <span className="text-xs font-bold hidden sm:inline">Voltar</span>
                             </button>
                         </div>
                     </div>

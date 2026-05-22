@@ -7,7 +7,7 @@ import { Mood, QuoteType } from './types';
  * NÃO MODIFICAR ESTA PASTA EM NENHUM DEPLOY.
  */
 
-const VERSION_QUERY = '?v=5.3.8';
+const VERSION_QUERY = '?v=6.0.0.0';
 const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/';
 
 export const AVATAR_IMAGES: Record<Mood, string> = {
@@ -18,6 +18,11 @@ export const AVATAR_IMAGES: Record<Mood, string> = {
   [Mood.PANIC_3H]: `${GITHUB_BASE}einstein-panic-3h.png${VERSION_QUERY}`,
   [Mood.PANIC_2H]: `${GITHUB_BASE}einstein-panic-2h.png${VERSION_QUERY}`,
   [Mood.PANIC_1H]: `${GITHUB_BASE}einstein-panic-1h.png${VERSION_QUERY}`,
+  [Mood.FOCUS]: `${GITHUB_BASE}einstein-focus.png${VERSION_QUERY}`,
+  [Mood.VICTORY]: `${GITHUB_BASE}einstein-victory.png${VERSION_QUERY}`,
+  [Mood.ZEN]: `${GITHUB_BASE}einstein-zen.png${VERSION_QUERY}`,
+  [Mood.MENTOR]: `${GITHUB_BASE}einstein-mentor.png${VERSION_QUERY}`,
+  [Mood.CHALLENGE]: `${GITHUB_BASE}einstein-challenge.png${VERSION_QUERY}`,
 };
 
 export const LOGO_URL = `${GITHUB_BASE}5task-logo.png${VERSION_QUERY}`;
@@ -53,5 +58,10 @@ export const QUOTES: Record<QuoteType, string[]> = {
     "O tempo é uma ilusão... mas o prazo dessa tarefa não é!",
     "Se você não pode explicar o que está fazendo de forma simples, você não entendeu bem.",
     "Duas coisas são infinitas: o universo e a criatividade humana. Vamos usá-la!"
-  ]
+  ],
+  focus: [],
+  victory: [],
+  zen: [],
+  mentor: [],
+  challenge: []
 };

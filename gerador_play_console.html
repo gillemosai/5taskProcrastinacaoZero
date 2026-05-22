@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5Task - Super Gerador de Screenshots (Play Console)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        'brand-blue': '#00a8ff',
+                        'brand-purple': '#6c5ce7',
+                        'brand-dark': '#070d19',
+                        'brand-darker': '#050811',
+                        'brand-accent': '#00f2ff',
+                        'brand-pink': '#ff007f'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+        }
+
+        /* 1080x1920 Play Store standard output canvas */
+        .screenshot-container {
+            width: 1080px;
+            height: 1920px;
+            position: relative;
+            overflow: hidden;
+            background-color: #070d19;
+            transform-origin: top left;
+        }
+        
+        /* Floating background elements */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.45;
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+
+        .pattern-grid {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            pointer-events: none;
+        }
+
+        .pattern-circles {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Styles matching 5task */
+        .glass-card {
+            background: rgba(13, 22, 41, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-vivid {
+            background: rgba(20, 35, 65, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(0, 242, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 242, 255, 0.08);
+        }
+
+        /* Interactive Pointer Bubble Style (Drag and Drop Container) */
+        .pointer-bubble {
+            position: absolute;
+            z-index: 90;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .pointer-bubble:active {
+            cursor: grabbing;
+            transform: scale(0.97);
+        }
+
+        /* Draggable Avatar Character Container */
+        .avatar-container {
+            position: absolute;
+            z-index: 85; /* Sits slightly under the speech balloon if they overlap */
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .avatar-container:active {
+            cursor: grabbing;
+            transform: scale(0.97);
+        }
+
+        .avatar-frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            background: rgba(13, 22, 41, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .avatar-container:hover .avatar-frame {
+            border-color: rgba(0, 242, 255, 0.5);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.35), 0 10px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .avatar-container:hover .avatar-img {
+            transform: scale(1.06);
+        }
+
+        .avatar-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(5, 8, 11, 0.95) 0%, rgba(5, 8, 11, 0.45) 40%, transparent 75%);
+            pointer-events: none;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                filter: drop-shadow(0 0 6px var(--glow-color)) drop-shadow(0 0 12px var(--glow-color));
+                opacity: 0.9;
+            }
+            50% {
+                filter: drop-shadow(0 0 12px var(--glow-color)) drop-shadow(0 0 24px var(--glow-color));
+                opacity: 1;
+            }
+        }
+
+        .pointer-arrow svg {
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+
+        /* Phone mockup styling (Pixel-perfect scale & layout) */
+        .phone-mockup {
+            width: 820px;
+            height: 1420px;
+            background: #0d1629;
+            border-radius: 54px;
+            border: 14px solid #1e293b;
+            box-shadow: 
+                0 40px 100px rgba(0,0,0,0.6), 
+                inset 0 0 0 3px rgba(255,255,255,0.05),
+                inset 0 0 20px rgba(0,242,255,0.1);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 28px;
+            background: #1e293b;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 50;
+        }
+        
+        .phone-content {
+            width: 100%;
+            height: 100%;
+            background-color: #070d19;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Preview Scaling (makes 1080x1920 grid fit in browser nicely) */
+        .preview-scale {
+            transform: scale(0.3333);
+            margin-bottom: -1280px;
+            margin-right: -720px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f2ff;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+    <div class="max-w-[1680px] mx-auto">
+        <!-- Main Header -->
+        <header class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-8 mb-8 border-b border-slate-800">
+            <div>
+                <div class="flex items-center gap-3">
+                    <img src="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png" width="48" alt="5task Logo" class="rounded-lg shadow-[0_0_15px_rgba(0,242,255,0.4)]">
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-accent bg-clip-text text-transparent">
+                        5Task Screenshot Studio
+                    </h1>
+                    <span class="bg-cyan-500/10 text-brand-accent text-xs font-mono font-bold px-3 py-1 rounded-full border border-brand-accent/20">v6.2 PRO</span>
+                </div>
+                <p class="text-slate-400 mt-2 text-sm md:text-base">
+                    Gere em tempo real as 8 artes profissionais (1080x1920px) exigidas no Google Play Console. Arraste os balões com o mouse para reposicionar livremente!
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap gap-3">
+                <button onclick="toggleVisualMode()" id="btn-toggle-mode" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-md flex items-center gap-2 border border-slate-700">
+                    <svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Modo: Pre-render High-Fi UI
+                </button>
+                <button onclick="downloadAll()" class="bg-gradient-to-r from-brand-accent to-brand-purple text-brand-darker px-6 py-3 rounded-xl font-black hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-brand-accent/20 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Baixar Lote Completo (8 Telas)
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace split -->
+        <div class="flex flex-col xl:flex-row gap-8">
+            
+            <!-- Sidebar: Controls -->
+            <aside class="w-full xl:w-[440px] shrink-0 bg-slate-900/60 border border-slate-800 p-6 rounded-3xl backdrop-blur-md max-h-[85vh] overflow-y-auto">
+                <h3 class="font-extrabold text-lg text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    Painel de Customização
+                </h3>
+                
+                <div class="space-y-6" id="editor-controls">
+                    <!-- Dynamic form entries will be injected here by JS -->
+                </div>
+            </aside>
+
+            <!-- Screen Previews Grid -->
+            <main class="flex-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-10">
+                    <!-- Screens containers will be generated dynamically -->
+                    <div id="grid-container" class="contents"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Data Definitions -->
+    <script>
+        let visualMode = 'render'; // 'render' or 'upload'
+        
+        // EINSTEIN AVATAR RAW IMAGES BASE
+        const EINSTEIN_IMAGES = {
+            happy: 'https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/einstein-happy.png',
+            shocked: 'https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/einstein-skeptical.png',
+            panic: 'https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/einstein-panic-2h.png'
+        };
+
+        const screens = [
+            {
+                id: 1,
+                bgColor: 'from-slate-950 via-slate-900 to-cyan-950',
+                glowColor: 'bg-cyan-500',
+                title: 'Priorização Radical',
+                subtitle: 'Foque no que importa. Apenas 5 tarefas ativas simultâneas.',
+                pointer: { 
+                    text: 'Focar em poucas variáveis garante o sucesso quântico!', 
+                    top: '980px', 
+                    left: '550px', 
+                    avatar: 'happy',
+                    arrow: 'baixo',
+                    arrowAngle: 180,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '980px',
+                    left: '390px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '320px',
+                uiType: 'home'
+            },
+            {
+                id: 2,
+                bgColor: 'from-slate-950 via-slate-900 to-purple-950',
+                glowColor: 'bg-purple-600',
+                title: 'Motor de Urgência',
+                subtitle: 'Ciclo de vida de 24h. Em caso de atraso, o Einstein entra em pânico!',
+                pointer: { 
+                    text: 'O prazo de tolerância está no fim! Foco total!', 
+                    top: '1100px', 
+                    left: '200px', 
+                    avatar: 'panic',
+                    arrow: 'direita',
+                    arrowAngle: 0,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '1100px',
+                    left: '40px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '320px',
+                uiType: 'panic'
+            },
+            {
+                id: 3,
+                bgColor: 'from-slate-950 via-slate-900 to-teal-950',
+                glowColor: 'bg-emerald-500',
+                title: 'Tarefas tipo Lista',
+                subtitle: 'Checklists interativos integrados para desdobrar suas metas diárias.',
+                pointer: { 
+                    text: 'Checklist tátil estilo To-Do para suas listas diárias.', 
+                    top: '860px', 
+                    left: '550px', 
+                    avatar: 'happy',
+                    arrow: 'baixo',
+                    arrowAngle: 180,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '860px',
+                    left: '390px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '320px',
+                uiType: 'checklist'
+            },
+            {
+                id: 4,
+                bgColor: 'from-slate-950 via-slate-900 to-fuchsia-950',
+                glowColor: 'bg-pink-500',
+                title: 'Micro-Kanban Integrado',
+                subtitle: 'Divida grandes objetivos em etapas e gerencie o fluxo até a conclusão.',
+                pointer: { 
+                    text: 'Quebre a tarefa em etapas e mova no Kanban interno.', 
+                    top: '920px', 
+                    left: '200px', 
+                    avatar: 'happy',
+                    arrow: 'direita',
+                    arrowAngle: 0,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '920px',
+                    left: '40px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '320px',
+                uiType: 'kanban'
+            },
+            {
+                id: 5,
+                bgColor: 'from-slate-950 via-slate-900 to-emerald-950',
+                glowColor: 'bg-teal-500',
+                title: 'Menu Radial em Leque',
+                subtitle: 'Uma interface tátil revolucionária para criar tarefas com um toque.',
+                pointer: { 
+                    text: 'Adicione itens com o inovador menu em arco!', 
+                    top: '1050px', 
+                    left: '310px', 
+                    avatar: 'happy',
+                    arrow: 'baixo',
+                    arrowAngle: 90,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '1050px',
+                    left: '150px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '260px',
+                uiType: 'menu'
+            },
+            {
+                id: 6,
+                bgColor: 'from-slate-950 via-slate-900 to-amber-950',
+                glowColor: 'bg-amber-500',
+                title: 'Recorrência Inteligente',
+                subtitle: 'Configure hábitos automáticos. Até 5 tarefas recorrentes ativas.',
+                pointer: { 
+                    text: 'Hábitos organizados sem sobrecarregar sua lista principal!', 
+                    top: '720px', 
+                    left: '440px', 
+                    avatar: 'happy',
+                    arrow: 'cima',
+                    arrowAngle: 270,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '720px',
+                    left: '280px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '320px',
+                uiType: 'recurrence'
+            },
+            {
+                id: 7,
+                bgColor: 'from-slate-950 via-slate-900 to-indigo-950',
+                glowColor: 'bg-indigo-600',
+                title: 'Quadro de Visão Pessoal',
+                subtitle: 'Mantenha o seu propósito vivo. Alinhamento de Valores, Visão e Metas.',
+                pointer: { 
+                    text: 'Os 3 pilares de Petr Ludwig para combater a procrastinação.', 
+                    top: '600px', 
+                    left: '550px', 
+                    avatar: 'shocked',
+                    arrow: 'baixo',
+                    arrowAngle: 180,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '600px',
+                    left: '390px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '320px',
+                uiType: 'vision'
+            },
+            {
+                id: 8,
+                bgColor: 'from-slate-950 via-slate-900 to-rose-950',
+                glowColor: 'bg-rose-600',
+                title: 'Painel de Conquistas',
+                subtitle: 'Acumule pontos offline, celebre dias produtivos e ganhe badges.',
+                pointer: { 
+                    text: 'Colecione pontos e badges gamificados offline!', 
+                    top: '580px', 
+                    left: '200px', 
+                    avatar: 'happy',
+                    arrow: 'direita',
+                    arrowAngle: 0,
+                    arrowLength: 70,
+                    arrowThickness: 5,
+                    arrowColor: '#00f2ff'
+                },
+                avatar: {
+                    top: '580px',
+                    left: '40px',
+                    width: 130,
+                    name: 'Einstein',
+                    customUrl: null
+                },
+                phoneTop: '320px',
+                uiType: 'dashboard'
+            }
+        ];
+
+        // Store original coordinates for resetting
+        const defaultPositions = screens.map(s => ({ top: s.pointer.top, left: s.pointer.left }));
+        const defaultAvatarPositions = screens.map(s => ({ top: s.avatar.top, left: s.avatar.left }));
+
+        // SVGs for high fidelity simulated phone content
+        const icons = {
+            dots: `<svg class="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`,
+            plus: `<svg class="w-6 h-6 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+            checkmark: `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            clock: `<svg class="w-4 h-4 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+            eye: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`,
+            list: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>`,
+            sparkles: `<svg class="w-4 h-4 text-yellow-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/></svg>`
+        };
+
+        // Pointer Arrow Generator
+        function getArrowMarkup(index) {
+            const screen = screens[index];
+            const p = screen.pointer;
+            const direction = p.arrow;
+            
+            if (direction === 'none' || !direction) return '';
+            
+            const strokeColor = p.arrowColor || '#00f2ff';
+            const angle = p.arrowAngle !== undefined ? p.arrowAngle : 0;
+            const length = p.arrowLength !== undefined ? p.arrowLength : 70;
+            const thickness = p.arrowThickness !== undefined ? p.arrowThickness : 5;
+            
+            const filter = `filter: drop-shadow(0 0 6px ${strokeColor}) drop-shadow(0 0 12px ${strokeColor});`;
+            
+            let positionClass = '';
+            if (direction === 'baixo') {
+                positionClass = 'absolute top-full left-1/2 -translate-x-1/2 pt-3';
+            } else if (direction === 'cima') {
+                positionClass = 'absolute bottom-full left-1/2 -translate-x-1/2 pb-3';
+            } else if (direction === 'esquerda') {
+                positionClass = 'absolute right-full top-1/2 -translate-y-1/2 pr-3';
+            } else if (direction === 'direita') {
+                positionClass = 'absolute left-full top-1/2 -translate-y-1/2 pl-3';
+            }
+            
+            return `
+                <div class="${positionClass} flex items-center justify-center pointer-events-none select-none z-50">
+                    <svg width="${length}" height="${length}" viewBox="0 0 100 100" fill="none" style="${filter} transform: rotate(${angle}deg); transform-origin: 50% 50%; overflow: visible;">
+                        <!-- Arrow shaft line -->
+                        <path d="M 10,50 L 85,50" stroke="${strokeColor}" stroke-width="${thickness}" stroke-linecap="round"/>
+                        <!-- Arrow head pointy part -->
+                        <path d="M 65,30 L 85,50 L 65,70" stroke="${strokeColor}" stroke-width="${thickness}" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Glowing tip circle -->
+                        <circle cx="85" cy="50" r="${thickness * 0.7}" fill="${strokeColor}"/>
+                    </svg>
+                </div>
+            `;
+        }
+
+        // Render phone mockup UI dynamically based on type
+        function getPhoneUIMarkup(type) {
+            const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            const statusBar = `
+                <div class="flex justify-between items-center px-8 py-3 text-[14px] font-semibold text-slate-300 font-mono tracking-wider w-full select-none shrink-0 bg-slate-950/20">
+                    <span>${time}</span>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c3.9 3.89 10.21 3.89 14.1 0l-.62-1.79C19.06 16.07 19.8 14.12 19.8 12c0-4.97-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 3.3-6 6z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M17 5H3a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2zm-1 16H4V9h12v12z"/></svg>
+                        <div class="w-6 h-3 border border-slate-400 rounded-sm p-0.5 flex items-center"><div class="w-4 h-full bg-slate-300 rounded-xs"></div></div>
+                    </div>
+                </div>
+            `;
+
+            const appHeader = `
+                <div class="px-6 py-4 flex items-center justify-between shrink-0 select-none">
+                    <div class="flex items-center gap-2">
+                        <img src="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png" width="32" class="rounded-md">
+                        <span class="font-black text-xl tracking-wider bg-gradient-to-r from-white to-brand-accent bg-clip-text text-transparent">5task</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="glass-card flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-yellow-500/30 text-yellow-400 text-xs font-black">
+                            ${icons.sparkles} <span>Hoje: 3</span>
+                        </div>
+                        <div class="w-8 h-8 rounded-full border border-slate-700 bg-slate-900 flex items-center justify-center text-slate-300 font-bold text-xs">GL</div>
+                    </div>
+                </div>
+            `;
+
+            const appBottomMenu = (active = 'tasks') => `
+                <div class="mt-auto px-4 py-4 flex justify-between items-center border-t border-slate-800/60 bg-slate-950/90 backdrop-blur-xl shrink-0 select-none">
+                    <button class="flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${active === 'vision' ? 'text-brand-accent' : 'text-slate-500'}">
+                        ${icons.eye}
+                        <span class="text-[10px] font-bold">Minha Visão</span>
+                    </button>
+                    <button class="flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${active === 'tasks' ? 'text-brand-accent' : 'text-slate-500'}">
+                        ${icons.list}
+                        <span class="text-[10px] font-bold">Hoje</span>
+                    </button>
+                    
+                    <div class="relative -top-4">
+                        <button class="w-14 h-14 rounded-2xl bg-brand-accent shadow-[0_0_20px_rgba(0,242,255,0.4)] flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+                            ${icons.plus}
+                        </button>
+                    </div>
+                    
+                    <button class="flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${active === 'recurrence' ? 'text-brand-accent' : 'text-slate-500'}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5"/></svg>
+                        <span class="text-[10px] font-bold">Recorrentes</span>
+                    </button>
+                    <button class="flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${active === 'dashboard' ? 'text-brand-accent' : 'text-slate-500'}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                        <span class="text-[10px] font-bold">Painel</span>
+                    </button>
+                </div>
+            `;
+
+            switch (type) {
+                case 'home':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-5 overflow-hidden">
+                            <div class="flex items-start gap-3 select-none">
+                                <img src="${EINSTEIN_IMAGES.happy}" width="70" class="rounded-full border border-slate-700 bg-slate-900 p-1">
+                                <div class="glass-card p-3 rounded-2xl rounded-tl-none relative border border-brand-accent/20 flex-1">
+                                    <p class="text-xs font-semibold text-slate-200">"Focar em poucas variáveis garante o sucesso. Vamos vencer a procrastinação hoje!"</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mt-1 select-none">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Tarefas em Foco (3/5)</h4>
+                                <span class="text-xs text-brand-accent font-semibold">2 Livres</span>
+                            </div>
+
+                            <div class="space-y-3 flex-1 overflow-hidden">
+                                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-rose-500 relative flex items-center justify-between border-t border-r border-b border-slate-800">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="bg-rose-500/10 text-rose-400 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md">Crítico</span>
+                                            <span class="text-[10px] text-slate-400 font-medium">Hoje</span>
+                                        </div>
+                                        <h5 class="text-sm font-bold text-slate-100">🚀 Finalizar Pitch Deck do Projeto</h5>
+                                    </div>
+                                    <div class="w-5 h-5 rounded-full border-2 border-rose-500/50 flex items-center justify-center cursor-pointer shrink-0"></div>
+                                </div>
+
+                                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-amber-500 relative flex items-center justify-between border-t border-r border-b border-slate-800">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="bg-amber-500/10 text-amber-400 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md">Atenção</span>
+                                            <span class="text-[10px] text-slate-400 font-medium">Amanhã</span>
+                                        </div>
+                                        <h5 class="text-sm font-bold text-slate-100">📚 Estudar Capítulo 4 do Livro de Foco</h5>
+                                    </div>
+                                    <div class="w-5 h-5 rounded-full border-2 border-amber-500/50 flex items-center justify-center cursor-pointer shrink-0"></div>
+                                </div>
+
+                                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-brand-accent relative flex items-center justify-between border-t border-r border-b border-slate-800">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="bg-cyan-500/10 text-brand-accent text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md">Urgente</span>
+                                            <span class="text-[10px] text-slate-400 font-medium">2 dias</span>
+                                        </div>
+                                        <h5 class="text-sm font-bold text-slate-100">🧠 Revisar Metas da Minha Visão</h5>
+                                    </div>
+                                    <div class="w-5 h-5 rounded-full border-2 border-brand-accent/50 flex items-center justify-center cursor-pointer shrink-0"></div>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('tasks')}
+                    `;
+
+                case 'panic':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-5 overflow-hidden">
+                            <div class="flex items-start gap-3 select-none">
+                                <img src="${EINSTEIN_IMAGES.panic}" width="70" class="rounded-full border border-red-500 bg-slate-900 p-1 animate-pulse">
+                                <div class="bg-rose-950/40 p-3 rounded-2xl rounded-tl-none relative border border-rose-500/30 flex-1">
+                                    <p class="text-xs font-black text-rose-300">"O tempo está acabando! Faltam menos de 3 horas para o expurgo da tarefa! FOCO TOTAL!"</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center select-none">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Estado de Pânico Global
+                                </h4>
+                            </div>
+
+                            <div class="space-y-4 flex-1">
+                                <div class="glass-card-vivid p-5 rounded-2xl border-l-4 border-l-rose-500 relative border-2 border-rose-500/40 shadow-[0_0_30px_rgba(239,68,68,0.15)] flex flex-col gap-4">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="bg-rose-500/20 text-rose-300 text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-md">🔴 Expirando</span>
+                                            </div>
+                                            <h5 class="text-base font-black text-white">⚠️ Entregar Relatório Trimestral</h5>
+                                        </div>
+                                        <div class="w-6 h-6 rounded-full border-2 border-rose-500 flex items-center justify-center shrink-0"></div>
+                                    </div>
+                                    
+                                    <div class="bg-slate-950/60 p-3 rounded-xl border border-rose-500/20 flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            ${icons.clock}
+                                            <span class="text-xs text-rose-400 font-black font-mono">01:54:12 restantes</span>
+                                        </div>
+                                        <span class="text-[10px] font-black text-rose-500 uppercase tracking-widest animate-pulse">Carga Crítica</span>
+                                    </div>
+                                </div>
+
+                                <div class="glass-card p-4 rounded-2xl opacity-60 flex items-center justify-between border border-slate-800">
+                                    <div>
+                                        <span class="bg-slate-800 text-slate-400 text-[9px] font-bold px-2.5 py-0.5 rounded-md">Arquivamento Automático</span>
+                                        <h5 class="text-sm font-semibold text-slate-400 mt-1">Refatorar Controllers Core</h5>
+                                    </div>
+                                    <div class="w-5 h-5 rounded-full border border-slate-700"></div>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('tasks')}
+                    `;
+
+                case 'checklist':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-5 overflow-hidden">
+                            <div class="flex justify-between items-center select-none">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Tarefas de Checklist</h4>
+                                <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md">Estilo To-Do</span>
+                            </div>
+
+                            <div class="space-y-4 flex-1 overflow-y-auto">
+                                <div class="glass-card-vivid p-5 rounded-3xl border border-brand-accent/30 flex flex-col gap-4">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="text-[10px] text-brand-accent font-black tracking-widest uppercase">Lista Completa</span>
+                                            <h5 class="text-base font-black text-slate-100 mt-0.5">🛒 Preparativos para Lançamento</h5>
+                                        </div>
+                                        <span class="text-xs font-black text-brand-accent font-mono bg-cyan-500/10 px-2 py-1 rounded-md border border-brand-accent/20">3/5 itens</span>
+                                    </div>
+
+                                    <div class="w-full bg-slate-900 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-brand-accent to-emerald-400 h-2 rounded-full shadow-[0_0_10px_rgba(0,242,255,0.4)]" style="width: 60%"></div>
+                                    </div>
+
+                                    <div class="space-y-2 mt-2">
+                                        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950/40 border border-slate-800/80 line-through text-slate-400">
+                                            <div class="w-5 h-5 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center">
+                                                ${icons.checkmark}
+                                            </div>
+                                            <span class="text-xs font-medium">Configurar o domínio de produção</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950/40 border border-slate-800/80 line-through text-slate-400">
+                                            <div class="w-5 h-5 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center">
+                                                ${icons.checkmark}
+                                            </div>
+                                            <span class="text-xs font-medium">Subir nova build na Vercel</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950/20 border border-brand-accent/15 text-slate-200">
+                                            <div class="w-5 h-5 rounded-lg border-2 border-brand-accent/40 flex items-center justify-center cursor-pointer"></div>
+                                            <span class="text-xs font-semibold">Homologar fluxo de pagamento</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950/40 border border-slate-800/80 line-through text-slate-400">
+                                            <div class="w-5 h-5 rounded-lg bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center">
+                                                ${icons.checkmark}
+                                            </div>
+                                            <span class="text-xs font-medium">Enviar e-mail para a lista beta</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950/20 border border-brand-accent/15 text-slate-200">
+                                            <div class="w-5 h-5 rounded-lg border-2 border-brand-accent/40 flex items-center justify-center cursor-pointer"></div>
+                                            <span class="text-xs font-semibold">Publicar posts no X/Twitter</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('tasks')}
+                    `;
+
+                case 'kanban':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-5 overflow-hidden">
+                            <div class="flex justify-between items-center select-none">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Micro-Kanban por Tarefa</h4>
+                                <span class="bg-brand-purple/20 text-brand-purple text-[10px] font-bold px-2 py-0.5 rounded-md border border-brand-purple/20">Fluxo Ágil</span>
+                            </div>
+
+                            <div class="space-y-4 flex-1">
+                                <div class="glass-card-vivid p-5 rounded-3xl border border-brand-purple/30 flex flex-col gap-4">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="bg-brand-purple/10 text-brand-purple text-[9px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded">Kanban</span>
+                                                <span class="text-[10px] text-slate-400 font-semibold">1/3 Etapas concluídas</span>
+                                            </div>
+                                            <h5 class="text-base font-black text-slate-100 mt-1">🎨 Design e UX do Painel de Metas</h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="w-full bg-slate-900 rounded-full h-1.5">
+                                        <div class="bg-brand-purple h-1.5 rounded-full shadow-[0_0_10px_rgba(108,92,231,0.5)]" style="width: 33%"></div>
+                                    </div>
+
+                                    <div class="grid grid-cols-3 gap-2.5 mt-1 select-none">
+                                        <div class="bg-slate-950/60 p-2 rounded-xl border border-slate-800 flex flex-col gap-2 min-h-[140px]">
+                                            <span class="text-[9px] font-black uppercase text-slate-500 tracking-wider">A Fazer</span>
+                                            <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-800 text-[10px] text-slate-300 font-semibold shadow-xs">
+                                                Fazer mockup de telas
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-blue-950/20 p-2 rounded-xl border border-blue-500/20 flex flex-col gap-2 min-h-[140px]">
+                                            <span class="text-[9px] font-black uppercase text-blue-400 tracking-wider">Fazendo</span>
+                                            <div class="bg-slate-900/90 p-2 rounded-lg border border-blue-500/30 text-[10px] text-blue-200 font-black shadow-[0_0_10px_rgba(0,168,255,0.1)]">
+                                                💻 Front-end
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-emerald-950/20 p-2 rounded-xl border border-emerald-500/20 flex flex-col gap-2 min-h-[140px]">
+                                            <span class="text-[9px] font-black uppercase text-emerald-400 tracking-wider">Concluído</span>
+                                            <div class="bg-slate-900/60 p-2 rounded-lg border border-emerald-500/10 text-[10px] text-slate-400 line-through font-medium">
+                                                Validar regras
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-slate-800 opacity-60">
+                                    <div>
+                                        <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded uppercase font-bold">Simples</span>
+                                        <h5 class="text-sm font-semibold text-slate-400 mt-1">Gravar vídeo do pitch</h5>
+                                    </div>
+                                    <div class="w-5 h-5 rounded-full border border-slate-700"></div>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('tasks')}
+                    `;
+
+                case 'menu':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-5 overflow-hidden relative">
+                            <div class="space-y-3 opacity-25 select-none blur-[1px]">
+                                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-rose-500 flex justify-between items-center">
+                                    <h5 class="text-sm font-bold text-slate-200">🚀 Finalizar Pitch Deck do Projeto</h5>
+                                </div>
+                                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-amber-500 flex justify-between items-center">
+                                    <h5 class="text-sm font-bold text-slate-200">📚 Estudar Capítulo 4 do Livro de Foco</h5>
+                                </div>
+                            </div>
+
+                            <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-xs z-30 flex flex-col justify-end">
+                                <div class="relative w-full h-[360px] flex items-center justify-center overflow-hidden">
+                                    
+                                    <svg class="absolute w-[500px] h-[500px] bottom-0" viewBox="0 0 200 200">
+                                        <path d="M 30,170 A 70,70 0 0,1 170,170" fill="none" stroke="rgba(0, 242, 255, 0.15)" stroke-width="2" stroke-dasharray="4,4"/>
+                                        <path d="M 50,170 A 50,50 0 0,1 150,170" fill="none" stroke="rgba(108, 92, 231, 0.1)" stroke-width="1.5"/>
+                                    </svg>
+
+                                    <div class="absolute bottom-40 w-full flex justify-center gap-2 select-none">
+                                        <span class="bg-purple-950/80 text-[10px] font-black text-purple-300 px-2.5 py-1.5 rounded-full border border-purple-500/30 shadow-[0_0_12px_rgba(108,92,231,0.2)]">Diária</span>
+                                        <span class="bg-purple-950/80 text-[10px] font-black text-purple-300 px-2.5 py-1.5 rounded-full border border-purple-500/30">Semanal</span>
+                                        <span class="bg-purple-950/80 text-[10px] font-black text-purple-300 px-2.5 py-1.5 rounded-full border border-purple-500/30">Dias Úteis</span>
+                                        <span class="bg-purple-950/80 text-[10px] font-black text-purple-300 px-2.5 py-1.5 rounded-full border border-purple-500/30">Custom</span>
+                                    </div>
+
+                                    <div class="absolute bottom-20 left-20 flex flex-col items-center gap-1">
+                                        <div class="w-14 h-14 rounded-full bg-emerald-500 flex items-center justify-center border-2 border-white shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+                                            ${icons.list}
+                                        </div>
+                                        <span class="text-[10px] font-black text-slate-100 bg-slate-900/90 px-2 py-0.5 rounded-md">Lista</span>
+                                    </div>
+
+                                    <div class="absolute bottom-28 right-24 flex flex-col items-center gap-1">
+                                        <div class="w-14 h-14 rounded-full bg-brand-purple flex items-center justify-center border-2 border-white shadow-[0_0_15px_rgba(108,92,231,0.5)]">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5"/></svg>
+                                        </div>
+                                        <span class="text-[10px] font-black text-slate-100 bg-slate-900/90 px-2 py-0.5 rounded-md">Recorrente</span>
+                                    </div>
+
+                                    <div class="absolute bottom-28 left-48 flex flex-col items-center gap-1">
+                                        <div class="w-14 h-14 rounded-full bg-brand-blue flex items-center justify-center border-2 border-white shadow-[0_0_15px_rgba(0,168,255,0.4)]">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                        <span class="text-[10px] font-black text-slate-100 bg-slate-900/90 px-2 py-0.5 rounded-md">Simples</span>
+                                    </div>
+
+                                    <div class="absolute bottom-2">
+                                        <button class="w-16 h-16 rounded-full bg-slate-950 border-4 border-brand-accent flex items-center justify-center shadow-[0_0_20px_rgba(0,242,255,0.6)] transform rotate-45">
+                                            ${icons.plus}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('tasks')}
+                    `;
+
+                case 'recurrence':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-5 overflow-hidden">
+                            <div class="flex justify-between items-center select-none">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Aba de Recorrência</h4>
+                                <span class="bg-brand-accent/20 text-brand-accent text-[10px] font-bold px-2 py-0.5 rounded-md border border-brand-accent/20">Hábitos Automáticos</span>
+                            </div>
+
+                            <div class="glass-card-vivid p-3.5 rounded-2xl border border-brand-accent/15 select-none bg-gradient-to-br from-cyan-950/20 to-transparent">
+                                <p class="text-[10px] leading-relaxed text-slate-300">
+                                    💡 <strong>Gerenciamento Inteligente:</strong> As 2 primeiras tarefas recorrentes do dia aparecem na sua tela principal. As demais ficam organizadas de forma limpa aqui.
+                                </p>
+                            </div>
+
+                            <div class="space-y-3 flex-1 overflow-y-auto">
+                                <div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-slate-800">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1.5">
+                                            <span class="bg-cyan-500/10 text-brand-accent text-[9px] font-black uppercase px-2 py-0.5 rounded-md">Diária</span>
+                                            <span class="text-[9px] text-slate-400 font-semibold">Toda manhã às 07:00</span>
+                                        </div>
+                                        <h5 class="text-sm font-bold text-slate-100">🏋️ Praticar Exercícios Físicos</h5>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </div>
+                                </div>
+
+                                <div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-slate-800">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1.5">
+                                            <span class="bg-purple-500/10 text-brand-purple text-[9px] font-black uppercase px-2 py-0.5 rounded-md">Semanal</span>
+                                            <span class="text-[9px] text-slate-400 font-semibold">Toda segunda-feira</span>
+                                        </div>
+                                        <h5 class="text-sm font-bold text-slate-100">📝 Planejamento Estratégico</h5>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                </div>
+
+                                <div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-slate-800">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1.5">
+                                            <span class="bg-indigo-500/10 text-indigo-400 text-[9px] font-black uppercase px-2 py-0.5 rounded-md">Dias Úteis</span>
+                                            <span class="text-[9px] text-slate-400 font-semibold">De segunda a sexta</span>
+                                        </div>
+                                        <h5 class="text-sm font-bold text-slate-100">☕ Alinhamento com o time</h5>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('recurrence')}
+                    `;
+
+                case 'vision':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-4 overflow-hidden">
+                            <div class="flex justify-between items-center select-none">
+                                <h4 class="text-xs font-black uppercase tracking-wider text-slate-400">Minha Visão Pessoal</h4>
+                                <span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-2.5 py-0.5 rounded-md border border-indigo-500/20">Petr Ludwig</span>
+                            </div>
+
+                            <div class="space-y-3.5 flex-1 overflow-y-auto pr-1">
+                                <div class="glass-card-vivid p-4.5 rounded-2xl border border-pink-500/20 bg-gradient-to-br from-pink-950/10 to-transparent">
+                                    <div class="flex items-center gap-2 mb-2 select-none">
+                                        <span class="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center text-white text-[10px] font-black">1</span>
+                                        <h5 class="text-xs font-black uppercase text-pink-400 tracking-wider">Meus Valores Core</h5>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-100">
+                                        Liberdade criativa absoluta, excelência técnica, consistência extrema e evolução humana através da tecnologia.
+                                    </p>
+                                </div>
+
+                                <div class="glass-card p-4.5 rounded-2xl border border-brand-accent/20 bg-gradient-to-br from-cyan-950/15 to-transparent">
+                                    <div class="flex items-center gap-2 mb-2 select-none">
+                                        <span class="w-5 h-5 rounded-full bg-brand-accent flex items-center justify-center text-slate-900 text-[10px] font-black">2</span>
+                                        <h5 class="text-xs font-black uppercase text-brand-accent tracking-wider">Minha Visão de Futuro</h5>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-100">
+                                        Desenvolver softwares minimalistas e disruptivos que eliminem o ruído moderno e permitam ao ser humano focar em seu propósito real.
+                                    </p>
+                                </div>
+
+                                <div class="glass-card p-4.5 rounded-2xl border border-brand-purple/20 bg-gradient-to-br from-purple-950/15 to-transparent">
+                                    <div class="flex items-center gap-2 mb-2 select-none">
+                                        <span class="w-5 h-5 rounded-full bg-brand-purple flex items-center justify-center text-white text-[10px] font-black">3</span>
+                                        <h5 class="text-xs font-black uppercase text-brand-purple tracking-wider">Metas & Projetos</h5>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-100">
+                                        🚀 Lançar o aplicativo 5task nas lojas globais.<br>
+                                        🧘 Consolidar rotina saudável e foco contínuo.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('vision')}
+                    `;
+
+                case 'dashboard':
+                    return `
+                        ${statusBar}
+                        ${appHeader}
+                        <div class="px-6 flex-1 flex flex-col gap-5 overflow-hidden">
+                            <div class="flex justify-between items-center select-none">
+                                <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 font-mono">Motor de Produtividade</h4>
+                                <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded border border-emerald-500/20">Offline DB</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3.5 select-none">
+                                <div class="glass-card p-4 rounded-2xl border border-slate-800 text-center flex flex-col justify-center items-center">
+                                    <span class="text-[28px] font-black text-yellow-400 tracking-tight">1.420</span>
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Pontos Ganhos</span>
+                                </div>
+                                <div class="glass-card p-4 rounded-2xl border border-slate-800 text-center flex flex-col justify-center items-center">
+                                    <span class="text-[28px] font-black text-rose-500 tracking-tight flex items-center gap-1 leading-none">🔥 5</span>
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Dias Seguidos</span>
+                                </div>
+                            </div>
+
+                            <div class="select-none">
+                                <h5 class="text-xs font-black uppercase text-slate-400 tracking-wider">Badges Desbloqueadas (3)</h5>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3 flex-1 overflow-y-auto">
+                                <div class="glass-card-vivid p-3 rounded-2xl border border-brand-accent/30 text-center flex flex-col items-center gap-1.5">
+                                    <div class="w-10 h-10 rounded-full bg-cyan-500/10 border border-brand-accent/40 flex items-center justify-center text-brand-accent">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                    </div>
+                                    <span class="text-[9px] font-black text-slate-200 leading-tight">Foco Total</span>
+                                </div>
+
+                                <div class="glass-card-vivid p-3 rounded-2xl border border-brand-purple/30 text-center flex flex-col items-center gap-1.5">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500/10 border border-brand-purple/40 flex items-center justify-center text-brand-purple">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                    </div>
+                                    <span class="text-[9px] font-black text-slate-200 leading-tight">Einstein Approve</span>
+                                </div>
+
+                                <div class="glass-card-vivid p-3 rounded-2xl border border-brand-pink/30 text-center flex flex-col items-center gap-1.5">
+                                    <div class="w-10 h-10 rounded-full bg-pink-500/10 border border-brand-pink/40 flex items-center justify-center text-brand-pink">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </div>
+                                    <span class="text-[9px] font-black text-slate-200 leading-tight">Procrastinação Zero</span>
+                                </div>
+
+                                <div class="glass-card p-3 rounded-2xl opacity-40 text-center flex flex-col items-center gap-1.5 border border-slate-800">
+                                    <div class="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500">
+                                        🏆
+                                    </div>
+                                    <span class="text-[9px] font-bold text-slate-400 leading-tight">Lenda Foco</span>
+                                </div>
+                            </div>
+                        </div>
+                        ${appBottomMenu('dashboard')}
+                    `;
+            }
+            return '';
+        }
+
+        // Global drag configurations
+        let activeDragIndex = null;
+        let activeDragType = null; // 'balloon' or 'avatar'
+        let isDragging = false;
+        let startX, startY;
+        let startLeft, startTop;
+
+        function startDrag(e, index, type = 'balloon') {
+            // Do not drag if clicking input or selectors
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+            
+            if (e.cancelable) e.preventDefault();
+            activeDragIndex = index;
+            activeDragType = type;
+            isDragging = true;
+
+            const targetId = type === 'balloon' ? `render-pointer-${index}` : `render-avatar-${index}`;
+            const bubble = document.getElementById(targetId);
+            
+            // Extract coordinates or fallback to default
+            startLeft = parseFloat(bubble.style.left) || 0;
+            startTop = parseFloat(bubble.style.top) || 0;
+            
+            const isTouch = e.type.startsWith('touch');
+            startX = isTouch ? e.touches[0].clientX : e.clientX;
+            startY = isTouch ? e.touches[0].clientY : e.clientY;
+
+            if (!isTouch) {
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('mouseup', stopDrag);
+            } else {
+                document.addEventListener('touchmove', onDragTouch, { passive: false });
+                document.addEventListener('touchend', stopDrag);
+            }
+        }
+
+        function onDrag(e) {
+            if (!isDragging || activeDragIndex === null || activeDragType === null) return;
+
+            const targetId = activeDragType === 'balloon' ? `render-pointer-${activeDragIndex}` : `render-avatar-${activeDragIndex}`;
+            const bubble = document.getElementById(targetId);
+            const captureArea = document.getElementById(`capture-area-${activeDragIndex}`);
+
+            // Compute exact scale ratio of CSS transform scale dynamically
+            const rect = captureArea.getBoundingClientRect();
+            const scale = rect.width / 1080;
+
+            const deltaX = (e.clientX - startX) / scale;
+            const deltaY = (e.clientY - startY) / scale;
+
+            let newLeft = startLeft + deltaX;
+            let newTop = startTop + deltaY;
+
+            // Restrict bounds of the elements inside the 1080x1920 canvas
+            newLeft = Math.max(-100, Math.min(1080 - 150, newLeft));
+            newTop = Math.max(0, Math.min(1920 - 150, newTop));
+
+            // Apply direct styles
+            bubble.style.left = `${newLeft}px`;
+            bubble.style.top = `${newTop}px`;
+
+            // Keep local data synced
+            const screen = screens[activeDragIndex];
+            if (activeDragType === 'balloon') {
+                screen.pointer.left = `${Math.round(newLeft)}px`;
+                screen.pointer.top = `${Math.round(newTop)}px`;
+                
+                // Update coord tag in Sidebar
+                const tag = document.getElementById(`coord-tag-${activeDragIndex}`);
+                if (tag) tag.innerText = `X: ${Math.round(newLeft)}px | Y: ${Math.round(newTop)}px`;
+            } else {
+                screen.avatar.left = `${Math.round(newLeft)}px`;
+                screen.avatar.top = `${Math.round(newTop)}px`;
+                
+                // Update avatar coord tag in Sidebar
+                const tag = document.getElementById(`avatar-coord-tag-${activeDragIndex}`);
+                if (tag) tag.innerText = `X: ${Math.round(newLeft)}px | Y: ${Math.round(newTop)}px`;
+            }
+        }
+
+        function onDragTouch(e) {
+            if (e.cancelable) e.preventDefault();
+            const touch = e.touches[0];
+            onDrag({
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            activeDragIndex = null;
+            activeDragType = null;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', onDragTouch);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        function resetBubblePosition(index) {
+            const screen = screens[index];
+            const defaults = defaultPositions[index];
+            const avatarDefaults = defaultAvatarPositions[index];
+            
+            screen.pointer.top = defaults.top;
+            screen.pointer.left = defaults.left;
+            screen.avatar.top = avatarDefaults.top;
+            screen.avatar.left = avatarDefaults.left;
+            
+            updateBubble(index);
+            
+            // Update coord tags in DOM
+            const tag = document.getElementById(`coord-tag-${index}`);
+            if (tag) tag.innerText = `X: ${parseInt(defaults.left)}px | Y: ${parseInt(defaults.top)}px`;
+            
+            const avatarTag = document.getElementById(`avatar-coord-tag-${index}`);
+            if (avatarTag) avatarTag.innerText = `X: ${parseInt(avatarDefaults.left)}px | Y: ${parseInt(avatarDefaults.top)}px`;
+        }
+
+        // Re-render pointer bubble and avatar container for responsive updates
+        function updateBubble(index) {
+            const screen = screens[index];
+            
+            // 1. UPDATE SPEECH BALLOON & ARROW
+            const bubbleContainer = document.getElementById(`render-pointer-${index}`);
+            if (bubbleContainer) {
+                bubbleContainer.style.top = screen.pointer.top;
+                bubbleContainer.style.left = screen.pointer.left;
+
+                bubbleContainer.innerHTML = `
+                    <!-- Talk Speech Balloon -->
+                    <div class="glass-card-vivid px-6 py-4 rounded-3xl border border-white/20 shadow-2xl max-w-[340px] relative">
+                        <p class="text-xl font-bold text-white tracking-wide leading-snug">${screen.pointer.text}</p>
+                        
+                        <!-- Pointing neon arrow -->
+                        <div class="pointer-arrow" id="arrow-direction-${index}">
+                            ${getArrowMarkup(index)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. UPDATE AVATAR CONTAINER (Vertical Rounded Rectangle Frame)
+            const avatarContainer = document.getElementById(`render-avatar-${index}`);
+            if (avatarContainer) {
+                avatarContainer.style.top = screen.avatar.top;
+                avatarContainer.style.left = screen.avatar.left;
+                
+                const width = screen.avatar.width || 130;
+                const height = Math.round(width * 1.35);
+                avatarContainer.style.width = `${width}px`;
+                avatarContainer.style.height = `${height}px`;
+                
+                const avatarImgSrc = screen.avatar.customUrl || EINSTEIN_IMAGES[screen.pointer.avatar] || EINSTEIN_IMAGES.happy;
+                const avatarNameText = screen.avatar.name || 'Einstein';
+
+                avatarContainer.innerHTML = `
+                    <div class="avatar-frame">
+                        <img src="${avatarImgSrc}" class="avatar-img absolute inset-0">
+                        <div class="avatar-gradient absolute inset-0"></div>
+                        
+                        <!-- Badge Overlay at Bottom -->
+                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-accent to-brand-purple text-brand-darker text-[10px] font-black px-3 py-0.5 rounded-full border border-slate-950 uppercase font-mono shadow-md whitespace-nowrap z-10">
+                            ${avatarNameText}
+                        </span>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize Workspace Builder
+        const gridContainer = document.getElementById('grid-container');
+        const editorControls = document.getElementById('editor-controls');
+
+        function renderAllWorkspace() {
+            gridContainer.innerHTML = '';
+            editorControls.innerHTML = '';
+
+            screens.forEach((screen, index) => {
+                // RENDER PREVIEW CARD
+                const card = document.createElement('div');
+                card.className = 'bg-slate-950 p-4 rounded-3xl shadow-xl flex flex-col gap-4 border border-slate-800 hover:border-slate-700 transition-colors w-[392px] overflow-hidden shrink-0';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-black text-slate-300">${screen.id}</span>
+                            <h2 class="font-extrabold text-white text-sm">Tela ${screen.id}</h2>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <label class="bg-slate-800 text-brand-accent px-2 py-1 rounded-lg text-xs font-bold cursor-pointer hover:bg-slate-700 transition-all border border-brand-accent/20">
+                                Upload Print
+                                <input type="file" class="hidden" accept="image/*" onchange="loadImage(event, ${index})">
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Screenshot 1080x1920 scaled down -->
+                    <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950 relative flex justify-center h-[640px] shadow-inner select-none">
+                        <div id="capture-area-${index}" class="screenshot-container preview-scale bg-gradient-to-b ${screen.bgColor}">
+                            
+                            <!-- Glowing background orbs matching colors -->
+                            <div class="glow-orb w-[600px] h-[600px] ${screen.glowColor} -top-[120px] -left-[100px]"></div>
+                            <div class="glow-orb w-[700px] h-[700px] ${screen.glowColor} -bottom-[200px] -right-[200px] opacity-30"></div>
+                            
+                            <!-- Mesh grids & abstract curves -->
+                            <div class="pattern-grid"></div>
+                            <div class="pattern-circles w-[600px] h-[600px] -top-[100px] -left-[100px]"></div>
+                            <div class="pattern-circles w-[800px] h-[800px] -bottom-[150px] -right-[150px]"></div>
+                            <div class="absolute w-[450px] h-[450px] bottom-[200px] left-[50px] border border-white/5 rounded-full pointer-events-none"></div>
+
+                            <!-- Header Caption Title and Description -->
+                            <div class="absolute top-[90px] left-0 w-full px-[80px] text-center z-30 select-none">
+                                <h1 class="text-[76px] font-black text-white leading-tight mb-4 tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] uppercase italic font-sans" id="render-title-${index}">${screen.title}</h1>
+                                <p class="text-[34px] font-medium text-slate-300 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" id="render-subtitle-${index}">${screen.subtitle}</p>
+                            </div>
+
+                            <!-- Mobile Frame Mockup -->
+                            <div class="phone-mockup" style="top: ${screen.phoneTop}">
+                                <div class="phone-notch"></div>
+                                <div class="phone-content" id="phone-content-${index}">
+                                    ${getPhoneUIMarkup(screen.uiType)}
+                                </div>
+                            </div>
+
+                            <!-- Speech Balloon Annotation -->
+                            <div class="pointer-bubble" id="render-pointer-${index}" style="top: ${screen.pointer.top}; left: ${screen.pointer.left};" onmousedown="startDrag(event, ${index}, 'balloon')" ontouchstart="startDrag(event, ${index}, 'balloon')">
+                                <!-- Rendered dynamically by updateBubble -->
+                            </div>
+
+                            <!-- Rectangular Rounded Avatar Annotation -->
+                            <div class="avatar-container" id="render-avatar-${index}" style="top: ${screen.avatar.top}; left: ${screen.avatar.left};" onmousedown="startDrag(event, ${index}, 'avatar')" ontouchstart="startDrag(event, ${index}, 'avatar')">
+                                <!-- Rendered dynamically by updateBubble -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="downloadScreenshot(${index})" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-white font-black py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
+                            <svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Baixar Imagem PNG
+                        </button>
+                    </div>
+                `;
+                gridContainer.appendChild(card);
+                updateBubble(index); // Draw the bubble markup inside
+
+                // INJECT EDIT CONTROLS IN SIDEBAR
+                const controlBlock = document.createElement('div');
+                controlBlock.className = 'bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3.5';
+                controlBlock.innerHTML = `
+                    <div class="flex flex-col gap-1 border-b border-slate-800/80 pb-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-brand-accent uppercase tracking-widest font-mono">TELA ${screen.id} - CONFIG</span>
+                            <button onclick="resetBubblePosition(${index})" class="text-[10px] text-rose-500 hover:text-rose-400 font-bold transition-colors underline">Resetar Coords</button>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-slate-500 font-mono mt-1">
+                            <span>Balão: <span id="coord-tag-${index}" class="text-slate-400 font-semibold">X: ${parseInt(screen.pointer.left)}px | Y: ${parseInt(screen.pointer.top)}px</span></span>
+                            <span>Avatar: <span id="avatar-coord-tag-${index}" class="text-slate-400 font-semibold">X: ${parseInt(screen.avatar.left)}px | Y: ${parseInt(screen.avatar.top)}px</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Título Principal</label>
+                        <input type="text" value="${screen.title}" oninput="updateScreenData(${index}, 'title', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm text-slate-100 font-bold focus:border-brand-accent outline-none">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Descrição (Legenda)</label>
+                        <textarea rows="2" oninput="updateScreenData(${index}, 'subtitle', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:border-brand-accent outline-none">${screen.subtitle}</textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Fala do Einstein (Balão)</label>
+                        <input type="text" value="${screen.pointer.text}" oninput="updateScreenData(${index}, 'pointerText', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-100 focus:border-brand-accent font-semibold outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-2">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Expressão Padrão</label>
+                            <select onchange="updateScreenData(${index}, 'avatar', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:border-brand-accent outline-none">
+                                <option value="happy" ${screen.pointer.avatar === 'happy' ? 'selected' : ''}>Feliz</option>
+                                <option value="shocked" ${screen.pointer.avatar === 'shocked' ? 'selected' : ''}>Preocupado</option>
+                                <option value="panic" ${screen.pointer.avatar === 'panic' ? 'selected' : ''}>Pânico</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Lado da Seta</label>
+                            <select onchange="updateScreenData(${index}, 'arrow', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:border-brand-accent outline-none">
+                                <option value="esquerda" ${screen.pointer.arrow === 'esquerda' ? 'selected' : ''}>← Esquerda</option>
+                                <option value="direita" ${screen.pointer.arrow === 'direita' ? 'selected' : ''}>Direita →</option>
+                                <option value="cima" ${screen.pointer.arrow === 'cima' ? 'selected' : ''}>↑ Cima</option>
+                                <option value="baixo" ${screen.pointer.arrow === 'baixo' ? 'selected' : ''}>↓ Baixo</option>
+                                <option value="none" ${screen.pointer.arrow === 'none' ? 'selected' : ''}>Ocultar Seta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Customizable Seta Properties Block -->
+                    <div class="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-3" id="arrow-props-panel-${index}">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">Customizar Seta</label>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[9px] font-bold text-slate-500 font-mono">Cor:</span>
+                                <input type="color" value="${screen.pointer.arrowColor || '#00f2ff'}" oninput="updateScreenData(${index}, 'arrowColor', this.value)" class="w-6 h-6 rounded-md bg-transparent border-0 cursor-pointer p-0 overflow-hidden outline-none">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                                <span>Rotação (0-360°)</span>
+                                <span id="arrow-angle-val-${index}" class="text-brand-accent font-mono font-bold">${screen.pointer.arrowAngle}°</span>
+                            </div>
+                            <input type="range" min="0" max="360" value="${screen.pointer.arrowAngle}" oninput="updateScreenData(${index}, 'arrowAngle', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-accent">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                                <span>Tamanho / Comprimento</span>
+                                <span id="arrow-length-val-${index}" class="text-brand-accent font-mono font-bold">${screen.pointer.arrowLength}px</span>
+                            </div>
+                            <input type="range" min="40" max="160" value="${screen.pointer.arrowLength}" oninput="updateScreenData(${index}, 'arrowLength', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-accent">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                                <span>Espessura da Seta</span>
+                                <span id="arrow-thickness-val-${index}" class="text-brand-accent font-mono font-bold">${screen.pointer.arrowThickness}px</span>
+                            </div>
+                            <input type="range" min="2" max="12" value="${screen.pointer.arrowThickness}" oninput="updateScreenData(${index}, 'arrowThickness', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-accent">
+                        </div>
+                    </div>
+
+                    <!-- Customizable Rectangular Avatar Properties Block -->
+                    <div class="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-3">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">Customizar Avatar</label>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nome no Badge</label>
+                            <input type="text" value="${screen.avatar.name || 'Einstein'}" oninput="updateScreenData(${index}, 'avatarName', this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-100 font-bold focus:border-brand-accent outline-none">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                                <span>Largura do Avatar</span>
+                                <span id="avatar-width-val-${index}" class="text-brand-accent font-mono font-bold">${screen.avatar.width || 130}px</span>
+                            </div>
+                            <input type="range" min="80" max="240" value="${screen.avatar.width || 130}" oninput="updateScreenData(${index}, 'avatarWidth', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-accent">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Imagem do Personagem</label>
+                            <div class="flex flex-col gap-2">
+                                <label class="w-full bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-brand-accent text-slate-300 px-3 py-2.5 rounded-lg text-xs font-semibold cursor-pointer transition-all text-center">
+                                    <span>Upload Personagem Customizado</span>
+                                    <input type="file" class="hidden" accept="image/*" onchange="loadCustomAvatar(event, ${index})">
+                                </label>
+                                ${screen.avatar.customUrl ? `
+                                    <button onclick="removeCustomAvatar(${index})" class="w-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-400 py-2.5 rounded-lg text-xs font-bold transition-all text-center">
+                                        Restaurar Einstein Padrão
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                editorControls.appendChild(controlBlock);
+            });
+        }
+
+        // Live updating data bindings
+        function updateScreenData(index, property, value) {
+            const screen = screens[index];
+            if (property === 'title') {
+                screen.title = value;
+                document.getElementById(`render-title-${index}`).innerText = value;
+            } else if (property === 'subtitle') {
+                screen.subtitle = value;
+                document.getElementById(`render-subtitle-${index}`).innerText = value;
+            } else if (property === 'pointerText') {
+                screen.pointer.text = value;
+                updateBubble(index);
+            } else if (property === 'avatar') {
+                screen.pointer.avatar = value;
+                updateBubble(index);
+            } else if (property === 'arrow') {
+                screen.pointer.arrow = value;
+                updateBubble(index);
+            } else if (property === 'arrowAngle') {
+                screen.pointer.arrowAngle = parseInt(value);
+                const valEl = document.getElementById(`arrow-angle-val-${index}`);
+                if (valEl) valEl.innerText = `${value}°`;
+                updateBubble(index);
+            } else if (property === 'arrowLength') {
+                screen.pointer.arrowLength = parseInt(value);
+                const valEl = document.getElementById(`arrow-length-val-${index}`);
+                if (valEl) valEl.innerText = `${value}px`;
+                updateBubble(index);
+            } else if (property === 'arrowThickness') {
+                screen.pointer.arrowThickness = parseInt(value);
+                const valEl = document.getElementById(`arrow-thickness-val-${index}`);
+                if (valEl) valEl.innerText = `${value}px`;
+                updateBubble(index);
+            } else if (property === 'arrowColor') {
+                screen.pointer.arrowColor = value;
+                updateBubble(index);
+            } else if (property === 'avatarName') {
+                screen.avatar.name = value;
+                updateBubble(index);
+            } else if (property === 'avatarWidth') {
+                screen.avatar.width = parseInt(value);
+                const valEl = document.getElementById(`avatar-width-val-${index}`);
+                if (valEl) valEl.innerText = `${value}px`;
+                updateBubble(index);
+            }
+        }
+
+        // Toggle pre-render vs local upload prints mode
+        function toggleVisualMode() {
+            visualMode = (visualMode === 'render') ? 'upload' : 'render';
+            const btn = document.getElementById('btn-toggle-mode');
+            
+            if (visualMode === 'upload') {
+                btn.innerHTML = `<svg class="w-5 h-5 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Modo: Custom Print Upload`;
+                
+                screens.forEach((screen, index) => {
+                    const content = document.getElementById(`phone-content-${index}`);
+                    content.innerHTML = `
+                        <div class="w-full h-full flex flex-col items-center justify-center text-center p-8 select-none">
+                            <div class="w-20 h-20 rounded-full bg-slate-900 border-2 border-dashed border-slate-700 flex items-center justify-center mb-4 text-slate-400">
+                                📷
+                            </div>
+                            <span class="text-sm font-bold text-slate-300">Faça Upload do Print Real</span>
+                            <span class="text-xs text-slate-500 mt-2 block">Largura recomendada: 820px</span>
+                        </div>
+                    `;
+                    content.style.backgroundImage = 'none';
+                });
+            } else {
+                btn.innerHTML = `<svg class="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Modo: Pre-render High-Fi UI`;
+                
+                screens.forEach((screen, index) => {
+                    const content = document.getElementById(`phone-content-${index}`);
+                    content.innerHTML = getPhoneUIMarkup(screen.uiType);
+                    content.style.backgroundImage = 'none';
+                });
+            }
+        }
+
+        // Image file loading handler
+        function loadImage(event, index) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = document.getElementById(`phone-content-${index}`);
+                    content.innerHTML = '';
+                    content.style.backgroundImage = `url('${e.target.result}')`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Custom character avatar loading handler
+        function loadCustomAvatar(event, index) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    screens[index].avatar.customUrl = e.target.result;
+                    updateBubble(index);
+                    renderAllWorkspace(); // redraw panel to display restore button
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Custom character avatar removal handler
+        function removeCustomAvatar(index) {
+            screens[index].avatar.customUrl = null;
+            updateBubble(index);
+            renderAllWorkspace(); // redraw panel to hide restore button
+        }
+
+        // High resolution 1080x1920 snapshot download
+        async function downloadScreenshot(index) {
+            const element = document.getElementById(`capture-area-${index}`);
+            
+            // Remove browser preview scale factor and style overrides
+            element.classList.remove('preview-scale');
+            element.style.transform = 'none';
+            
+            // Generate canvas with exact device resolution (adding extra scale for razor sharpness)
+            const canvas = await html2canvas(element, {
+                scale: 1.5,
+                width: 1080,
+                height: 1920,
+                backgroundColor: null,
+                logging: false,
+                useCORS: true // Allow loading assets from Raw GitHub
+            });
+            
+            // Restore visual layout scale
+            element.classList.add('preview-scale');
+            element.style.transform = '';
+            
+            const link = document.createElement('a');
+            link.download = `5task_playstore_screen_${index + 1}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Batch execution helper
+        async function downloadAll() {
+            for (let i = 0; i < screens.length; i++) {
+                await downloadScreenshot(i);
+                // Pause slightly to let browser breath
+                await new Promise(r => setTimeout(r, 600));
+            }
+        }
+
+        // Initial setup
+        window.addEventListener('DOMContentLoaded', () => {
+            renderAllWorkspace();
+        });
+    </script>
+</body>
+</html>

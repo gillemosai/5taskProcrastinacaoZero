@@ -17,3 +17,9 @@ play-console/*.jks
 play-console/android.keystore
 play-console/signing.keystore
 play-console/signing-key-info.txt
+
+# Arquivos do Modo Pro Secreto (SQLite, Calendário, Sync) - Manter apenas localmente
+components/ProCalendar.tsx
+components/SyncModal.tsx
+utils/proDb.ts
+capacitor.config.ts
