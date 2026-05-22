@@ -546,7 +546,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkAppVersion = async () => {
       try {
-        let currentVersion = '6.0.0.0'; // Fallback padrão / Versão web atual
+        let currentVersion = '6.0.0.1'; // Fallback padrão / Versão web atual
 
         // Se estiver rodando nativo no celular (Capacitor)
         if (Capacitor.isNativePlatform()) {
@@ -1185,23 +1185,25 @@ const App: React.FC = () => {
       {/* ===== MAIN DASHBOARD ===== */}
       <main className="px-4 py-3 space-y-4 max-w-4xl mx-auto pb-24">
 
-        {/* --- Top Bar: Logo + TopMenu --- */}
+        {/* --- Top Bar: TopMenu + Logo --- */}
         <header className="flex justify-between items-center py-2 px-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⚡</span>
-            <h1 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-              5task{isPro && <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 ml-1">Pro</span>}
-            </h1>
+          <div className="flex items-center gap-3">
+            <TopMenu
+              tasks={tasks}
+              isDarkMode={isDarkMode}
+              onOpenVisionBoard={() => setShowVisionBoard(true)}
+              isPro={isPro}
+              onOpenCalendar={() => setShowProCalendar(true)}
+              onDisablePro={handleDisablePro}
+              onOpenSyncModal={() => setShowSyncModal(true)}
+            />
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⚡</span>
+              <h1 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                5task{isPro && <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 ml-1">Pro</span>}
+              </h1>
+            </div>
           </div>
-          <TopMenu
-            tasks={tasks}
-            isDarkMode={isDarkMode}
-            onOpenVisionBoard={() => setShowVisionBoard(true)}
-            isPro={isPro}
-            onOpenCalendar={() => setShowProCalendar(true)}
-            onDisablePro={handleDisablePro}
-            onOpenSyncModal={() => setShowSyncModal(true)}
-          />
         </header>
 
         {/* --- Hero Section: Avatar LEFT | Stats + Visão RIGHT --- */}
@@ -1219,7 +1221,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 6.0.0.0</span>
+            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 6.0.0.1</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -1966,7 +1968,7 @@ const App: React.FC = () => {
 
       {/* ===== USER GUIDE ===== */}
       {showUserGuide && (
-        <UserGuide isDarkMode={isDarkMode} onClose={() => setShowUserGuide(false)} />
+        <UserGuide isDarkMode={isDarkMode} onClose={() => setShowUserGuide(false)} isPro={isPro} />
       )}
 
       {/* ===== PLAY STORE UPDATE MODAL ===== */}
