@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, ExternalLink, CheckCircle2, Clock, Trash2, Target, Zap, GripVertical, Eye, Archive, Sun, ArrowLeft, Repeat, RefreshCw, Trophy, Sparkles, LayoutGrid } from 'lucide-react';
 
 const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero#readme';
@@ -6,9 +6,25 @@ const GITHUB_README_URL = 'https://github.com/gillemosai/5taskProcrastinacaoZero
 interface UserGuideProps {
     isDarkMode: boolean;
     onClose: () => void;
+    isPro?: boolean;
 }
 
-export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => {
+export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose, isPro }) => {
+    const [isDev, setIsDev] = useState(() => localStorage.getItem('5task_dev_mode') === 'true');
+    const [versionClicks, setVersionClicks] = useState(0);
+
+    const handleVersionClick = () => {
+        const nextClicks = versionClicks + 1;
+        if (nextClicks >= 7) {
+            const nextDev = !isDev;
+            setIsDev(nextDev);
+            localStorage.setItem('5task_dev_mode', nextDev ? 'true' : 'false');
+            setVersionClicks(0);
+            alert(nextDev ? 'Modo Desenvolvedor Ativado! 💻\nComandos de Build Git/Android agora estão visíveis.' : 'Modo Desenvolvedor Desativado! 🕊️\nComandos de Build Git/Android foram ocultados.');
+        } else {
+            setVersionClicks(nextClicks);
+        }
+    };
     const card = isDarkMode
         ? 'bg-slate-800/60 border border-slate-700/50'
         : 'bg-white border border-slate-200';
@@ -27,7 +43,13 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                 <div className={`flex items-center justify-between px-5 py-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                     <div>
                         <h2 className="text-lg font-black">📘 Como Usar o 5Task</h2>
-                        <p className={`text-[11px] mt-0.5 ${muted}`}>Guia rápido v6.0.0.0</p>
+                        <p 
+                            onClick={handleVersionClick} 
+                            className={`text-[11px] mt-0.5 select-none cursor-pointer active:scale-95 transition-transform duration-100 ${muted}`}
+                            title="Clique 7 vezes para alternar o Modo Desenvolvedor"
+                        >
+                            Guia rápido v6.0.0.0
+                        </p>
                     </div>
                     <button onClick={onClose} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}>
                         <ArrowLeft size={18} /> <span className="text-sm font-bold">Voltar</span>
@@ -249,57 +271,59 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose }) => 
                         </p>
                     </div>
 
-                    {/* Orientações de Build (Git/Android) */}
-                    <div className={`rounded-2xl p-4 border-l-4 border-amber-500 ${card}`}>
-                        <h3 className={`font-bold text-sm mb-3 flex items-center gap-1.5 ${accent}`}>
-                            💻 Orientações de Build (Git/Android)
-                        </h3>
-                        <div className="space-y-3">
-                            <p className={`text-[12px] leading-relaxed ${muted}`}>
-                                Toda vez que fizer alterações no código do seu PWA (<strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>App.tsx</strong>, componentes, etc.), execute os comandos abaixo para sincronizar e gerar o app:
-                            </p>
-                            <div className="space-y-2">
-                                <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-[11px] font-black text-amber-500">Passo 1</span>
-                                        <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-600'}`}>Web Build</span>
+                    {/* Orientações de Build (Git/Android) - Apenas visível para Desenvolvedor */}
+                    {isDev && (
+                        <div className={`rounded-2xl p-4 border-l-4 border-amber-500 ${card}`}>
+                            <h3 className={`font-bold text-sm mb-3 flex items-center gap-1.5 ${accent}`}>
+                                💻 Orientações de Build (Git/Android)
+                            </h3>
+                            <div className="space-y-3">
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    Toda vez que fizer alterações no código do seu PWA (<strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>App.tsx</strong>, componentes, etc.), execute os comandos abaixo para sincronizar e gerar o app:
+                                </p>
+                                <div className="space-y-2">
+                                    <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[11px] font-black text-amber-500">Passo 1</span>
+                                            <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-cyan-500/20 text-cyan-400' : 'bg-cyan-100 text-cyan-600'}`}>Web Build</span>
+                                        </div>
+                                        <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                            Faça o build da nova versão Web:
+                                        </p>
+                                        <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
+                                            npm run build
+                                        </code>
                                     </div>
-                                    <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                                        Faça o build da nova versão Web:
-                                    </p>
-                                    <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
-                                        npm run build
-                                    </code>
-                                </div>
 
-                                <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-[11px] font-black text-amber-500">Passo 2</span>
-                                        <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>Sync Capacitor</span>
+                                    <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[11px] font-black text-amber-500">Passo 2</span>
+                                            <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>Sync Capacitor</span>
+                                        </div>
+                                        <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                            Sincronize as novidades com a pasta do Android:
+                                        </p>
+                                        <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
+                                            npx cap sync android
+                                        </code>
                                     </div>
-                                    <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                                        Sincronize as novidades com a pasta do Android:
-                                    </p>
-                                    <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
-                                        npx cap sync android
-                                    </code>
-                                </div>
 
-                                <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-[11px] font-black text-amber-500">Passo 3</span>
-                                        <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>Android Studio</span>
+                                    <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-slate-900/60' : 'bg-slate-100'}`}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[11px] font-black text-amber-500">Passo 3</span>
+                                            <span className={`text-[9px] px-1 rounded ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>Android Studio</span>
+                                        </div>
+                                        <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                            Gere o novo .aab: Abra o projeto no Android Studio:
+                                        </p>
+                                        <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
+                                            npx cap open android
+                                        </code>
                                     </div>
-                                    <p className={`text-[11.5px] font-medium leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                                        Gere o novo .aab: Abra o projeto no Android Studio:
-                                    </p>
-                                    <code className={`block mt-1 text-[11px] px-2 py-1 rounded font-mono ${isDarkMode ? 'bg-slate-950 text-cyan-300 border border-slate-800/80' : 'bg-white text-cyan-700 border border-slate-200'}`}>
-                                        npx cap open android
-                                    </code>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Link para docs completa */}
                     <div className="pt-2 pb-2">
