@@ -44,7 +44,7 @@ export const ContextualTip: React.FC<ContextualTipProps> = ({ tip, isDarkMode, o
     >
       <div className={`rounded-3xl shadow-2xl overflow-hidden border ${
         isDarkMode
-          ? 'bg-slate-900/98 border-neon-purple/40 shadow-[0_8px_40px_rgba(188,19,254,0.18)]'
+          ? 'bg-slate-900 border-neon-purple/40 shadow-[0_8px_40px_rgba(188,19,254,0.18)]'
           : 'bg-white border-purple-200 shadow-[0_8px_40px_rgba(168,85,247,0.15)]'
       }`}>
         {/* Top gradient accent */}

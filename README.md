@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-6.0.0.1-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-6.0.0.2-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -30,16 +30,16 @@ O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob
 
 Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **5 recorrentes no total**, com gerenciamento inteligente que mantém **2 recorrentes visíveis na tela principal** e disponibiliza as demais na aba dedicada **Recorrentes**, além de guiar o usuário com banners informativos automáticos.
 
-## ✨ Funcionalidades Principais (Atualizado v6.0.0.1)
+## ✨ Funcionalidades Principais (Atualizado v6.0.0.2)
 
-- **⚡ Renascimento Visual: Logotipo "T-Raio" (v6.0.0.1):** Nova identidade visual minimalista, simétrica e harmônica baseada na fusão da letra **"T"** (Task) com o **Raio** (Foco/Produtividade) estilizados sobre a curva do número **"5"**. Cores em gradiente ciano e magenta com acabamento neon de alta qualidade.
-- **🧠 5 Expressões Inéditas do Einstein 3D Neon (v6.0.0.1):** Reações emotivas e expressivas geradas em alta definição (estilo animação 3D Pixar) com luzes neon para aumentar a conexão emocional e a imersão com o usuário:
+- **⚡ Renascimento Visual: Logotipo "T-Raio" (v6.0.0.2):** Nova identidade visual minimalista, simétrica e harmônica baseada na fusão da letra **"T"** (Task) com o **Raio** (Foco/Produtividade) estilizados sobre a curva do número **"5"**. Cores em gradiente ciano e magenta com acabamento neon de alta qualidade.
+- **🧠 5 Expressões Inéditas do Einstein 3D Neon (v6.0.0.2):** Reações emotivas e expressivas geradas em alta definição (estilo animação 3D Pixar) com luzes neon para aumentar a conexão emocional e a imersão com o usuário:
   - **Foco (`einstein-focus.png`):** Einstein de óculos focado em lousa digital holográfica de física.
   - **Vitória (`einstein-victory.png`):** Albert celebrando e jogando tarefas no ar com óculos neon rosa.
   - **Zen (`einstein-zen.png`):** Expressão meditativa em lótus para acalmar momentos estressantes.
   - **Mentor (`einstein-mentor.png`):** Einstein acolhedor e sábio segurando uma xícara quente.
   - **Desafio (`einstein-challenge.png`):** Postura firme e desafiadora de braços cruzados para quando o limite de tarefas for excedido.
-- **📖 Repertório Emocional Ampliado em `QUOTES.md` (v6.0.0.1):** Adicionados dezenas de insights de física e frases motivacionais exclusivas categorizadas pelos novos estados emocionais do avatar.
+- **📖 Repertório Emocional Ampliado em `QUOTES.md` (v6.0.0.2):** Adicionados dezenas de insights de física e frases motivacionais exclusivas categorizadas pelos novos estados emocionais do avatar.
 - **🎓 Onboarding Anti-Procrastinação (v5.4.0):** Novo `WelcomeCarousel` com 5 slides amigáveis e motivadores que apresentam o método, os benefícios e reposicionam o app como solução anti-procrastinação — não como uma simples lista de tarefas.
 - **💡 Dicas Contextuais com Einstein (v5.4.0):** Sistema de balões educativos disparados por eventos reais: ao concluir a 1ª tarefa, ao visitar a aba Concluídas pela 1ª vez e ao ter uma tarefa expirada para o Arquivo. Cada dica aparece apenas uma vez, respeitando o usuário.
 - **📖 "O que é isso?" na Visão (v5.4.0):** Botão explicativo na tela Minha Visão que abre um modal com o Einstein explicando o método dos 3 pilares de Petr Ludwig ("O Fim da Procrastinação"): Valores → Visão → Metas.
@@ -137,7 +137,7 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
 - [x] WelcomeCarousel reformulado com 5 slides motivadores e botão "Pular introdução" (v5.4.0).
 - [x] Sistema de dicas contextuais com Einstein (1ª conclusão, aba Concluídas, Arquivo) (v5.4.0).
 - [x] Modal "O que é isso?" na tela Visão explicando o método de Petr Ludwig (v5.4.0).
-- [x] Identidade visual harmônica "T-Raio" e 5 novos avatares Einstein 3D Neon (v6.0.0.1).
+- [x] Identidade visual harmônica "T-Raio" e 5 novos avatares Einstein 3D Neon (v6.0.0.2).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 

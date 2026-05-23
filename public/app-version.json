@@ -1,6 +1,6 @@
 {
-  "latestVersion": "6.0.0.1",
+  "latestVersion": "6.0.0.2",
   "minRequiredVersion": "5.4.0",
-  "releaseNotes": "Novo logotipo minimalista 'T-Raio', avatar Einstein reativo em 3D com 5 novas expressões dinâmicas (Foco, Vitória, Zen, Mentor, Desafio), novas frases inspiradoras e otimizações gerais de estabilidade e carregamento local offline.",
+  "releaseNotes": "Correção de contraste e visibilidade da Dica do Einstein com fundo 100% sólido em dark mode. Novo logotipo minimalista 'T-Raio', avatar Einstein reativo em 3D com 5 novas expressões dinâmicas (Foco, Vitória, Zen, Mentor, Desafio) e otimizações gerais.",
   "playStoreUrl": "market://details?id=com.gillemosai.cincotask"
 }
