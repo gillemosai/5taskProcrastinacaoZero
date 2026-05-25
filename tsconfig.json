@@ -17,4 +17,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["./"],
+  "exclude": ["node_modules", "dist", "agenda-diária", "android"]
 }

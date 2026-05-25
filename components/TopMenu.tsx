@@ -14,9 +14,10 @@ interface TopMenuProps {
     onOpenCalendar?: () => void;
     onDisablePro?: () => void;
     onOpenSyncModal?: () => void;
+    onOpenAgenda?: () => void;
 }
 
-export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisionBoard, isPro, onOpenCalendar, onDisablePro, onOpenSyncModal }) => {
+export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisionBoard, isPro, onOpenCalendar, onDisablePro, onOpenSyncModal, onOpenAgenda }) => {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -76,7 +77,53 @@ export const TopMenu: React.FC<TopMenuProps> = ({ tasks, isDarkMode, onOpenVisio
                                 <span>Quadro Visão</span>
                             </button>
 
+                            {isPro && (
+                                <>
+                                    {onOpenCalendar && (
+                                        <button
+                                            onClick={() => handleAction(onOpenCalendar)}
+                                            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors text-left ${isDarkMode ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : 'text-slate-700 hover:bg-slate-100 focus:bg-slate-100'
+                                                }`}
+                                        >
+                                            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500"><Calendar size={18} /></div>
+                                            <span>Calendário Pro</span>
+                                        </button>
+                                    )}
 
+                                    {onOpenAgenda && (
+                                        <button
+                                            onClick={() => handleAction(onOpenAgenda)}
+                                            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors text-left ${isDarkMode ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : 'text-slate-700 hover:bg-slate-100 focus:bg-slate-100'
+                                                }`}
+                                        >
+                                            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500"><Calendar size={18} /></div>
+                                            <span>Agenda Diária Pro</span>
+                                        </button>
+                                    )}
+
+                                    {onOpenSyncModal && (
+                                        <button
+                                            onClick={() => handleAction(onOpenSyncModal)}
+                                            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors text-left ${isDarkMode ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : 'text-slate-700 hover:bg-slate-100 focus:bg-slate-100'
+                                                }`}
+                                        >
+                                            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-500"><RefreshCw size={18} /></div>
+                                            <span>Sincronizar com o PC</span>
+                                        </button>
+                                    )}
+
+                                    {onDisablePro && (
+                                        <button
+                                            onClick={() => handleAction(onDisablePro)}
+                                            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors text-left ${isDarkMode ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : 'text-slate-700 hover:bg-slate-100 focus:bg-slate-100'
+                                                }`}
+                                        >
+                                            <div className="p-2 rounded-lg bg-rose-500/10 text-rose-500"><ToggleLeft size={18} /></div>
+                                            <span>Voltar ao modo Free</span>
+                                        </button>
+                                    )}
+                                </>
+                            )}
 
                             <div className={`h-px w-full my-1 ${isDarkMode ? 'bg-slate-800/60' : 'bg-slate-100'}`}></div>
 

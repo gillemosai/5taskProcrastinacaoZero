@@ -1,0 +1,6 @@
+{
+  "name": "Agenda Diária",
+  "description": "Uma agenda diária e organizador de tarefas inteligente para PC com visualização por linha do tempo/horas, calendário interativo e métricas de produtividade.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -18,7 +18,10 @@ import { ContextualTip, ContextualTipData } from './components/ContextualTip';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { UpdateModal } from './components/UpdateModal';
+import { ProCalendar } from './components/ProCalendar';
 import { TopMenu } from './components/TopMenu';
+import { SyncModal } from './components/SyncModal';
+import AgendaDiaria from './components/agenda/AgendaDiaria';
 
 
 /**
@@ -347,6 +350,7 @@ const App: React.FC = () => {
   // --- Estados do Modo PRO Secreto ---
   const [isPro, setIsPro] = useState(() => localStorage.getItem('5task_pro_mode') === 'true');
   const [showProCalendar, setShowProCalendar] = useState(false);
+  const [showProAgenda, setShowProAgenda] = useState(false);
   const [proToast, setProToast] = useState<string | null>(null);
   const avatarClicksRef = useRef<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 });
 
@@ -546,7 +550,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkAppVersion = async () => {
       try {
-        let currentVersion = '6.0.0.1'; // Fallback padrão / Versão web atual
+        let currentVersion = '7.0.0.0'; // Fallback padrão / Versão web atual
 
         // Se estiver rodando nativo no celular (Capacitor)
         if (Capacitor.isNativePlatform()) {
@@ -1196,6 +1200,7 @@ const App: React.FC = () => {
               onOpenCalendar={() => setShowProCalendar(true)}
               onDisablePro={handleDisablePro}
               onOpenSyncModal={() => setShowSyncModal(true)}
+              onOpenAgenda={() => setShowProAgenda(true)}
             />
             <div className="flex items-center gap-2">
               <span className="text-xl">⚡</span>
@@ -1221,7 +1226,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-            <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 6.0.0.1</span>
+             <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 7.0.0.0</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -1982,7 +1987,32 @@ const App: React.FC = () => {
         isDarkMode={isDarkMode}
       />
 
+      {/* ===== PRO CALENDAR ===== */}
+      <ProCalendar
+        isOpen={showProCalendar}
+        onClose={() => setShowProCalendar(false)}
+        isDarkMode={isDarkMode}
+      />
 
+      {/* ===== SYNC MODAL (PRO ONLY) ===== */}
+      {showSyncModal && (
+        <SyncModal
+          isDarkMode={isDarkMode}
+          onClose={() => setShowSyncModal(false)}
+          onImportSuccess={() => window.location.reload()}
+          tasks={tasks}
+          archivedTasks={archivedTasks}
+          completedTasks={completedTasks}
+        />
+      )}
+
+      {/* ===== PRO AGENDA ===== */}
+      {showProAgenda && (
+        <AgendaDiaria
+          onClose={() => setShowProAgenda(false)}
+          isDarkMode={isDarkMode}
+        />
+      )}
 
       {/* ===== PRO TOAST NOTIFICATION ===== */}
       <AnimatePresence>

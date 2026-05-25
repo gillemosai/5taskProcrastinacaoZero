@@ -48,7 +48,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose, isPro
                             className={`text-[11px] mt-0.5 select-none cursor-pointer active:scale-95 transition-transform duration-100 ${muted}`}
                             title="Clique 7 vezes para alternar o Modo Desenvolvedor"
                         >
-                            Guia rápido v6.0.0.3
+                            Guia rápido v7.0.0.0
                         </p>
                     </div>
                     <button onClick={onClose} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors ${isDarkMode ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-800'}`}>
@@ -84,7 +84,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose, isPro
                                 </p>
                             </div>
                             <div className="flex items-start gap-2.5">
-                                <GripVertical size={15} className="text-slate-500 shrink-0 mt-0.5" />
+                                <GripVertical size={15} className="text-slate-505 shrink-0 mt-0.5" />
                                 <p className={`text-[12px] leading-relaxed ${muted}`}>
                                     <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Reordenar:</strong> Arraste as tarefas para mudar a prioridade
                                 </p>
@@ -98,7 +98,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose, isPro
                         </div>
                     </div>
 
-                    {/* Tarefas Recorrentes */}
+                    {/* Rentabilidade / Recorrentes */}
                     <div className={`rounded-2xl p-4 border-l-4 border-cyan-500 ${card}`}>
                         <h3 className={`font-bold text-sm mb-3 ${accent}`}>🔄 Tarefas Recorrentes</h3>
                         <div className="space-y-2.5">
@@ -123,9 +123,9 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose, isPro
                         </div>
                     </div>
 
-                    {/* Novidades v5.4.1 */}
+                    {/* Novidades v7.0.0.0 */}
                     <div className={`rounded-2xl p-4 border-l-4 border-neon-blue ${card}`}>
-                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎓 Novidades <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-neon-blue/20 text-neon-blue' : 'bg-blue-100 text-blue-600'}`}>v6.0.0.3</span></h3>
+                        <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎓 Novidades <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-neon-blue/20 text-neon-blue' : 'bg-blue-100 text-blue-600'}`}>v7.0.0.0</span></h3>
                         <div className="space-y-2.5">
                             <div className="flex items-start gap-2.5">
                                 <span className="text-base shrink-0">✨</span>

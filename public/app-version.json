@@ -1,6 +1,6 @@
 {
-  "latestVersion": "6.0.0.3",
+  "latestVersion": "7.0.0.0",
   "minRequiredVersion": "5.4.0",
-  "releaseNotes": "Correção no carregamento do novo logotipo no Android (geração de ícones nativos e splash screen atualizada) e atualização do Service Worker para a versão 6.0.0.3.",
+  "releaseNotes": "Lançamento da Agenda Diária Pro (exclusivo para PC) e atualização do Service Worker para a versão 7.0.0.0.",
   "playStoreUrl": "market://details?id=com.gillemosai.cincotask"
 }
