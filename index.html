@@ -151,33 +151,56 @@
     });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=6.0.0.2').then(reg => {
-          console.log('[SW] Registrado com sucesso.');
+        // Limpar registros antigos com query parameters (ex: sw.js?v=6.0.0.1) para evitar travamento de cache
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          let hasLegacySW = false;
+          const promises = registrations.map(reg => {
+            const scriptURL = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || '';
+            if (scriptURL.includes('sw.js?v=')) {
+              console.log('[SW] Encontrado SW legado:', scriptURL, '- Removendo...');
+              hasLegacySW = true;
+              return reg.unregister();
+            }
+            return Promise.resolve(false);
+          });
 
-          // Detecta quando um novo SW está esperando para ser ativado
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            if (!newWorker) return;
-            newWorker.addEventListener('statechange', () => {
-              // Quando o novo SW está instalado e há um SW ativo (não é primeira visita)
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[SW] Nova versão disponível!');
-                // Notifica o app React via evento customizado
+          Promise.all(promises).then(() => {
+            // Registra o SW limpo sem query string para evitar problemas de cache futuro
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+              console.log('[SW] Registrado com sucesso (limpo).');
+
+              if (hasLegacySW) {
+                console.log('[SW] SW legado removido, recarregando página...');
+                window.location.reload();
+                return;
+              }
+
+              // Detecta quando um novo SW está esperando para ser ativado
+              reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', () => {
+                  // Quando o novo SW está instalado e há um SW ativo (não é primeira visita)
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('[SW] Nova versão disponível!');
+                    // Notifica o app React via evento customizado
+                    window.dispatchEvent(new CustomEvent('sw-update-available', {
+                      detail: { registration: reg }
+                    }));
+                  }
+                });
+              });
+
+              // Verifica se já há um SW esperando (caso de reload após update)
+              if (reg.waiting && navigator.serviceWorker.controller) {
                 window.dispatchEvent(new CustomEvent('sw-update-available', {
                   detail: { registration: reg }
                 }));
               }
-            });
+
+            }).catch(err => console.log('[SW] Erro ao registrar SW limpo:', err));
           });
-
-          // Verifica se já há um SW esperando (caso de reload após update)
-          if (reg.waiting && navigator.serviceWorker.controller) {
-            window.dispatchEvent(new CustomEvent('sw-update-available', {
-              detail: { registration: reg }
-            }));
-          }
-
-        }).catch(err => console.log('[SW] Erro:', err));
+        }).catch(err => console.log('[SW] Erro ao recuperar registros:', err));
 
         // Quando o SW assume o controle (após skipWaiting), recarrega a página
         let refreshing = false;
