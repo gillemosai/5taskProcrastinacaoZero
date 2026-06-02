@@ -96,8 +96,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
   const getPriorityInfo = (p?: Priority) => {
     switch (p) {
-      case 'urgent': return { color: 'bg-red-500', label: 'URGENTE' };
-      case 'attention': return { color: 'bg-yellow-500', label: 'ATENÇÃO' };
+      case 'urgent': return { color: isDarkMode ? 'bg-red-500' : 'bg-red-700', label: 'URGENTE' };
+      case 'attention': return { color: isDarkMode ? 'bg-yellow-500' : 'bg-amber-700', label: 'ATENÇÃO' };
       case 'critical': return { color: 'bg-black', label: 'CRÍTICO' };
       default: return null;
     }
@@ -237,22 +237,22 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                   </span>
                 )}
                 {task.rescueSource === 'completed' && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase bg-emerald-500 text-white shadow-sm inline-block`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${isDarkMode ? 'bg-emerald-500 text-white' : 'bg-emerald-700 text-white'} shadow-sm inline-block`}>
                     FAZER NOVAMENTE!
                   </span>
                 )}
                 {task.rescueSource === 'expiration' && rescueLabel && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase bg-amber-500 text-white shadow-sm inline-block`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${isDarkMode ? 'bg-amber-500 text-white' : 'bg-amber-700 text-white'} shadow-sm inline-block`}>
                     {rescueLabel}
                   </span>
                 )}
                 {!task.rescueSource && rescueLabel && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase bg-amber-500 text-white shadow-sm inline-block`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase ${isDarkMode ? 'bg-amber-500 text-white' : 'bg-amber-700 text-white'} shadow-sm inline-block`}>
                     {rescueLabel}
                   </span>
                 )}
                 {task.isRecreatedRecurring && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-cyan-600 text-white' : 'bg-cyan-500 text-white'}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-cyan-600 text-white' : 'bg-cyan-700 text-white'}`}>
                     <Repeat size={10} /> RECORRENTE
                   </span>
                 )}
@@ -263,7 +263,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                   </span>
                 )}
                 {isListTask && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white'}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-black tracking-widest uppercase flex items-center gap-1 shadow-sm inline-block ${isDarkMode ? 'bg-purple-600 text-white' : 'bg-purple-700 text-white'}`}>
                     <ListChecks size={10} /> LISTA
                   </span>
                 )}

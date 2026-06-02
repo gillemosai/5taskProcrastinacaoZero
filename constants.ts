@@ -7,7 +7,7 @@ import { Mood, QuoteType } from './types';
  * NÃO MODIFICAR ESTA PASTA EM NENHUM DEPLOY.
  */
 
-const VERSION_QUERY = '?v=7.0.0.1';
+const VERSION_QUERY = '?v=7.0.0.2';
 const GITHUB_BASE = 'https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/';
 
 export const AVATAR_IMAGES: Record<Mood, string> = {

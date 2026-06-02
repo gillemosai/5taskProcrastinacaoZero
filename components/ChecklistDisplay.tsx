@@ -72,7 +72,7 @@ export const ChecklistDisplay: React.FC<ChecklistDisplayProps> = ({
               <div
                 className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300 ${
                   item.completed
-                    ? 'bg-accent-cyan/20 border-accent-cyan'
+                    ? isDarkMode ? 'bg-accent-cyan/20 border-accent-cyan' : 'bg-teal-100 border-teal-600'
                     : isDarkMode
                       ? 'border-slate-600 group-hover:border-slate-400'
                       : 'border-slate-300 group-hover:border-slate-400'
@@ -84,7 +84,7 @@ export const ChecklistDisplay: React.FC<ChecklistDisplayProps> = ({
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 20 }}
                   >
-                    <Check size={11} className="text-accent-cyan" strokeWidth={3} />
+                    <Check size={11} className={isDarkMode ? "text-accent-cyan" : "text-teal-700"} strokeWidth={3} />
                   </motion.div>
                 )}
               </div>

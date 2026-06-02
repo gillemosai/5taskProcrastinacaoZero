@@ -30,7 +30,9 @@ export const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
           onClick={() => onChange('none')}
           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
             value === 'none'
-              ? 'bg-accent-cyan text-slate-900 border-accent-cyan'
+              ? isDarkMode
+                ? 'bg-accent-cyan text-slate-900 border-accent-cyan shadow-md shadow-accent-cyan/10'
+                : 'bg-teal-700 text-white border-teal-700 shadow-md shadow-teal-700/10'
               : isDarkMode
               ? 'bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600'
               : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-slate-300'
@@ -44,7 +46,9 @@ export const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
           onClick={() => onChange('daily')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
             value === 'daily'
-              ? 'bg-purple-500 text-white border-purple-500 shadow-md shadow-purple-500/20'
+              ? isDarkMode
+                ? 'bg-purple-500 text-white border-purple-500 shadow-md shadow-purple-500/20'
+                : 'bg-purple-700 text-white border-purple-700 shadow-md shadow-purple-700/20'
               : isDarkMode
               ? 'bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600'
               : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-slate-300'
@@ -58,7 +62,9 @@ export const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
           onClick={() => onChange('weekdays')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
             value === 'weekdays'
-              ? 'bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20'
+              ? isDarkMode
+                ? 'bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20'
+                : 'bg-blue-700 text-white border-blue-700 shadow-md shadow-blue-700/20'
               : isDarkMode
               ? 'bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600'
               : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-slate-300'
@@ -72,7 +78,9 @@ export const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
           onClick={() => onChange('weekly')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
             value === 'weekly'
-              ? 'bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-500/20'
+              ? isDarkMode
+                ? 'bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-500/20'
+                : 'bg-pink-700 text-white border-pink-700 shadow-md shadow-pink-700/20'
               : isDarkMode
               ? 'bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600'
               : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-slate-300'
@@ -86,7 +94,9 @@ export const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
           onClick={() => onChange('custom')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
             value === 'custom'
-              ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
+              ? isDarkMode
+                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
+                : 'bg-amber-700 text-white border-amber-700 shadow-md shadow-amber-700/20'
               : isDarkMode
               ? 'bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600'
               : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-slate-300'

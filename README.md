@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-7.0.0.1-blueviolet?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-7.0.0.2-blueviolet?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
   <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
   <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
@@ -30,7 +30,7 @@ O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob
 
 Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **5 recorrentes no total**, com gerenciamento inteligente que mantém **2 recorrentes visíveis na tela principal** e disponibiliza as demais na aba dedicada **Recorrentes**, além de guiar o usuário com banners informativos automáticos.
 
-## ✨ Funcionalidades Principais (Atualizado v7.0.0.1)
+## ✨ Funcionalidades Principais (Atualizado v7.0.0.2)
 
 - **⚡ Renascimento Visual: Logotipo "T-Raio" (v6.0.0.3):** Nova identidade visual minimalista, simétrica e harmônica baseada na fusão da letra **"T"** (Task) com o **Raio** (Foco/Produtividade) estilizados sobre a curva do número **"5"**. Cores em gradiente ciano e magenta com acabamento neon de alta qualidade.
 - **🧠 5 Expressões Inéditas do Einstein 3D Neon (v6.0.0.3):** Reações emotivas e expressivas geradas em alta definição (estilo animação 3D Pixar) com luzes neon para aumentar a conexão emocional e a imersão com o usuário:
@@ -142,6 +142,7 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
 - [x] Agenda Diária Pro integrada ao 5Task (exclusivo desktop/PWA) com visão de timeline, calendário lateral e gestão completa de compromissos (v7.0.0.0).
 - [x] Atualização do Service Worker e PWA cache para v7.0.0.0.
 - [x] Correção no botão de adicionar tarefa recorrente para abrir o subset do menu radial (v7.0.0.1).
+- [x] Acessibilidade de cores (WCAG), remoção de blur e transição dinâmica com troca de lugar das fatias no menu em leque (v7.0.0.2).
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
