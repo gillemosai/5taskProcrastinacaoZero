@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:android": "npm run build && npx cap sync android",
+    "open:android": "npx cap open android",
     "preview": "vite preview"
   },
   "dependencies": {

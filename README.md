@@ -108,6 +108,28 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
     npm run dev
     ```
 
+## 📱 Como Gerar o Android App Bundle (.aab) para a Google Play
+
+Para gerar a versão atualizada do aplicativo para a Google Play Store, execute os seguintes passos:
+
+1. **Faça o build da nova versão Web:**
+   ```bash
+   npm run build
+   ```
+2. **Sincronize as novidades com a pasta do Android:**
+   ```bash
+   npx cap sync android
+   ```
+3. **Abra o projeto no Android Studio:**
+   ```bash
+   npx cap open android
+   ```
+4. **Gere o arquivo `.aab` assinado no Android Studio:**
+   * No Android Studio, vá em: **Build -> Generate Signed Bundle / APK...**
+   * Escolha **Android App Bundle** e clique em **Next**.
+   * Insira suas chaves de assinatura e selecione a variante **release**.
+   * Clique em **Finish** para compilar o arquivo `.aab` pronto para o Google Play Console.
+
 ## 🗺️ Roadmap de Evolução
 
 - [x] Limite de 5 tarefas e Gamificação com Einstein.
