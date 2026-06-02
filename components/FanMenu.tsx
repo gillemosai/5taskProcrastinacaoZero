@@ -8,6 +8,7 @@ interface FanMenuProps {
   onClose: () => void;
   onSelectType: (type: TaskType, recurrence?: RecurrenceType) => void;
   isDarkMode?: boolean;
+  initialLevel?: 1 | 2;
 }
 
 const playMenuClickSound = () => {
@@ -135,15 +136,17 @@ const describeAnnularSector = (x: number, y: number, innerRadius: number, outerR
   ].join(" ");
 };
 
-export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType, isDarkMode = true }) => {
-  const [level, setLevel] = React.useState<1 | 2>(1);
+export const FanMenu: React.FC<FanMenuProps> = ({ isOpen, onClose, onSelectType, isDarkMode = true, initialLevel = 1 }) => {
+  const [level, setLevel] = React.useState<1 | 2>(initialLevel);
 
   React.useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      setLevel(initialLevel);
+    } else {
       const timer = setTimeout(() => setLevel(1), 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, initialLevel]);
 
   const handleLevel1Click = (e: React.MouseEvent, type: TaskType) => {
     e.stopPropagation();

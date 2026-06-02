@@ -341,6 +341,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('today');
   const [showRecurringBanner, setShowRecurringBanner] = useState(false);
   const [showFanMenu, setShowFanMenu] = useState(false);
+  const [fanMenuInitialLevel, setFanMenuInitialLevel] = useState<1 | 2>(1);
   const [showListModal, setShowListModal] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(() => localStorage.getItem('5task_sound') !== 'false');
   const [dynamicQuotes, setDynamicQuotes] = useState(QUOTES);
@@ -550,7 +551,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkAppVersion = async () => {
       try {
-        let currentVersion = '7.0.0.0'; // Fallback padrão / Versão web atual
+        let currentVersion = '7.0.0.1'; // Fallback padrão / Versão web atual
 
         // Se estiver rodando nativo no celular (Capacitor)
         if (Capacitor.isNativePlatform()) {
@@ -1228,7 +1229,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-             <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 7.0.0.0</span>
+             <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 7.0.0.1</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
@@ -1569,7 +1570,7 @@ const App: React.FC = () => {
                                 </div>
                                 {canAddRecurring && (
                                   <button
-                                    onClick={() => { setShowFanMenu(true); }}
+                                    onClick={() => { setFanMenuInitialLevel(2); setShowFanMenu(true); }}
                                     className={`w-full p-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 border-2 border-dashed ${
                                       isDarkMode
                                         ? 'border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400/60'
@@ -1627,7 +1628,7 @@ const App: React.FC = () => {
                               {/* Botão para criar nova recorrente diretamente nesta aba */}
                               {canAddRecurring ? (
                                 <button
-                                  onClick={() => { setShowFanMenu(true); }}
+                                  onClick={() => { setFanMenuInitialLevel(2); setShowFanMenu(true); }}
                                   className={`w-full mt-1 p-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 border-2 border-dashed ${
                                     isDarkMode
                                       ? 'border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400/60'
@@ -1727,6 +1728,7 @@ const App: React.FC = () => {
         onClose={() => setShowFanMenu(false)}
         onSelectType={handleFanMenuSelect}
         isDarkMode={isDarkMode}
+        initialLevel={fanMenuInitialLevel}
       />
 
       {/* ===== LIST TASK MODAL ===== */}
@@ -1830,6 +1832,7 @@ const App: React.FC = () => {
                   setShowListModal(false);
                   setShowFanMenu(false);
                 } else {
+                  setFanMenuInitialLevel(1);
                   setShowFanMenu(!showFanMenu);
                 }
               }}
