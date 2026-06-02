@@ -343,6 +343,7 @@ const App: React.FC = () => {
   const [showFanMenu, setShowFanMenu] = useState(false);
   const [fanMenuInitialLevel, setFanMenuInitialLevel] = useState<1 | 2>(1);
   const [showListModal, setShowListModal] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(() => localStorage.getItem('5task_sound') !== 'false');
   const [dynamicQuotes, setDynamicQuotes] = useState(QUOTES);
   const [quoteHistory, setQuoteHistory] = useState<string[]>([]);
@@ -897,6 +898,8 @@ const App: React.FC = () => {
     // Limite: 5 tarefas não-recorrentes no máximo
     if (activeNonRecurringCount >= 5) {
       updateEinstein('challenge', Mood.CHALLENGE);
+      setIsAddingTask(false);
+      setShowLimitModal(true);
       return;
     }
 
@@ -1099,6 +1102,8 @@ const App: React.FC = () => {
     const activeNonRecurringCount = activeTasks.filter(t => !t.isRecurring).length;
     if (activeNonRecurringCount >= 5) {
       updateEinstein('challenge', Mood.CHALLENGE);
+      setShowListModal(false);
+      setShowLimitModal(true);
       return;
     }
 
@@ -1161,6 +1166,16 @@ const App: React.FC = () => {
   // === NEW: Fan Menu handler ===
   const handleFanMenuSelect = (type: TaskType, recurrence?: RecurrenceType) => {
     setShowFanMenu(false);
+
+    const activeTasks = tasks.filter(t => !t.completed);
+    const activeNonRecurringCount = activeTasks.filter(t => !t.isRecurring).length;
+
+    if ((type === 'list' || type === 'task') && activeNonRecurringCount >= 5) {
+      updateEinstein('challenge', Mood.CHALLENGE);
+      setShowLimitModal(true);
+      return;
+    }
+
     if (type === 'list') {
       setShowListModal(true);
     } else if (type === 'task') {
@@ -2003,6 +2018,78 @@ const App: React.FC = () => {
                 className="w-full bg-accent-cyan text-background-dark font-black text-lg p-4 rounded-xl shadow-[0_4px_14px_0_rgba(0,242,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,242,255,0.23)] hover:scale-105 transition-all active:scale-95"
               >
                 Continuar Vencendo! 🚀
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== LIMIT MODAL ===== */}
+      <AnimatePresence>
+        {showLimitModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-md"
+            onClick={() => setShowLimitModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.82, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.82, y: 30 }}
+              className={`relative max-w-md w-full p-8 rounded-3xl shadow-2xl flex flex-col items-center text-center border ${
+                isDarkMode 
+                  ? 'glass-card-vivid border-cyan-500/30' 
+                  : 'bg-white border-cyan-500/20 shadow-cyan-100/50'
+              }`}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowLimitModal(false)}
+                className={`absolute top-4 right-4 p-1.5 rounded-full transition-colors ${
+                  isDarkMode ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                }`}
+                title="Fechar"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="w-40 h-40 mb-6 rounded-full border-4 border-cyan-500 shadow-[0_0_35px_rgba(0,242,255,0.45)] overflow-hidden shrink-0 relative bg-slate-950/40">
+                <img
+                  src={AVATAR_IMAGES[Mood.CHALLENGE]}
+                  alt="Einstein Challenge"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute -bottom-1 -right-1 text-2xl animate-bounce">💡</div>
+              </div>
+
+              <h2 className={`text-2xl font-black mb-3 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                Massa Crítica Atingida! ⚛️
+              </h2>
+              
+              <div className="space-y-4 mb-6 text-left">
+                <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                  Olá! Albert Einstein por aqui. Lembre-se do nosso lema: <strong className="text-accent-cyan">Priorização Radical</strong>. 
+                </p>
+                <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Você já tem <strong className="text-accent-cyan">5 tarefas principais ativas</strong> na sua tela. Adicionar mais variáveis na sua equação mental causará sobrecarga e dispersão do seu foco!
+                </p>
+                <p className={`text-[12px] leading-relaxed p-3 rounded-xl border border-dashed ${
+                  isDarkMode ? 'bg-cyan-950/20 border-cyan-500/20 text-cyan-200' : 'bg-cyan-50 border-cyan-200 text-cyan-800'
+                }`}>
+                  👉 <strong>Como prosseguir?</strong> Você não poderá incluir uma nova tarefa simples ou checklist até concluir, excluir ou arquivar alguma das tarefas principais que já estão na tela. 
+                </p>
+                <p className={`text-[10px] italic ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                  * Nota: As tarefas recorrentes ainda podem ser criadas normalmente, pois ficam salvas na aba de recorrentes.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowLimitModal(false)}
+                className="w-full bg-accent-cyan hover:bg-cyan-400 text-background-dark font-black text-base py-4 rounded-xl shadow-[0_4px_14px_0_rgba(0,242,255,0.35)] hover:shadow-[0_6px_20px_rgba(0,242,255,0.45)] hover:scale-[1.02] transition-all active:scale-95"
+              >
+                Focar nas Tarefas Ativas! 🎯
               </button>
             </motion.div>
           </motion.div>
