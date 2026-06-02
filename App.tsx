@@ -841,13 +841,15 @@ const App: React.FC = () => {
 
     const isRecurringNew = newTaskRecurrence !== 'none';
 
-    // Conta recorrentes GLOBAIS (tasks + completedTasks)
-    const globalRecurringCount = [
-      ...tasks.filter(t => t.isRecurring),
-      ...completedTasks.filter(t => t.isRecurring),
-    ].length;
+    // Conta recorrentes ÚNICAS no sistema (deduplica por texto para não contar
+    // instâncias ativas + concluídas da mesma recorrência como entradas separadas)
+    const allRecurringTexts = new Set<string>([
+      ...tasks.filter(t => t.isRecurring).map(t => t.text),
+      ...completedTasks.filter(t => t.isRecurring).map(t => t.text),
+    ]);
+    const globalRecurringCount = allRecurringTexts.size;
 
-    // Limite absoluto de 5 recorrentes no sistema
+    // Limite absoluto de 5 recorrentes únicas no sistema
     if (isRecurringNew && globalRecurringCount >= 5) {
       alert('Limite máximo de 5 tarefas recorrentes atingido. Remova uma recorrente antes de criar outra.');
       return;
@@ -1551,11 +1553,33 @@ const App: React.FC = () => {
                             return true;
                           });
 
+                          // Calcula localmente (globalRecurringCount está no escopo de addTask)
+                          const recurringTextsInRender = new Set<string>([
+                            ...tasks.filter(t => t.isRecurring).map(t => t.text),
+                            ...completedTasks.filter(t => t.isRecurring).map(t => t.text),
+                          ]);
+                          const canAddRecurring = recurringTextsInRender.size < 5;
+
                           if (uniqueRecurring.length === 0) {
                             return (
-                              <div className={`p-8 rounded-xl text-center border-2 border-dashed ${isDarkMode ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'}`}>
-                                <p className="text-sm">Nenhuma tarefa recorrente configurada.</p>
-                                <p className="text-[11px] mt-1 opacity-60">Crie uma tarefa e configure a recorrência no menu de edição.</p>
+                              <div className="space-y-3">
+                                <div className={`p-8 rounded-xl text-center border-2 border-dashed ${isDarkMode ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'}`}>
+                                  <p className="text-sm">Nenhuma tarefa recorrente configurada.</p>
+                                  <p className="text-[11px] mt-1 opacity-60">Use o botão abaixo para criar uma tarefa recorrente.</p>
+                                </div>
+                                {canAddRecurring && (
+                                  <button
+                                    onClick={() => { setShowFanMenu(true); }}
+                                    className={`w-full p-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 border-2 border-dashed ${
+                                      isDarkMode
+                                        ? 'border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400/60'
+                                        : 'border-cyan-300 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-500'
+                                    }`}
+                                  >
+                                    <Repeat size={15} />
+                                    + Nova Recorrente
+                                  </button>
+                                )}
                               </div>
                             );
                           }
@@ -1599,6 +1623,28 @@ const App: React.FC = () => {
                                   </button>
                                 </div>
                               ))}
+
+                              {/* Botão para criar nova recorrente diretamente nesta aba */}
+                              {canAddRecurring ? (
+                                <button
+                                  onClick={() => { setShowFanMenu(true); }}
+                                  className={`w-full mt-1 p-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 border-2 border-dashed ${
+                                    isDarkMode
+                                      ? 'border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400/60'
+                                      : 'border-cyan-300 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-500'
+                                  }`}
+                                >
+                                  <Repeat size={15} />
+                                  + Nova Recorrente ({recurringTextsInRender.size}/5)
+                                </button>
+                              ) : (
+                                <div className={`w-full mt-1 p-3 rounded-xl text-sm flex items-center justify-center gap-2 border-2 border-dashed opacity-50 ${
+                                  isDarkMode ? 'border-slate-700 text-slate-500' : 'border-slate-200 text-slate-400'
+                                }`}>
+                                  <Repeat size={15} />
+                                  Limite atingido (5/5)
+                                </div>
+                              )}
                             </div>
                           );
                         })()}

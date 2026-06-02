@@ -128,6 +128,12 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose, isPro
                         <h3 className={`font-bold text-sm mb-3 ${accent}`}>🎓 Novidades <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ml-1 ${isDarkMode ? 'bg-neon-blue/20 text-neon-blue' : 'bg-blue-100 text-blue-600'}`}>v7.0.0.0</span></h3>
                         <div className="space-y-2.5">
                             <div className="flex items-start gap-2.5">
+                                <span className="text-base shrink-0">📅</span>
+                                <p className={`text-[12px] leading-relaxed ${muted}`}>
+                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Agenda Diária Pro:</strong> Visualize e gerencie seus compromissos do dia com uma timeline visual, calendário lateral e modal completo de criação de eventos — disponível no menu ☰.
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-2.5">
                                 <span className="text-base shrink-0">✨</span>
                                 <p className={`text-[12px] leading-relaxed ${muted}`}>
                                     <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Avatares 3D do Einstein:</strong> 5 novos moods tridimensionais neon (Foco, Vitória, Zen, Mentor e Desafio) que reagem dinamicamente à sua lista de tarefas e ações!
@@ -137,12 +143,6 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isDarkMode, onClose, isPro
                                 <span className="text-base shrink-0">⚡</span>
                                 <p className={`text-[12px] leading-relaxed ${muted}`}>
                                     <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Nova Logo Harmonizada:</strong> Design moderno e minimalista integrando a letra "T" (Task) e o número "5" perfeitamente dentro do raio de foco em ciano/magenta.
-                                </p>
-                            </div>
-                            <div className="flex items-start gap-2.5">
-                                <span className="text-base shrink-0">💡</span>
-                                <p className={`text-[12px] leading-relaxed ${muted}`}>
-                                    <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>Frases Científicas Inéditas:</strong> Novas frases de efeito do Einstein personalizadas para cada estado de ânimo e conquistas diárias.
                                 </p>
                             </div>
                         </div>
