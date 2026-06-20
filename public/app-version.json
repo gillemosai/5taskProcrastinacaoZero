@@ -1,6 +1,6 @@
 {
-  "latestVersion": "7.0.0.2",
+  "latestVersion": "7.0.0.4",
   "minRequiredVersion": "5.4.0",
-  "releaseNotes": "Ajuste no botão de adicionar nova recorrente e otimização no menu radial de criação.",
+  "releaseNotes": "Fix: balão do Einstein agora fecha imediatamente ao abrir qualquer tela.",
   "playStoreUrl": "market://details?id=com.gillemosai.cincotask"
 }
