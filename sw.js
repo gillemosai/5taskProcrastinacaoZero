@@ -1,7 +1,7 @@
 
-// 5Task Service Worker - v7.0.0.0
+// 5Task Service Worker - v7.0.0.4
 // Mudar o nome do CACHE força o navegador a instalar o novo SW e limpar o cache antigo.
-const CACHE = "5task-quantum-v7-0-0-0-offline";
+const CACHE = "5task-quantum-v7-0-0-4-offline";
 const offlineFallbackPage = "index.html";
 
 const ASSETS_TO_CACHE = [

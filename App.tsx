@@ -552,7 +552,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkAppVersion = async () => {
       try {
-        let currentVersion = '7.0.0.3'; // Fallback padrão / Versão web atual
+        let currentVersion = '7.0.0.4'; // Fallback padrão / Versão web atual
 
         // Se estiver rodando nativo no celular (Capacitor)
         if (Capacitor.isNativePlatform()) {
@@ -1282,7 +1282,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-             <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 7.0.0.3</span>
+             <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 7.0.0.4</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}

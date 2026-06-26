@@ -1,8 +1,9 @@
 import React from 'react';
-import { Sparkles, Download, ArrowRight, ShieldCheck, X } from 'lucide-react';
+import { Sparkles, Download, ArrowRight, ShieldCheck, X, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mood } from '../types';
 import { AVATAR_IMAGES } from '../constants';
+import { Capacitor } from '@capacitor/core';
 
 interface UpdateModalProps {
   isOpen: boolean;
@@ -25,9 +26,16 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const isNative = Capacitor.isNativePlatform();
+
   const handleUpdate = () => {
-    // Abre a Play Store
-    window.open(playStoreUrl, '_system');
+    if (isNative) {
+      // Abre a Play Store
+      window.open(playStoreUrl, '_system');
+    } else {
+      // Recarrega a página na Web/PC para limpar o cache
+      window.location.reload();
+    }
   };
 
   const handleOverlayClick = () => {
@@ -103,9 +111,17 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
                 isDarkMode ? 'bg-slate-850 border-slate-800' : 'bg-white border-slate-100'
               }`} />
               {isForceUpdate ? (
-                <span>"Esta é uma atualização crítica indispensável! Preciso recalibrar nossos algoritmos de foco agora mesmo!"</span>
+                <span>
+                  {isNative 
+                    ? '"Esta é uma atualização crítica indispensável! Preciso recalibrar nossos algoritmos de foco agora mesmo!"'
+                    : '"Esta é uma atualização crítica indispensável! Atualize a memória cache para carregar a nova versão."'}
+                </span>
               ) : (
-                <span>"Excelente trabalho combatendo a procrastinação! Preparei novos recursos incríveis para nossa jornada."</span>
+                <span>
+                  {isNative 
+                    ? '"Excelente trabalho combatendo a procrastinação! Preparei novos recursos incríveis para nossa jornada."'
+                    : '"Excelente trabalho! Uma nova versão está disponível. Atualize a memória cache para carregar os novos recursos."'}
+                </span>
               )}
             </div>
           </div>
@@ -156,8 +172,8 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({
                     : 'bg-slate-950 text-white shadow-slate-950/15 hover:bg-slate-850'
                 }`}
               >
-                <Download size={18} />
-                Atualizar na Google Play
+                {isNative ? <Download size={18} /> : <RefreshCw size={18} />}
+                {isNative ? 'Atualizar na Google Play' : 'Atualizar Memória Cache'}
                 <ArrowRight size={16} />
               </motion.button>
 
