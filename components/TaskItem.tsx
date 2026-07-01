@@ -78,6 +78,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const [showConfig, setShowConfig] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [newItemText, setNewItemText] = useState('');
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAlarmInput, setShowAlarmInput] = useState(false);
   const [alarmTimeInput, setAlarmTimeInput] = useState(task.alarmTime || '');
