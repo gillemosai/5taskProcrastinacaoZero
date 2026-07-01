@@ -1286,7 +1286,7 @@ const App: React.FC = () => {
               </div>
               <div className="absolute -top-1 -right-1 text-lg z-20">⚛️</div>
             </div>
-             <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 7.0.0.4</span>
+             <span className={`text-[9px] font-mono font-bold mt-1 tracking-wider ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>V 7.0.0.6</span>
           </div>
 
           {/* Right Column: Quote + Stats + Visão */}
