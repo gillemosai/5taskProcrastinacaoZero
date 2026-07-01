@@ -1,10 +1,42 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle, Repeat, ListChecks, Plus } from 'lucide-react';
+import { Trash2, Check, Edit2, X, Save, GripVertical, KanbanSquare, Flag, Palette, AlertCircle, Repeat, ListChecks, Plus, Clock, BellRing, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Task, Priority, HighlightColor, RecurrenceType } from '../types';
 import { RecurrenceSelector } from './RecurrenceSelector';
 import { ChecklistDisplay } from './ChecklistDisplay';
+
+const playAlarmSound = () => {
+  if (localStorage.getItem('5task_sound') === 'false') return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    
+    const playBeep = (startTime: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(800, startTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, startTime + 0.1);
+      
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
+      
+      osc.start(startTime);
+      osc.stop(startTime + 0.2);
+    };
+
+    playBeep(ctx.currentTime);
+    playBeep(ctx.currentTime + 0.3);
+    playBeep(ctx.currentTime + 0.6);
+  } catch (e) {
+    console.warn('Audio feedback failed', e);
+  }
+};
 
 interface TaskItemProps {
   task: Task;
@@ -14,6 +46,7 @@ interface TaskItemProps {
   onEdit: (id: string, newText: string) => void;
   onUpdateProps: (id: string, priority: Priority, color: HighlightColor) => void;
   onUpdateRecurrence: (id: string, recurrence: RecurrenceType, interval?: number) => void;
+  onUpdateAlarm?: (id: string, time?: string, active?: boolean) => void;
   onToggleChecklistItem?: (taskId: string, itemId: string) => void;
   onAddChecklistItem?: (taskId: string, text: string) => void;
   onOpenKanban: (id: string) => void;
@@ -31,6 +64,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onEdit,
   onUpdateProps,
   onUpdateRecurrence,
+  onUpdateAlarm,
   onToggleChecklistItem,
   onAddChecklistItem,
   onOpenKanban,
@@ -44,8 +78,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const [showConfig, setShowConfig] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [newItemText, setNewItemText] = useState('');
   const [showAddItem, setShowAddItem] = useState(false);
+  const [showAlarmInput, setShowAlarmInput] = useState(false);
+  const [alarmTimeInput, setAlarmTimeInput] = useState(task.alarmTime || '');
   const itemRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const newItemRef = useRef<HTMLInputElement>(null);
@@ -63,6 +98,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (itemRef.current && !itemRef.current.contains(event.target as Node)) {
         setShowConfig(false);
+        setShowAlarmInput(false);
       }
     };
     if (showConfig) {
@@ -170,8 +206,41 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     return () => clearInterval(interval);
   }, [task.createdAt, task.completed]);
 
-  const alertClasses = isAlertTime && !task.completed
-    ? `border-l-red-500 shadow-[0_0_20px_rgba(239,68,68,0.25)] ${isBlinking ? 'animate-pulse bg-red-950/20' : ''}`
+  const [isAlarmRinging, setIsAlarmRinging] = useState(false);
+  const hasPlayedAlarmRef = useRef(false);
+  
+  useEffect(() => {
+    if (!task.alarmActive || !task.alarmTime || task.completed) {
+      setIsAlarmRinging(false);
+      hasPlayedAlarmRef.current = false;
+      return;
+    }
+    
+    const checkAlarm = () => {
+      const now = new Date();
+      const currentHours = now.getHours().toString().padStart(2, '0');
+      const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+      const currentTimeStr = `${currentHours}:${currentMinutes}`;
+      
+      if (currentTimeStr === task.alarmTime) {
+        setIsAlarmRinging(true);
+        if (!hasPlayedAlarmRef.current) {
+          playAlarmSound();
+          hasPlayedAlarmRef.current = true;
+        }
+      } else {
+        setIsAlarmRinging(false);
+        hasPlayedAlarmRef.current = false;
+      }
+    };
+    
+    checkAlarm();
+    const interval = setInterval(checkAlarm, 5000);
+    return () => clearInterval(interval);
+  }, [task.alarmActive, task.alarmTime, task.completed]);
+
+  const alertClasses = (isAlertTime || isAlarmRinging) && !task.completed
+    ? `border-l-red-500 shadow-[0_0_20px_rgba(239,68,68,0.25)] ${isBlinking || isAlarmRinging ? 'animate-pulse bg-red-950/20' : ''}`
     : (priority ? `border-l-${priority.color.replace('bg-', '')}` : (isDarkMode ? 'border-l-primary' : 'border-l-slate-200'));
 
   return (
@@ -343,17 +412,66 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           )}
 
           <div className={`gap-1 transition-all ${isExpanded ? 'flex flex-wrap mt-1' : 'hidden md:flex opacity-0 group-hover:opacity-100'}`}>
-            <button onClick={() => setShowConfig(!showConfig)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAlarmInput(!showAlarmInput);
+                setShowConfig(false);
+              }} 
+              className={`p-2 rounded-lg transition-colors ${task.alarmActive ? (isAlarmRinging ? 'text-red-500 animate-bounce' : 'text-blue-500') : 'text-slate-400'} ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}
+              title="Configurar Alarme"
+            >
+              {task.alarmActive ? <BellRing size={16} /> : <Clock size={16} />}
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); setShowConfig(!showConfig); setShowAlarmInput(false); }} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
               <Palette size={16} />
             </button>
-            <button onClick={() => setIsEditing(true)} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
+            <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className={`p-2 rounded-lg text-slate-400 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-100'}`}>
               <Edit2 size={16} />
             </button>
-            <button onClick={() => onDelete(task.id)} className={`p-2 rounded-lg text-red-400 ${isDarkMode ? 'hover:bg-red-500/20' : 'hover:bg-red-50'}`}>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className={`p-2 rounded-lg text-red-400 ${isDarkMode ? 'hover:bg-red-500/20' : 'hover:bg-red-50'}`}>
               <Trash2 size={16} />
             </button>
           </div>
         </div>
+
+        {/* Alarm Config */}
+        {showAlarmInput && !task.completed && (
+          <div className={`flex flex-wrap items-center gap-2 mt-2 px-1 pt-1 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`} onClick={(e) => e.stopPropagation()}>
+            <Bell size={14} className={isDarkMode ? 'text-slate-400' : 'text-slate-500'} />
+            <input 
+              type="time" 
+              value={alarmTimeInput}
+              onChange={(e) => setAlarmTimeInput(e.target.value)}
+              className={`text-sm rounded-md px-2 py-1 outline-none border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-100 border-slate-200 text-slate-800'}`}
+            />
+            <button 
+              onClick={() => {
+                if (onUpdateAlarm && alarmTimeInput) {
+                  onUpdateAlarm(task.id, alarmTimeInput, true);
+                  setShowAlarmInput(false);
+                }
+              }}
+              className={`text-[11px] font-bold px-3 py-1.5 rounded-md ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            >
+              Ativar Alarme
+            </button>
+            {task.alarmActive && (
+              <button 
+                onClick={() => {
+                  if (onUpdateAlarm) {
+                    onUpdateAlarm(task.id, undefined, false);
+                    setShowAlarmInput(false);
+                    setAlarmTimeInput('');
+                  }
+                }}
+                className={`text-[11px] font-bold px-3 py-1.5 rounded-md ${isDarkMode ? 'bg-red-900/50 hover:bg-red-800 text-red-200' : 'bg-red-100 hover:bg-red-200 text-red-700'}`}
+              >
+                Desativar
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Inline Checklist for List tasks */}
         {isListTask && showChecklist && (

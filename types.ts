@@ -39,6 +39,8 @@ export interface Task {
   isRecreatedRecurring?: boolean; // Tarefa recriada por recorrência
   taskType?: TaskType; // Tipo da tarefa: task, list, recurring
   checklistItems?: ChecklistItem[]; // Itens do checklist (para taskType === 'list')
+  alarmTime?: string; // Hora do alarme no formato "HH:mm"
+  alarmActive?: boolean; // Se o alarme está ativado
 }
 
 export enum Mood {

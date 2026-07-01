@@ -1036,6 +1036,10 @@ const App: React.FC = () => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, priority, highlightColor: color } : t));
   };
 
+  const updateTaskAlarm = (id: string, time?: string, active?: boolean) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, alarmTime: time, alarmActive: active } : t));
+  };
+
   const updateTaskRecurrence = (id: string, recurrence: RecurrenceType, interval?: number) => {
     // Validação global: até 5 recorrentes no sistema todo
     const globalRecurringCount = [
@@ -1480,6 +1484,7 @@ const App: React.FC = () => {
                                 onEdit={(id, text) => setTasks(prev => prev.map(t => t.id === id ? { ...t, text } : t))}
                                 onUpdateProps={updateTaskProps}
                                 onUpdateRecurrence={updateTaskRecurrence}
+                                onUpdateAlarm={updateTaskAlarm}
                                 onToggleChecklistItem={toggleChecklistItem}
                                 onAddChecklistItem={addChecklistItem}
                                 onOpenKanban={setActiveTaskId}
