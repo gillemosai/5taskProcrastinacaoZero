@@ -1,6 +1,6 @@
 {
-  "latestVersion": "7.0.0.4",
+  "latestVersion": "7.0.0.6",
   "minRequiredVersion": "5.4.0",
-  "releaseNotes": "Fix: balão do Einstein agora fecha imediatamente ao abrir qualquer tela.",
+  "releaseNotes": "Novo sistema de alarmes sonoros e correção de PWA cache.",
   "playStoreUrl": "market://details?id=com.gillemosai.cincotask"
 }
