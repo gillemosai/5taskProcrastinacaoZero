@@ -1,6 +1,6 @@
 {
-  "latestVersion": "7.0.0.4",
+  "latestVersion": "8.0.0.0",
   "minRequiredVersion": "5.4.0",
-  "releaseNotes": "Fix: balão do Einstein agora fecha imediatamente ao abrir qualquer tela.",
+  "releaseNotes": "Versão 8.0: Notificações nativas anti-procrastinação, haptics, melhorias de arquitetura e alta performance.",
   "playStoreUrl": "market://details?id=com.gillemosai.cincotask"
 }

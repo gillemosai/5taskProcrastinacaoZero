@@ -22,6 +22,7 @@ import { ProCalendar } from './components/ProCalendar';
 import { TopMenu } from './components/TopMenu';
 import { SyncModal } from './components/SyncModal';
 import AgendaDiaria from './components/agenda/AgendaDiaria';
+import { useNativeCapabilities } from './hooks/useNativeCapabilities';
 
 
 /**
@@ -355,6 +356,25 @@ const App: React.FC = () => {
   const [showProAgenda, setShowProAgenda] = useState(false);
   const [proToast, setProToast] = useState<string | null>(null);
   const avatarClicksRef = useRef<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 });
+
+  const activeModalsCount = (showArchiveModal ? 1 : 0) + (showSyncModal ? 1 : 0) + (showUserGuide ? 1 : 0) + (showVisionBoard ? 1 : 0) + (showListModal ? 1 : 0) + (showQuoteModal ? 1 : 0) + (showProCalendar ? 1 : 0) + (showProAgenda ? 1 : 0);
+
+  const handleCloseAllModals = useCallback(() => {
+    setShowArchiveModal(false);
+    setShowSyncModal(false);
+    setShowUserGuide(false);
+    setShowVisionBoard(false);
+    setShowListModal(false);
+    setShowQuoteModal(false);
+    setShowProCalendar(false);
+    setShowProAgenda(false);
+  }, []);
+
+  const { triggerHaptic } = useNativeCapabilities({
+    darkMode: isDarkMode,
+    activeModalsCount,
+    onCloseModals: handleCloseAllModals
+  });
 
   useEffect(() => {
     if (proToast) {

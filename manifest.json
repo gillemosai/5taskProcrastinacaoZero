@@ -2,7 +2,7 @@
   "name": "5task - Foco Quântico",
   "short_name": "5task",
   "description": "Gerenciador de tarefas baseado na priorização radical. Limite de 5 itens para foco total e produtividade máxima.",
-  "id": "com.fivetask.quantum.app.v80",
+  "id": "com.gillemosai.cincotask",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -24,26 +24,26 @@
   "related_applications": [
     {
       "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.fivetask.quantum.app",
-      "id": "com.fivetask.quantum.app"
+      "url": "https://play.google.com/store/apps/details?id=com.gillemosai.cincotask",
+      "id": "com.gillemosai.cincotask"
     }
   ],
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo-192x192.png",
+      "src": "/assets/5task-logo-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png",
+      "src": "/assets/5task-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png",
+      "src": "/assets/5task-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

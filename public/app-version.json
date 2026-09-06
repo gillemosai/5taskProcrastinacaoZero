@@ -1,6 +1,6 @@
 {
-  "latestVersion": "7.0.0.6",
+  "latestVersion": "8.0.0.0",
   "minRequiredVersion": "5.4.0",
-  "releaseNotes": "Novo sistema de alarmes sonoros e correção de PWA cache.",
+  "releaseNotes": "Versão 8.0: Notificações nativas anti-procrastinação, haptics, melhorias de arquitetura e alta performance.",
   "playStoreUrl": "market://details?id=com.gillemosai.cincotask"
 }
