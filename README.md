@@ -1,26 +1,28 @@
-# 🧠 5task - Motor de Produtividade Procrastinação Zero
+<div align="center">
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png" width="160" alt="5task Logo">
-</p>
+# 🧠 5task — Procrastinação Zero
 
-<p align="center">
-  <strong>"Tudo deve ser feito da forma mais simples possível, mas não simplista." — Albert Einstein</strong>
-</p>
+**Gerenciador de tarefas minimalista e gamificado: no máximo 5 tarefas, concluídas em 24 horas. Funciona offline e se instala como app.**
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Version-8.0.0.0-blueviolet?style=for-the-badge" alt="Version">
-  <img src="https://img.shields.io/badge/Focus-Max-00f3ff?style=for-the-badge" alt="Focus">
-  <img src="https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge" alt="PWA Ready">
-  <img src="https://img.shields.io/badge/Theme-Dual-yellow?style=for-the-badge" alt="Dual Theme">
-  <img src="https://img.shields.io/badge/Feature-Procrastinacao_Zero-red?style=for-the-badge" alt="Procrastinação Zero">
-</p>
+*"Tudo deve ser feito da forma mais simples possível, mas não simplista." — Albert Einstein*
 
-<p align="center">
-  <a href="https://5task-procrastinacao-zero.vercel.app/" target="_blank">
-    <img src="https://img.shields.io/badge/TESTAR_AGORA-CLIQUE_AQUI-5e17eb?style=for-the-badge&logo=rocket" alt="Testar Agora">
-  </a>
-</p>
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-8.0.0.0-blueviolet)](CHANGELOG.md)
+[![PWA](https://img.shields.io/badge/PWA-pronto-brightgreen)](https://5task-procrastinacao-zero.vercel.app/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Android](https://img.shields.io/badge/Android-TWA-3DDC84?logo=android&logoColor=white)](#-sobre-o-projeto)
+[![Tema](https://img.shields.io/badge/tema-claro%20%2F%20escuro-yellow)](#-sobre-o-projeto)
+[![Stars](https://img.shields.io/github/stars/gillemosai/5taskProcrastinacaoZero?style=social)](https://github.com/gillemosai/5taskProcrastinacaoZero/stargazers)
+[![Último commit](https://img.shields.io/github/last-commit/gillemosai/5taskProcrastinacaoZero)](https://github.com/gillemosai/5taskProcrastinacaoZero/commits)
+[![Site](https://img.shields.io/badge/Site-gillemosai.com-6D28D9)](https://gillemosai.com)
+[![Testar agora](https://img.shields.io/badge/TESTAR%20AGORA-clique%20aqui-5e17eb?logo=rocket&logoColor=white)](https://5task-procrastinacao-zero.vercel.app/)
+
+[Testar agora](https://5task-procrastinacao-zero.vercel.app/) · [Sobre](#-sobre-o-projeto) · [Histórico de versões](CHANGELOG.md)
+
+© 2026 **Gil Lemos** · [gillemosai.com](https://gillemosai.com)
+
+<img src="https://raw.githubusercontent.com/gillemosai/5taskProcrastinacaoZero/main/assets/5task-logo.png" width="160" alt="Logo do 5task">
+
+</div>
 
 ---
 
