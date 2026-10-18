@@ -24,6 +24,24 @@
 
 ---
 
+<details>
+<summary><b>🌍 English</b></summary>
+
+**5task** is a minimalist, gamified to-do app built on one rule: *at most 5 tasks, finished within 24 hours*. If you procrastinate, Einstein panics. It works **offline** (PWA, data stored in IndexedDB), has dark/light themes, a micro-Kanban per task, recurring tasks, and is installable on Android and iOS.
+
+**Try it:** https://5task-procrastinacao-zero.vercel.app/ · **Stack:** React 19, Tailwind CSS, Framer Motion, IndexedDB, Capacitor (Android).
+
+```bash
+git clone https://github.com/gillemosai/5taskProcrastinacaoZero.git
+cd 5taskProcrastinacaoZero && npm install && npm run dev
+```
+
+Version history: [CHANGELOG.md](CHANGELOG.md).
+
+</details>
+
+---
+
 ## 🚀 Sobre o Projeto
 
 O **5task** é um gerenciador de tarefas minimalista e gamificado, desenhado sob o princípio da **Priorização Radical**. Em um mundo de distrações infinitas, o 5task impõe um limite físico de apenas **5 tarefas simultâneas**. 
@@ -96,8 +114,8 @@ Na versão **5.0**, expandimos o sistema de **Tarefas Recorrentes** para até **
 
 1.  **Clone o repositório:**
     ```bash
-    git clone https://github.com/gillemosai/5task-android.git
-    cd 5task-android
+    git clone https://github.com/gillemosai/5taskProcrastinacaoZero.git
+    cd 5taskProcrastinacaoZero
     ```
 2.  **Instale as dependências:**
     ```bash
@@ -130,42 +148,10 @@ Para gerar a versão atualizada do aplicativo para a Google Play Store, execute 
    * Insira suas chaves de assinatura e selecione a variante **release**.
    * Clique em **Finish** para compilar o arquivo `.aab` pronto para o Google Play Console.
 
-## 🗺️ Roadmap de Evolução
+## 🗺️ Roadmap
 
-- [x] Limite de 5 tarefas e Gamificação com Einstein.
-- [x] Persistência local com IndexedDB.
-- [x] Micro-Kanban por tarefa.
-- [x] Sistema de Temas Claro/Escuro (v78).
-- [x] Priorização Colorida e Reordenação Animada (v78).
-- [x] Expiração de 27 horas (Procrastinação Zero - v79).
-- [x] Painel visual do Einstein em Pânico (v79).
-- [x] Otimização das imagens dos avatares para o PWA / Wrapper.
-- [x] Correção de sobreposição de tags visuais em tarefas longas.
-- [x] Implementação do Banco de Pontos Offline / Gamification Local no IndexedDB.
-- [x] Nova Funcionalidade de Arquivos e Vidas de Resgate (v4.1.0).
-- [x] TWA Experience em Full Screen: Integração resolvida com Google Play Developer signatures (v4.2.1).
-- [x] Tarefas Recorrentes e Painel Analógico de Foco Diário (v4.2.1).
-- [x] Expansão de Recorrentes para 5 tarefas, gerenciamento inteligente com aba dedicada (v5.0).
-- [x] Banners informativos auto-dismiss e botão "ver+ recorrentes" (v5.0).
-- [x] Modal "Dia Produtivo" ao completar 3 tarefas, contador diário e botão "Fazer novamente" (v5.0).
-- [x] Menu em leque animado com 3 tipos de tarefa: Lista, Tarefa, Recorrente (v5.1).
-- [x] Tarefas tipo Lista com checklist interativo, progresso e auto-complete (v5.1).
-- [x] Correções de layout mobile no menu em leque e checklist colapsado por padrão (v5.1.1).
-- [x] Descrição de tarefas compacta com clamp de 2 linhas e "ver mais/ver menos" (v5.3.0).
-- [x] Botão Kanban "Quebrar em etapas" sempre visível em tarefas ativas (v5.3.0).
-- [x] Refinamento estético do balão de fala com SVG Path (v5.3.5).
-- [x] Externalização de frases para `QUOTES.md` e sistema de memória anti-repetição (v5.3.8).
-- [x] Correção de aspas duplicadas no balão de fala do Einstein (v5.4.0).
-- [x] WelcomeCarousel reformulado com 5 slides motivadores e botão "Pular introdução" (v5.4.0).
-- [x] Sistema de dicas contextuais com Einstein (1ª conclusão, aba Concluídas, Arquivo) (v5.4.0).
-- [x] Modal "O que é isso?" na tela Visão explicando o método de Petr Ludwig (v5.4.0).
-- [x] Identidade visual harmônica "T-Raio" e 5 novos avatares Einstein 3D Neon (v6.0.0.0).
-- [x] Correção no carregamento do logotipo do app no Android (geração de ícones/splash nativos) e atualização do SW para v6.0.0.3.
-- [x] Agenda Diária Pro integrada ao 5Task (exclusivo desktop/PWA) com visão de timeline, calendário lateral e gestão completa de compromissos (v7.0.0.0).
-- [x] Atualização do Service Worker e PWA cache para v7.0.0.0.
-- [x] Correção no botão de adicionar tarefa recorrente para abrir o subset do menu radial (v7.0.0.1).
-- [x] Acessibilidade de cores (WCAG), remoção de blur e transição dinâmica com troca de lugar das fatias no menu em leque (v7.0.0.2).
-- [x] Nova versão para liberação de teste aberto no Google Play Console, corrigindo erros de publicação (v7.0.0.4).
+O histórico do que já foi entregue está no [CHANGELOG](CHANGELOG.md). Próximos passos:
+
 - [ ] ☁️ Sincronização e autenticação opcional em nuvem (Vercel Postgres/Firebase).
 - [ ] 📊 Relatórios de Produtividade Quântica (Insights Semanais).
 
